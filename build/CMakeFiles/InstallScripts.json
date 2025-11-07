@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/joey/geant4_sims/Hadr03_mod/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
