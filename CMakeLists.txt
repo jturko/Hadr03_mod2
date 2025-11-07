@@ -45,7 +45,7 @@ set(Hadr03_SCRIPTS
 
 foreach(_script ${Hadr03_SCRIPTS})
   configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
+    ${PROJECT_SOURCE_DIR}/macros/${_script}
     ${PROJECT_BINARY_DIR}/${_script}
     COPYONLY
     )
