@@ -3,12 +3,19 @@
 #define PROGBAR_HH 1
 
 #include <time.h>
+#include <format>
 
 using namespace std;
 
+#pragma once
+#include <atomic>
+
 class ProgressBar {
   public:
-    ProgressBar(ULong64_t max_events, int readout_interval=1, int bar_width=40) {
+    
+    inline static std::atomic<uint64_t> gEvtNb{0};
+    
+    ProgressBar(uint64_t max_events, int readout_interval=1, int bar_width=40) {
         fMaxEvents = max_events;
         fTimeInterval = readout_interval;
         fLastEvent = 0;
@@ -27,9 +34,9 @@ class ProgressBar {
     }
     ~ProgressBar() {}
 
-    void SetMaxEvents(ULong64_t n) { fMaxEvents = n; }
-    void SetPrintInterval(Int_t time) { fTimeInterval = time; }
-    bool Print(ULong64_t event) {
+    void SetMaxEvents(uint64_t n) { fMaxEvents = n; }
+    void SetPrintInterval(int time) { fTimeInterval = time; }
+    bool Print(uint64_t event) {
         time(&fThisTime);
         bool printing = false;
         if((difftime(fThisTime,fLastTime) >= fTimeInterval) || event == (fMaxEvents-1)) {  
@@ -60,11 +67,18 @@ class ProgressBar {
                 if(i<percent*fBarWidth) cout << "=";
                 else                    cout << " ";
             }
+
+            fSSPercent.str("");
+            fSSPercent.clear();
+            fSSPercent << std::fixed << std::setprecision(1) << 100.0*percent;
+            
             if( event == (fMaxEvents-1))
                 cout << "] all done!" << flush << endl;
             else
-                cout << "] processing evt " << event+1 << " / " << fMaxEvents << " (" << Form("%.1f",(100*percent)) << "%), " << timeLeftHours << "h " 
+                cout << "] processing evt " << event+1 << " / " << fMaxEvents << " (" << fSSPercent.str() << "%), " << timeLeftHours << "h " 
                      << timeLeftMinutes%60 << "m " << timeLeftSeconds%60 << "s left @ " << (int)rate << " evts/s" << flush;
+                //cout << "] processing evt " << event+1 << " / " << fMaxEvents << " (" << Form("%.1f",(100*percent)) << "%), " << timeLeftHours << "h " 
+                //     << timeLeftMinutes%60 << "m " << timeLeftSeconds%60 << "s left @ " << (int)rate << " evts/s" << flush;
             fCounter++;
         }
         return printing;
@@ -84,20 +98,21 @@ class ProgressBar {
     }
 
   private:
-    ULong64_t fMaxEvents;
-    ULong64_t fLastEvent;
+    uint64_t fMaxEvents;
+    uint64_t fLastEvent;
     time_t fLastTime;
     time_t fThisTime;
-    Int_t fTimeInterval;
+    int fTimeInterval;
 
-    Int_t fBarWidth;
+    int fBarWidth;
 
-    ULong64_t fCounter;
+    uint64_t fCounter;
 
     int                     fN;
     std::vector<double>     fRates;
     int                     fNextToReplace;
 
+    std::ostringstream      fSSPercent; 
 };
 
 #endif

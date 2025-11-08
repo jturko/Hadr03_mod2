@@ -66,15 +66,17 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
         aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld()) 
     {
         G4ThreeVector momentum = aStep->GetPostStepPoint()->GetMomentum();
+        G4double ekin = aStep->GetPostStepPoint()->GetKineticEnergy();
         if(momentum.z() > 0) {
             G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
             G4String partName = particle->GetParticleName();
-            G4cout << "!!!!!! Found a " << partName << " with momentum: " << momentum << G4endl;
+            //G4cout << "!!!!!! Found a " << partName << " with momentum: " << momentum << G4endl;
 
             analysis->FillNtupleDColumn(0, particle->GetPDGEncoding());
             analysis->FillNtupleDColumn(1, momentum.x());
             analysis->FillNtupleDColumn(2, momentum.y());
             analysis->FillNtupleDColumn(3, momentum.z());
+            analysis->FillNtupleDColumn(4, ekin);
             analysis->AddNtupleRow();
         }
     }

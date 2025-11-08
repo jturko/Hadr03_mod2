@@ -67,7 +67,8 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDet
     auto posDist = fGPS->GetCurrentSource()->GetPosDist();
     posDist->SetPosDisType("Beam");
     //posDist->SetCentreCoords(G4ThreeVector(0., 0., -1*cm));
-    posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()-10*mm));
+    //posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()-10*mm));
+    posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()+1*um)); // start in target
     posDist->SetBeamSigmaInX(2.*mm);
     posDist->SetBeamSigmaInY(2.*mm);
 }

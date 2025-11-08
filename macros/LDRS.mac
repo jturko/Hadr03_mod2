@@ -23,5 +23,5 @@
 #/control/execute vis_vrml.mac
 #/control/execute vis.mac
 #
-/run/printProgress 1000000
-/run/beamOn        100000000
+#/run/printProgress 100000
+/run/beamOn        10000000

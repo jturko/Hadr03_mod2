@@ -95,6 +95,7 @@ void HistoManager::Book()
     analysisManager->CreateNtupleDColumn("pX");
     analysisManager->CreateNtupleDColumn("pY");
     analysisManager->CreateNtupleDColumn("pZ");
+    analysisManager->CreateNtupleDColumn("Ekin");
     analysisManager->FinishNtuple();
 
 
