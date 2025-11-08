@@ -40,41 +40,74 @@
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
 
+#include "HistoManager.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDetector(det)
 {
-  fParticleGun = new G4ParticleGun(1);
-  G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("neutron");
-  fParticleGun->SetParticleDefinition(particle);
-  fParticleGun->SetParticleEnergy(1 * MeV);
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(1., 0., 0.));
+    fUseGPS = true;
+
+    fParticleGun = new G4ParticleGun(1);
+    G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
+    fParticleGun->SetParticleDefinition(particle);
+    fParticleGun->SetParticleEnergy(1 * MeV);
+    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(1., 0., 0.));
+
+    fGPS = new G4GeneralParticleSource;
+    fGPS->SetParticleDefinition(particle);
+    fGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Lin");
+    fGPS->GetCurrentSource()->GetEneDist()->SetEmin(1.*MeV);
+    fGPS->GetCurrentSource()->GetEneDist()->SetEmax(10.*MeV);
+    fGPS->GetCurrentSource()->GetEneDist()->SetInterCept(1);
+    fGPS->GetCurrentSource()->GetEneDist()->SetGradient(0);
+    auto angDist = fGPS->GetCurrentSource()->GetAngDist();
+    angDist->SetAngDistType("planar");
+    angDist->SetParticleMomentumDirection(G4ThreeVector(0., 0., 1.));
+    auto posDist = fGPS->GetCurrentSource()->GetPosDist();
+    posDist->SetPosDisType("Beam");
+    //posDist->SetCentreCoords(G4ThreeVector(0., 0., -1*cm));
+    posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()-10*mm));
+    posDist->SetBeamSigmaInX(2.*mm);
+    posDist->SetBeamSigmaInY(2.*mm);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorAction::~PrimaryGeneratorAction()
 {
-  delete fParticleGun;
+    delete fParticleGun;
+    delete fGPS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
-  // this function is called at the begining of event
-  //
-  G4double halfSize = 0.5 * (fDetector->GetSize());
-  G4double x0 = -halfSize + 1. * nm;
+    G4AnalysisManager* analysis = G4AnalysisManager::Instance();
+    
+    if(!fUseGPS) {
+        // this function is called at the begining of event
+        //
+        G4double halfSize = 0.5 * (fDetector->GetCatcherZ());
+        //G4double x0 = -halfSize + 1. * nm;
+        G4double x0 = -halfSize - 1. * cm;
 
-  // randomize (y0,z0)
-  //
-  G4double beam = 0.8 * halfSize;
-  G4double y0 = (2 * G4UniformRand() - 1.) * beam;
-  G4double z0 = (2 * G4UniformRand() - 1.) * beam;
+        // randomize (y0,z0)
+        //
+        G4double beam = 0.8 * halfSize;
+        G4double y0 = (2 * G4UniformRand() - 1.) * beam;
+        G4double z0 = (2 * G4UniformRand() - 1.) * beam;
 
-  fParticleGun->SetParticlePosition(G4ThreeVector(x0, y0, z0));
-  fParticleGun->GeneratePrimaryVertex(anEvent);
+        fParticleGun->SetParticlePosition(G4ThreeVector(x0, y0, z0));
+        fParticleGun->GeneratePrimaryVertex(anEvent);
+    }
+    else {
+        fGPS->GeneratePrimaryVertex(anEvent);
+
+        double Ep = fGPS->GetParticleEnergy();
+        analysis->FillH1(14, Ep);
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -34,6 +34,7 @@
 #define PrimaryGeneratorAction_h 1
 
 #include "G4ParticleGun.hh"
+#include "G4GeneralParticleSource.hh"
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
 
@@ -51,10 +52,14 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
   public:
     void GeneratePrimaries(G4Event*) override;
     G4ParticleGun* GetParticleGun() { return fParticleGun; };
+    G4GeneralParticleSource* GetGPS() { return fGPS; };
 
   private:
     G4ParticleGun* fParticleGun = nullptr;
+    G4GeneralParticleSource* fGPS;
     DetectorConstruction* fDetector = nullptr;
+
+    G4bool fUseGPS = true;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

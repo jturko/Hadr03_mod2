@@ -61,84 +61,109 @@
 #include "G4MesonConstructor.hh"
 #include "G4ShortLivedConstructor.hh"
 
+
+
+#include "G4EmStandardPhysics_option4.hh"
+#include "G4HadronElasticPhysicsHP.hh"
+#include "G4HadronPhysicsQGSP_BIC_HP.hh"
+#include "G4IonElasticPhysics.hh"
+#include "G4IonPhysicsXS.hh"
+#include "GammaNuclearPhysics.hh"
+#include "G4NuclideTable.hh"
+
+
+
+
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PhysicsList::PhysicsList()
 {
-  G4int verb = 1;
-  SetVerboseLevel(verb);
+    G4int verb = 1;
+    SetVerboseLevel(verb);
 
-  // add new units for cross sections
-  //
-  new G4UnitDefinition("mm2/g", "mm2/g", "Surface/Mass", mm2 / g);
-  new G4UnitDefinition("um2/mg", "um2/mg", "Surface/Mass", um * um / mg);
+    //   // add new units for cross sections
+    //   //
+    //   new G4UnitDefinition("mm2/g", "mm2/g", "Surface/Mass", mm2 / g);
+    //   new G4UnitDefinition("um2/mg", "um2/mg", "Surface/Mass", um * um / mg);
 
-  // mandatory for G4NuclideTable
-  //
-  const G4double meanLife = 1 * nanosecond;
-  G4NuclideTable::GetInstance()->SetMeanLifeThreshold(meanLife);
+    //   // mandatory for G4NuclideTable
+    //   //
+    //   const G4double meanLife = 1 * nanosecond;
+    //   G4NuclideTable::GetInstance()->SetMeanLifeThreshold(meanLife);
 
-  // Hadron Elastic scattering
-  //
-  // RegisterPhysics( new G4HadronElasticPhysicsHP(verb));
-  RegisterPhysics(new G4HadronElasticPhysicsXS(verb));
+    //   // Hadron Elastic scattering
+    //   //
+    //    RegisterPhysics( new G4HadronElasticPhysicsHP(verb));
+    //   // RegisterPhysics(new G4HadronElasticPhysicsXS(verb));
 
-  // Hadron Inelastic physics
-  //
-  ////RegisterPhysics( new G4HadronPhysicsFTFP_BERT_HP(verb));
-  RegisterPhysics(new G4HadronPhysicsQGSP_BIC_HP(verb));
-  ////RegisterPhysics( new G4HadronPhysicsQGSP_BIC_AllHP(verb));
-  ////RegisterPhysics( new G4HadronPhysicsFTFP_BERT(verb));
-  ////RegisterPhysics( new G4HadronPhysicsQGSP_BIC(verb));
-  ////RegisterPhysics( new G4HadronInelasticQBBC(verb));
-  ////RegisterPhysics( new G4HadronPhysicsINCLXX(verb));
-  ////RegisterPhysics( new G4HadronPhysicsShielding(verb));
+    //   // Hadron Inelastic physics
+    //   //
+    //   ////RegisterPhysics( new G4HadronPhysicsFTFP_BERT_HP(verb));
+    //   RegisterPhysics(new G4HadronPhysicsQGSP_BIC_HP(verb));
+    //   ////RegisterPhysics( new G4HadronPhysicsQGSP_BIC_AllHP(verb));
+    //   ////RegisterPhysics( new G4HadronPhysicsFTFP_BERT(verb));
+    //   ////RegisterPhysics( new G4HadronPhysicsQGSP_BIC(verb));
+    //   ////RegisterPhysics( new G4HadronInelasticQBBC(verb));
+    //   ////RegisterPhysics( new G4HadronPhysicsINCLXX(verb));
+    //   ////RegisterPhysics( new G4HadronPhysicsShielding(verb));
 
-  // Ion Elastic scattering
-  //
-  RegisterPhysics(new G4IonElasticPhysics(verb));
+    //   // Ion Elastic scattering
+    //   //
+    //   RegisterPhysics(new G4IonElasticPhysics(verb));
 
-  // Ion Inelastic physics
-  //
-  RegisterPhysics(new G4IonPhysicsXS(verb));
-  ////RegisterPhysics( new G4IonPhysicsPHP(verb));
-  ////RegisterPhysics( new G4IonQMDPhysics(verb));
-  ////RegisterPhysics( new G4IonINCLXXPhysics(verb));
+    //   // Ion Inelastic physics
+    //   //
+    //   RegisterPhysics(new G4IonPhysicsXS(verb));
+    //   ////RegisterPhysics( new G4IonPhysicsPHP(verb));
+    //   ////RegisterPhysics( new G4IonQMDPhysics(verb));
+    //   ////RegisterPhysics( new G4IonINCLXXPhysics(verb));
 
-  // Gamma physics
-  //
-  RegisterPhysics(new GammaNuclearPhysics("gamma"));
-  ////RegisterPhysics( new GammaNuclearPhysicsLEND("gamma"));
+    //   // Gamma physics
+    //   //
+    //   RegisterPhysics(new GammaNuclearPhysics("gamma"));
+    //   ////RegisterPhysics( new GammaNuclearPhysicsLEND("gamma"));
+    
+    
+    RegisterPhysics(new G4EmStandardPhysics_option4());
+    RegisterPhysics(new G4HadronElasticPhysicsXS(verb));
+        //RegisterPhysics(new G4HadronPhysicsQGSP_BIC_HP(verb));
+        RegisterPhysics(new G4HadronPhysicsQGSP_BIC_AllHP(verb));
+    RegisterPhysics(new G4IonElasticPhysics(verb));
+    RegisterPhysics(new G4IonPhysicsXS(verb));
+    RegisterPhysics(new GammaNuclearPhysics("gamma"));
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PhysicsList::ConstructParticle()
 {
-  G4BosonConstructor pBosonConstructor;
-  pBosonConstructor.ConstructParticle();
+    G4BosonConstructor pBosonConstructor;
+    pBosonConstructor.ConstructParticle();
 
-  G4LeptonConstructor pLeptonConstructor;
-  pLeptonConstructor.ConstructParticle();
+    G4LeptonConstructor pLeptonConstructor;
+    pLeptonConstructor.ConstructParticle();
 
-  G4MesonConstructor pMesonConstructor;
-  pMesonConstructor.ConstructParticle();
+    G4MesonConstructor pMesonConstructor;
+    pMesonConstructor.ConstructParticle();
 
-  G4BaryonConstructor pBaryonConstructor;
-  pBaryonConstructor.ConstructParticle();
+    G4BaryonConstructor pBaryonConstructor;
+    pBaryonConstructor.ConstructParticle();
 
-  G4IonConstructor pIonConstructor;
-  pIonConstructor.ConstructParticle();
+    G4IonConstructor pIonConstructor;
+    pIonConstructor.ConstructParticle();
 
-  G4ShortLivedConstructor pShortLivedConstructor;
-  pShortLivedConstructor.ConstructParticle();
+    G4ShortLivedConstructor pShortLivedConstructor;
+    pShortLivedConstructor.ConstructParticle();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PhysicsList::SetCuts()
 {
-  SetCutValue(0. * mm, "proton");
+    //SetCutValue(0. * mm, "proton");
+    SetCutValue(1. * um, "proton");
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

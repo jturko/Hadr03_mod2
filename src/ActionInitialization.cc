@@ -55,7 +55,7 @@ void ActionInitialization::Build() const
   RunAction* runAction = new RunAction(fDetector, primary);
   SetUserAction(runAction);
 
-  SteppingAction* steppingAction = new SteppingAction();
+  SteppingAction* steppingAction = new SteppingAction(fDetector);
   SetUserAction(steppingAction);
 }
 

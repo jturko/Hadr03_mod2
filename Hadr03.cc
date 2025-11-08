@@ -86,10 +86,10 @@ int main(int argc, char** argv)
   // get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
+  visManager = new G4VisExecutive;
+  visManager->Initialize();
   if (ui) {
     // interactive mode
-    visManager = new G4VisExecutive;
-    visManager->Initialize();
     ui->SessionStart();
     delete ui;
   }

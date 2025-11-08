@@ -245,12 +245,12 @@ void Run::EndOfRun(G4bool print)
 
   // run condition
   //
-  const G4Material* material = fDetector->GetMaterial();
+  const G4Material* material = fDetector->GetCatcherMaterial();
   G4double density = material->GetDensity();
 
   G4String Particle = fParticle->GetParticleName();
   G4cout << "\n The run is " << numberOfEvent << " " << Particle << " of "
-         << G4BestUnit(fEkin, "Energy") << " through " << G4BestUnit(fDetector->GetSize(), "Length")
+         << G4BestUnit(fEkin, "Energy") << " through " << G4BestUnit(fDetector->GetCatcherZ(), "Length")
          << " of " << material->GetName() << " (density: " << G4BestUnit(density, "Volumic Mass")
          << ")" << G4endl;
 
@@ -274,7 +274,7 @@ void Run::EndOfRun(G4bool print)
 
   if (survive > 0) {
     G4cout << "\n Nb of incident particles surviving after "
-           << G4BestUnit(fDetector->GetSize(), "Length") << " of " << material->GetName() << " : "
+           << G4BestUnit(fDetector->GetCatcherZ(), "Length") << " of " << material->GetName() << " : "
            << survive << G4endl;
   }
 

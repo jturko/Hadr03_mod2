@@ -54,23 +54,31 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     G4Material* MaterialWithSingleIsotope(G4String, G4String, G4double, G4int, G4int);
 
-    void SetSize(G4double);
-    void SetMaterial(G4String);
+    void SetCatcherZ(G4double);
+    void SetCatcherMaterial(G4String);
 
   public:
-    const G4VPhysicalVolume* GetWorld() { return fPBox; };
+    const G4VPhysicalVolume* GetWorld() { return fPWorld; };
+    const G4VPhysicalVolume* GetCatcher() { return fPCatcher; };
 
-    G4double GetSize() { return fBoxSize; };
-    G4Material* GetMaterial() { return fMaterial; };
+    G4double GetCatcherZ() { return fCatcherZ; };
+    G4Material* GetCatcherMaterial() { return fCatcherMaterial; };
 
     void PrintParameters();
 
   private:
-    G4VPhysicalVolume* fPBox = nullptr;
-    G4LogicalVolume* fLBox = nullptr;
+    G4VPhysicalVolume*  fPWorld = nullptr;
+    G4LogicalVolume*    fLWorld = nullptr;
+    G4double fWorldXYZ;
+    
+    G4VPhysicalVolume*  fPCatcher = nullptr;
+    G4LogicalVolume*    fLCatcher = nullptr;
+    G4double            fCatcherXY;
+    G4double            fCatcherZ;
+    G4Material*         fCatcherMaterial = nullptr;
 
-    G4double fBoxSize = 0.;
-    G4Material* fMaterial = nullptr;
+    G4VPhysicalVolume*  fPCatcherTracker = nullptr;;
+    G4LogicalVolume*    fLCatcherTracker = nullptr;
 
     DetectorMessenger* fDetectorMessenger = nullptr;
 

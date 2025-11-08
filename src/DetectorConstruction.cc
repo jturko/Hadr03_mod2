@@ -48,13 +48,19 @@
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
 
+#include "G4VisAttributes.hh"
+#include "G4Colour.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction()
 {
-    fBoxSize = 10 * m;
+    fWorldXYZ = 5 * m;
+        
+    fCatcherXY = 5 * cm;
+    fCatcherZ = 3 * mm;
+    
     DefineMaterials();
-    SetMaterial("Molybdenum98");
     fDetectorMessenger = new DetectorMessenger(this);
 }
 
@@ -76,38 +82,38 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 void DetectorConstruction::DefineMaterials()
 {
-    // define a Material from isotopes
-    //
-    MaterialWithSingleIsotope("Molybdenum98", "Mo98", 10.28 * g / cm3, 42, 98);
+    //  // define a Material from isotopes
+    //  //
+    //  MaterialWithSingleIsotope("Molybdenum98", "Mo98", 10.28 * g / cm3, 42, 98);
 
-    // NE213
-    G4Element* H = new G4Element("Hydrogen", "H", 1., 1.01 * g / mole);
-    G4Element* C = new G4Element("Carbon", "C", 6., 12.00 * g / mole);
-    G4Material* ne213 = new G4Material("NE213", 0.874 * g / cm3, 2);
-    ne213->AddElement(H, 9.2 * perCent);
-    ne213->AddElement(C, 90.8 * perCent);
+    //  // NE213
+    //  G4Element* H = new G4Element("Hydrogen", "H", 1., 1.01 * g / mole);
+    //  G4Element* C = new G4Element("Carbon", "C", 6., 12.00 * g / mole);
+    //  G4Material* ne213 = new G4Material("NE213", 0.874 * g / cm3, 2);
+    //  ne213->AddElement(H, 9.2 * perCent);
+    //  ne213->AddElement(C, 90.8 * perCent);
 
-    G4Material* hydrogen = new G4Material("hydrogen", 1.0 * g / cm3, 1);
-    hydrogen->AddElement(H, 1);
+    //  G4Material* hydrogen = new G4Material("hydrogen", 1.0 * g / cm3, 1);
+    //  hydrogen->AddElement(H, 1);
 
-    G4Material* carbon = new G4Material("carbon", 1.0 * g / cm3, 1);
-    carbon->AddElement(C, 1);
+    //  G4Material* carbon = new G4Material("carbon", 1.0 * g / cm3, 1);
+    //  carbon->AddElement(C, 1);
 
-    G4Material* plastic = new G4Material("plastic", 1.0 * g / cm3, 2);
-    plastic->AddElement(H, 1);
-    plastic->AddElement(C, 1);
+    //  G4Material* plastic = new G4Material("plastic", 1.0 * g / cm3, 2);
+    //  plastic->AddElement(H, 1);
+    //  plastic->AddElement(C, 1);
 
-    // or use G4-NIST materials data base
-    //
-    G4NistManager* man = G4NistManager::Instance();
-    man->FindOrBuildMaterial("G4_B");
+    //  // or use G4-NIST materials data base
+    //  //
+    //  G4NistManager* man = G4NistManager::Instance();
+    //  man->FindOrBuildMaterial("G4_B");
 
-    G4Element* O = man->FindOrBuildElement("O");
-    G4Element* Hf = man->FindOrBuildElement("Hf");
+    //  G4Element* O = man->FindOrBuildElement("O");
+    //  G4Element* Hf = man->FindOrBuildElement("Hf");
 
-    G4Material* HfO2 = new G4Material("HfO2", 9.68 * g / cm3, 2);
-    HfO2->AddElement(Hf, 1);
-    HfO2->AddElement(O, 2);
+    //  G4Material* HfO2 = new G4Material("HfO2", 9.68 * g / cm3, 2);
+    //  HfO2->AddElement(Hf, 1);
+    //  HfO2->AddElement(O, 2);
 
     /// G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
@@ -143,53 +149,72 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
     G4LogicalVolumeStore::GetInstance()->Clean();
     G4SolidStore::GetInstance()->Clean();
 
+    // materials
+    G4NistManager* man = G4NistManager::Instance();
+    G4Material * material; 
+
+    // world volume
+    G4Box* sWorld = new G4Box("sWorld", 
+            fWorldXYZ/2., fWorldXYZ/2., fWorldXYZ/2.);
+    material = man->FindOrBuildMaterial("G4_AIR");
+    fLWorld = new G4LogicalVolume(sWorld, 
+            material,
+            material->GetName());
+    fLWorld->SetVisAttributes(G4VisAttributes::GetInvisible());
+    fPWorld = new G4PVPlacement(0,  // no rotation
+            G4ThreeVector(),        // at (0,0,0)
+            fLWorld,                // its logical volume
+            "pWorld",               // its name
+            0,                      // its mother  volume
+            false,                  // no boolean operation
+            0);                     // copy number
 
 
+    // catcher volume
+    G4Box* sCatcher = new G4Box("catcher_solid",  // its name
+            fCatcherXY/2., fCatcherXY/2., fCatcherZ/2.);  // its dimensions
+    fLCatcher = new G4LogicalVolume(sCatcher,   // its shape
+            fCatcherMaterial,                      // its material
+            fCatcherMaterial->GetName());          // its name
+    fLCatcher->SetVisAttributes(new G4VisAttributes(true, G4Colour::Green()));
+    fPCatcher = new G4PVPlacement(0,// no rotation
+            G4ThreeVector(),        // at (0,0,0)
+            fLCatcher,                  // its logical volume
+            fCatcherMaterial->GetName(),   // its name
+            fLWorld,                // its mother  volume
+            false,                  // no boolean operation
+            0);                     // copy number
 
-
-    G4Box* sBox = new G4Box("Container",  // its name
-            fBoxSize / 2, fBoxSize / 2, fBoxSize / 2);  // its dimensions
-
-    fLBox = new G4LogicalVolume(sBox,  // its shape
-            fMaterial,  // its material
-            fMaterial->GetName());  // its name
-
-    fPBox = new G4PVPlacement(0,  // no rotation
-            G4ThreeVector(),  // at (0,0,0)
-            fLBox,  // its logical volume
-            fMaterial->GetName(),  // its name
-            0,  // its mother  volume
-            false,  // no boolean operation
-            0);  // copy number
+    // post-target tracker
+    //G4Box* sBoxTracker = new G4Box(
 
     PrintParameters();
 
     // always return the root volume
-    //
-    return fPBox;
+    return fPWorld;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorConstruction::PrintParameters()
 {
-    G4cout << "\n The Box is " << G4BestUnit(fBoxSize, "Length") << " of " << fMaterial->GetName()
+    G4cout << "\n The catcher is " << G4BestUnit(fCatcherZ, "Length") << " of " << fCatcherMaterial->GetName()
         << "\n \n"
-        << fMaterial << G4endl;
+        << fCatcherMaterial << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::SetMaterial(G4String materialChoice)
+void DetectorConstruction::SetCatcherMaterial(G4String materialChoice)
 {
     // search the material by its name
     G4Material* pttoMaterial = G4NistManager::Instance()->FindOrBuildMaterial(materialChoice);
 
     if (pttoMaterial) {
-        if (fMaterial != pttoMaterial) {
-            fMaterial = pttoMaterial;
-            if (fLBox) {
-                fLBox->SetMaterial(pttoMaterial);
+        if (fCatcherMaterial != pttoMaterial) {
+            fCatcherMaterial = pttoMaterial;
+            if (fLCatcher) {
+                fLCatcher->SetMaterial(pttoMaterial);
             }
             G4RunManager::GetRunManager()->PhysicsHasBeenModified();
         }
@@ -202,9 +227,9 @@ void DetectorConstruction::SetMaterial(G4String materialChoice)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::SetSize(G4double value)
+void DetectorConstruction::SetCatcherZ(G4double value)
 {
-    fBoxSize = value;
+    fCatcherZ = value;
     G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 

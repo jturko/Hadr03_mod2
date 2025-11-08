@@ -39,6 +39,7 @@
 #include <map>
 
 class G4ParticleDefinition;
+class DetectorConstruction;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -46,12 +47,14 @@ class SteppingAction : public G4UserSteppingAction
 {
   public:
     SteppingAction() = default;
+    SteppingAction(DetectorConstruction*);
     ~SteppingAction() override = default;
 
     void UserSteppingAction(const G4Step*) override;
 
   private:
     std::map<G4ParticleDefinition*, G4int> fParticleFlag;
+    DetectorConstruction* fDetector = nullptr; 
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

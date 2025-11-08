@@ -58,8 +58,8 @@ class DetectorMessenger : public G4UImessenger
 
     G4UIdirectory* fTesthadDir = nullptr;
     G4UIdirectory* fDetDir = nullptr;
-    G4UIcmdWithAString* fMaterCmd = nullptr;
-    G4UIcmdWithADoubleAndUnit* fSizeCmd = nullptr;
+    G4UIcmdWithAString* fCatcherMaterialCmd = nullptr;
+    G4UIcmdWithADoubleAndUnit* fCatcherZCmd = nullptr;
     G4UIcommand* fIsotopeCmd = nullptr;
 };
 

@@ -51,19 +51,19 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
   fDetDir = new G4UIdirectory("/testhadr/det/");
   fDetDir->SetGuidance("detector construction commands");
 
-  fMaterCmd = new G4UIcmdWithAString("/testhadr/det/setMat", this);
-  fMaterCmd->SetGuidance("Select material of the box.");
-  fMaterCmd->SetParameterName("choice", false);
-  fMaterCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
-  fMaterCmd->SetToBeBroadcasted(false);
+  fCatcherMaterialCmd = new G4UIcmdWithAString("/testhadr/det/setCatcherMat", this);
+  fCatcherMaterialCmd->SetGuidance("Select material of the catcher.");
+  fCatcherMaterialCmd->SetParameterName("choice", false);
+  fCatcherMaterialCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+  fCatcherMaterialCmd->SetToBeBroadcasted(false);
 
-  fSizeCmd = new G4UIcmdWithADoubleAndUnit("/testhadr/det/setSize", this);
-  fSizeCmd->SetGuidance("Set size of the box");
-  fSizeCmd->SetParameterName("Size", false);
-  fSizeCmd->SetRange("Size>0.");
-  fSizeCmd->SetUnitCategory("Length");
-  fSizeCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
-  fSizeCmd->SetToBeBroadcasted(false);
+  fCatcherZCmd = new G4UIcmdWithADoubleAndUnit("/testhadr/det/setCatcherZ", this);
+  fCatcherZCmd->SetGuidance("Set the thickness of the catcher");
+  fCatcherZCmd->SetParameterName("Size", false);
+  fCatcherZCmd->SetRange("Size>0.");
+  fCatcherZCmd->SetUnitCategory("Length");
+  fCatcherZCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+  fCatcherZCmd->SetToBeBroadcasted(false);
 
   fIsotopeCmd = new G4UIcommand("/testhadr/det/setIsotopeMat", this);
   fIsotopeCmd->SetGuidance("Build and select a material with single isotope");
@@ -102,8 +102,8 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
 
 DetectorMessenger::~DetectorMessenger()
 {
-  delete fMaterCmd;
-  delete fSizeCmd;
+  delete fCatcherMaterialCmd;
+  delete fCatcherZCmd;
   delete fIsotopeCmd;
   delete fDetDir;
   delete fTesthadDir;
@@ -113,12 +113,12 @@ DetectorMessenger::~DetectorMessenger()
 
 void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
-  if (command == fMaterCmd) {
-    fDetector->SetMaterial(newValue);
+  if (command == fCatcherMaterialCmd) {
+    fDetector->SetCatcherMaterial(newValue);
   }
 
-  if (command == fSizeCmd) {
-    fDetector->SetSize(fSizeCmd->GetNewDoubleValue(newValue));
+  if (command == fCatcherZCmd) {
+    fDetector->SetCatcherZ(fCatcherZCmd->GetNewDoubleValue(newValue));
   }
 
   if (command == fIsotopeCmd) {
@@ -130,7 +130,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     is >> name >> Z >> A >> dens >> unt;
     dens *= G4UIcommand::ValueOf(unt);
     fDetector->MaterialWithSingleIsotope(name, name, dens, Z, A);
-    fDetector->SetMaterial(name);
+    fDetector->SetCatcherMaterial(name);
   }
 }
 
