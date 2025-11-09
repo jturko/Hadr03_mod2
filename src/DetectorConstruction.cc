@@ -36,6 +36,7 @@
 #include "DetectorMessenger.hh"
 
 #include "G4Box.hh"
+#include "G4SubtractionSolid.hh"
 #include "G4GeometryManager.hh"
 #include "G4LogicalVolume.hh"
 #include "G4LogicalVolumeStore.hh"
@@ -56,10 +57,15 @@
 DetectorConstruction::DetectorConstruction()
 {
     fWorldXYZ = 5 * m;
-        
+
     fCatcherXY = 5 * cm;
     fCatcherZ = 3 * mm;
     
+    fCollimatorXY = 5 * cm;
+    fCollimatorZ = 5 * cm;
+    fCollimatorDistance = 10 * cm;
+    fCollimatorSpacing = 10 * cm;
+
     DefineMaterials();
     fDetectorMessenger = new DetectorMessenger(this);
 }
@@ -114,6 +120,21 @@ void DetectorConstruction::DefineMaterials()
     //  G4Material* HfO2 = new G4Material("HfO2", 9.68 * g / cm3, 2);
     //  HfO2->AddElement(Hf, 1);
     //  HfO2->AddElement(O, 2);
+
+    // borated PE
+    G4Element* H  = new G4Element("Hydrogen", "H", 1., 1.0079*g/mole);
+    G4Element* C  = new G4Element("Carbon",   "C", 6., 12.01*g/mole);
+    G4Element* B  = new G4Element("Boron",    "B", 5., 10.81*g/mole);
+    // Assume 5% boron by mass
+    G4double fractionB = 0.05;
+    G4double fractionPE = 1.0 - fractionB;
+    // Density of borated polyethylene
+    G4double density = 0.95*g/cm3;  // typical value
+    G4Material* BoratedPE = new G4Material("BoratedPE", density, 3);
+    BoratedPE->AddElement(B, fractionB);
+    BoratedPE->AddElement(C, 0.857*fractionPE);  // Polyethylene is (CH2)n
+    BoratedPE->AddElement(H, 0.143*fractionPE);
+
 
     /// G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
@@ -185,9 +206,50 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             false,                  // no boolean operation
             0);                     // copy number
 
-    // post-target tracker
-    //G4Box* sBoxTracker = new G4Box(
 
+    // extra parameters for collimator
+    G4double cut_extra = 1*cm;
+
+    // collimator solid and logical
+    G4Box* sCol1_PreCut = new G4Box("col1_precut_solid",
+            fCollimatorXY, fCollimatorXY, fCollimatorZ/2.);
+    G4Box* sCol1_Cut = new G4Box("col1_cut_solid",
+            fCollimatorXY/2., fCollimatorXY/2., fCollimatorZ/2. + cut_extra);
+    G4SubtractionSolid* sCol1 = new G4SubtractionSolid("col1_solid",
+            sCol1_PreCut, sCol1_Cut);
+    material = man->FindOrBuildMaterial("BoratedPE");
+    G4LogicalVolume* lCol1 = new G4LogicalVolume(sCol1,
+            material,
+            material->GetName());
+    lCol1->SetVisAttributes(new G4VisAttributes(true, G4Colour::White()));
+
+    // first collimator
+    G4VPhysicalVolume* pCol1 = new G4PVPlacement(0,
+            G4ThreeVector(0., 0., fCollimatorDistance),
+            lCol1,
+            "pCol1",
+            fLWorld,
+            false,
+            0);
+    
+    // second collimator
+    G4VPhysicalVolume* pCol2 = new G4PVPlacement(0,
+            G4ThreeVector(0., 0., fCollimatorDistance + fCollimatorSpacing),
+            lCol1,
+            "pCol2",
+            fLWorld,
+            false,
+            1);
+    
+    // third collimator
+    G4VPhysicalVolume* pCol3 = new G4PVPlacement(0,
+            G4ThreeVector(0., 0., fCollimatorDistance + 2*fCollimatorSpacing),
+            lCol1,
+            "pCol3",
+            fLWorld,
+            false,
+            2);
+    
     PrintParameters();
 
     // always return the root volume

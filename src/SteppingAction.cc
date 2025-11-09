@@ -67,7 +67,9 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
     {
         G4ThreeVector momentum = aStep->GetPostStepPoint()->GetMomentum();
         G4double ekin = aStep->GetPostStepPoint()->GetKineticEnergy();
-        if(momentum.z() > 0) {
+        
+        //if(momentum.z() > 0) {
+        if(1) {
             G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
             G4String partName = particle->GetParticleName();
             //G4cout << "!!!!!! Found a " << partName << " with momentum: " << momentum << G4endl;

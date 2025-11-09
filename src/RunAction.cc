@@ -97,6 +97,7 @@ void RunAction::BeginOfRunAction(const G4Run* run)
         analysisManager->OpenFile();
     }
 
+    ProgressBar::gEvtNb.store(0, std::memory_order_relaxed);
     if(fProgBar)
         delete fProgBar;
     fProgBar = new ProgressBar(run->GetNumberOfEventToBeProcessed());
