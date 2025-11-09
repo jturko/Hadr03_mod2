@@ -86,16 +86,20 @@ void HistoManager::Book()
         G4int ih = analysisManager->CreateH1(id[k], title[k], nbins, vmin, vmax);
         analysisManager->SetH1Activation(ih, false);
     }
-    G4int ii = analysisManager->CreateH1("hIncProtonE", "incident proton energy distrib.", 2000, 0, 20);
+    G4int ii = analysisManager->CreateH1("hEp", "incident proton energy distrib.", 2000, 0, 20);
     analysisManager->SetH1Activation(ii, true);
 
     // ntuple
     analysisManager->CreateNtuple("tree", "spectrum of outgoing particles");
     analysisManager->CreateNtupleDColumn("particle");
-    analysisManager->CreateNtupleDColumn("pX");
-    analysisManager->CreateNtupleDColumn("pY");
-    analysisManager->CreateNtupleDColumn("pZ");
     analysisManager->CreateNtupleDColumn("Ekin");
+    analysisManager->CreateNtupleDColumn("t");
+    analysisManager->CreateNtupleDColumn("x");
+    analysisManager->CreateNtupleDColumn("y");
+    analysisManager->CreateNtupleDColumn("z");
+    analysisManager->CreateNtupleDColumn("px");
+    analysisManager->CreateNtupleDColumn("py");
+    analysisManager->CreateNtupleDColumn("pz");
     analysisManager->FinishNtuple();
 
 

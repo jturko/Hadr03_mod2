@@ -40,6 +40,9 @@
 #include "G4ParticleTypes.hh"
 #include "G4RunManager.hh"
 
+#include "G4SystemOfUnits.hh"
+#include "G4UnitsTable.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 // SteppingAction::SteppingAction()
@@ -65,20 +68,26 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
     if (aStep->GetPreStepPoint()->GetPhysicalVolume()  == fDetector->GetCatcher() && 
         aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld()) 
     {
-        G4ThreeVector momentum = aStep->GetPostStepPoint()->GetMomentum();
-        G4double ekin = aStep->GetPostStepPoint()->GetKineticEnergy();
-        
+        G4double particleID     = aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
+        G4double ekin           = aStep->GetPostStepPoint()->GetKineticEnergy();
+        G4double t              = aStep->GetPostStepPoint()->GetGlobalTime();
+        G4ThreeVector position  = aStep->GetPostStepPoint()->GetPosition();
+        G4ThreeVector momentum  = aStep->GetPostStepPoint()->GetMomentum();
+
         //if(momentum.z() > 0) {
         if(1) {
-            G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
-            G4String partName = particle->GetParticleName();
-            //G4cout << "!!!!!! Found a " << partName << " with momentum: " << momentum << G4endl;
+            //G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
+            //G4String partName = particle->GetParticleName();
 
-            analysis->FillNtupleDColumn(0, particle->GetPDGEncoding());
-            analysis->FillNtupleDColumn(1, momentum.x());
-            analysis->FillNtupleDColumn(2, momentum.y());
-            analysis->FillNtupleDColumn(3, momentum.z());
-            analysis->FillNtupleDColumn(4, ekin);
+            analysis->FillNtupleDColumn(0, particleID);
+            analysis->FillNtupleDColumn(1, ekin / MeV);
+            analysis->FillNtupleDColumn(2, t / ns);
+            analysis->FillNtupleDColumn(3, position.x() / mm);
+            analysis->FillNtupleDColumn(4, position.y() / mm);
+            analysis->FillNtupleDColumn(5, position.z() / mm);
+            analysis->FillNtupleDColumn(6, momentum.x());
+            analysis->FillNtupleDColumn(7, momentum.y());
+            analysis->FillNtupleDColumn(8, momentum.z());
             analysis->AddNtupleRow();
         }
     }
