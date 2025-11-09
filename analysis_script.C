@@ -50,7 +50,8 @@ void analysis_script(const char* inputFileName = "hadr03.root") {
     const int nDim = 7; // time,    x,    y,    z,    px,    py,   pz
     double xMin[nDim] = {     0,  -50,  -50,   -5,  -300,  -300, -300 };  
     double xMax[nDim] = {    10,   50,   50,    5,   300,   300,  300 };  
-    int    xBin[nDim] = {   100,  100,  100,  100,   100,   100,  100 };
+    int    xBin[nDim] = {  1000, 1000, 1000, 1000,  1000,  1000, 1000 };
+    //int    xBin[nDim] = {   100,  100,  100,  100,   100,   100,  100 };
     THnSparseD * hsparse = new THnSparseD("hsparse", "hsparse", nDim, xBin, xMin, xMax);
 
     for (Long64_t i = 0; i < nEntries_tree; ++i) {
@@ -78,7 +79,7 @@ void analysis_script(const char* inputFileName = "hadr03.root") {
     hTimeEkinN->Draw("colz");
 
     // test sampling from THnSparseD
-    const int nSamples = 1000000;
+    const int nSamples = 10000000;
     TH2D * hTimeEkinN_sampled = new TH2D("hTimeEkinN_sampled", "sampled emission time vs kinetic energy of neutrons from catcher;#it{E}_{kin} / MeV;#it{t} / ns;Counts", 2000, 0, 20, 1000, 0, 10);
     for(int i=0; i<nSamples; i++) {
         double val[nDim];
@@ -88,6 +89,11 @@ void analysis_script(const char* inputFileName = "hadr03.root") {
     }
     new TCanvas;
     hTimeEkinN_sampled->Draw("colz");
+
+    TFile* outfile = new TFile("phase_space.root", "RECREATE");
+    outfile->cd();
+    hsparse->Write();
+    outfile->Close();
 
     //file->Close();
 }
