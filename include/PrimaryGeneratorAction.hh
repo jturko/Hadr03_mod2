@@ -38,6 +38,9 @@
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "globals.hh"
 
+#include "THnSparse.h"
+#include "TROOT.h"
+
 class G4Event;
 class DetectorConstruction;
 
@@ -54,12 +57,17 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4ParticleGun* GetParticleGun() { return fParticleGun; };
     G4GeneralParticleSource* GetGPS() { return fGPS; };
 
+    void SetNeutronPhaseSpace(std::shared_ptr<THnSparseD>);
+
   private:
     G4ParticleGun* fParticleGun = nullptr;
     G4GeneralParticleSource* fGPS;
     DetectorConstruction* fDetector = nullptr;
 
-    G4bool fUseGPS = true;
+    G4bool fUseGPS;
+
+    G4bool fUseNeutronPhaseSpace;
+    std::shared_ptr<THnSparseD> fhNeutronPhaseSpace;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

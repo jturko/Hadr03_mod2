@@ -47,6 +47,9 @@
 
 #include <iomanip>
 
+#include "TFile.h"
+#include "TROOT.h"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* prim)
@@ -54,6 +57,18 @@ RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* prim)
 {
     fHistoManager = new HistoManager();
     fRunMessenger = new RunMessenger(this);
+
+    if(isMaster) {
+        TFile* f = TFile::Open("root_files/G4Li_3mm_1e9_phase.root", "READ");
+        if(!f || f->IsZombie()) {
+            G4Exception("RunAction", "FileError", FatalException, "Cannot open ROOT file");
+        }
+        THnSparseD* h = (THnSparseD*)f->Get("hsparse");
+        fhNeutronPhaseSpace = std::shared_ptr<THnSparseD>((THnSparseD*)h->Clone());
+        f->Close();
+        delete f;
+        gROOT->GetListOfCleanups()->Remove(fhNeutronPhaseSpace.get()); // detach from ROOT cleanup
+    }
 
 }
 
@@ -66,6 +81,10 @@ RunAction::~RunAction()
 
     if(fProgBar)
         delete fProgBar;
+
+    if(isMaster) {
+        fhNeutronPhaseSpace.reset();
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

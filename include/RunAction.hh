@@ -39,6 +39,8 @@
 
 #include <map>
 
+#include "THnSparse.h"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class DetectorConstruction;
@@ -64,8 +66,9 @@ class RunAction : public G4UserRunAction
     void EndOfRunAction(const G4Run*) override;
 
     void SetPrintFlag(G4bool);
-    
     ProgressBar * GetProgBar() { return fProgBar; }
+
+    std::shared_ptr<THnSparseD> GetNeutronPhaseSpace() { return fhNeutronPhaseSpace; }
 
   private:
     DetectorConstruction* fDetector = nullptr;
@@ -75,8 +78,9 @@ class RunAction : public G4UserRunAction
     RunMessenger* fRunMessenger = nullptr;
 
     G4bool fPrint = true;  // optional printing
-                           
-    ProgressBar* fProgBar;                          
+    ProgressBar* fProgBar; 
+    
+    std::shared_ptr<THnSparseD> fhNeutronPhaseSpace;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
