@@ -36,6 +36,7 @@
 #include "DetectorMessenger.hh"
 
 #include "G4Box.hh"
+#include "G4Tubs.hh"
 #include "G4SubtractionSolid.hh"
 #include "G4GeometryManager.hh"
 #include "G4LogicalVolume.hh"
@@ -65,6 +66,9 @@ DetectorConstruction::DetectorConstruction()
     fCollimatorZ = 5 * cm;
     fCollimatorDistance = 10 * cm;
     fCollimatorSpacing = 10 * cm;
+
+    fDetectorXY = 20.*cm;
+    fDetectorZ = 1.*cm;
 
     DefineMaterials();
     fDetectorMessenger = new DetectorMessenger(this);
@@ -249,7 +253,38 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             fLWorld,
             false,
             2);
-    
+ 
+    // sample
+    G4Tubs * sSampleCyl = new G4Tubs("sample_cyl_solid", 0, 1.*cm, 5.*cm / 2., 0., 2.*M_PI);
+    material = man->FindOrBuildMaterial("G4_Pb");
+    G4LogicalVolume * lSampleCyl = new G4LogicalVolume(sSampleCyl,
+            material,
+            material->GetName());
+    lSampleCyl->SetVisAttributes(new G4VisAttributes(true, G4Colour::Red()));
+    G4VPhysicalVolume* pSampleCyl = new G4PVPlacement(0,
+            G4ThreeVector(1.*cm, 1.*cm, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm),
+            lSampleCyl,
+            "pSampleCyl",
+            fLWorld,
+            false,
+            0); 
+
+    // detector 
+    G4Box* sDetector = new G4Box("detector_solid",  // its name
+            fDetectorXY/2., fDetectorXY/2., fDetectorZ/2.);  // its dimensions
+    fDetectorMaterial = man->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+    fLDetector = new G4LogicalVolume(sDetector,   // its shape
+            fDetectorMaterial,                      // its material
+            fDetectorMaterial->GetName());          // its name
+    fLDetector->SetVisAttributes(new G4VisAttributes(true, G4Colour::Blue()));
+    fPDetector = new G4PVPlacement(0,// no rotation
+            G4ThreeVector(0, 0, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm + 10.*cm),
+            fLDetector,                  // its logical volume
+            fDetectorMaterial->GetName(),   // its name
+            fLWorld,                // its mother  volume
+            false,                  // no boolean operation
+            0);                     // copy number
+
     PrintParameters();
 
     // always return the root volume

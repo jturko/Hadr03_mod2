@@ -83,8 +83,11 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double            fCollimatorSpacing;
     G4Material*         fCollimatorMaterial = nullptr;
 
-    G4VPhysicalVolume*  fPCatcherTracker = nullptr;;
-    G4LogicalVolume*    fLCatcherTracker = nullptr;
+    G4VPhysicalVolume*  fPDetector = nullptr;
+    G4LogicalVolume*    fLDetector = nullptr;
+    G4double            fDetectorXY;
+    G4double            fDetectorZ;
+    G4Material*         fDetectorMaterial = nullptr;
 
     DetectorMessenger* fDetectorMessenger = nullptr;
 
