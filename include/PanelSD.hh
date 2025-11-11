@@ -58,6 +58,7 @@ class PanelSD : public G4VSensitiveDetector
 
   private:
     PanelHitsCollection* fHitsCollection = nullptr;
+    G4bool fTrig = false;
 };
 
 

@@ -77,6 +77,9 @@ void HistoManager::Book()
     
     // ntuple for detector hits
     idx = analysisManager->CreateNtuple("hits", "detector hits");
+    analysisManager->CreateNtupleDColumn("particle");
+    analysisManager->CreateNtupleDColumn("Edep");
+    analysisManager->CreateNtupleDColumn("t");
     analysisManager->CreateNtupleDColumn("x");
     analysisManager->CreateNtupleDColumn("y");
     analysisManager->CreateNtupleDColumn("z");

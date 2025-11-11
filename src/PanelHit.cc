@@ -43,31 +43,31 @@ G4ThreadLocal G4Allocator<PanelHit>* PanelHitAllocator = nullptr;
 
 G4bool PanelHit::operator==(const PanelHit& right) const
 {
-  return (this == &right) ? true : false;
+    return (this == &right) ? true : false;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PanelHit::Draw()
 {
-  G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
-  if (pVVisManager) {
-    G4Circle circle(fPos);
-    circle.SetScreenSize(4.);
-    circle.SetFillStyle(G4Circle::filled);
-    G4VisAttributes attribs(G4Colour::Red());
-    circle.SetVisAttributes(attribs);
-    pVVisManager->Draw(circle);
-  }
+    G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
+    if (pVVisManager) {
+        G4Circle circle(fPos);
+        circle.SetScreenSize(4.);
+        circle.SetFillStyle(G4Circle::filled);
+        G4VisAttributes attribs(G4Colour::Red());
+        circle.SetVisAttributes(attribs);
+        pVVisManager->Draw(circle);
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PanelHit::Print()
 {
-  G4cout << "  trackID: " << fTrackID << ", Edep: " << std::setw(7)
-         << G4BestUnit(fEdep, "Energy") << ", Position: " << std::setw(7)
-         << G4BestUnit(fPos, "Length") << G4endl;
+    G4cout << "  trackID: " << fTrackID << ", Edep: " << std::setw(7)
+        << G4BestUnit(fEdep, "Energy") << ", Position: " << std::setw(7)
+        << G4BestUnit(fPos, "Length") << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

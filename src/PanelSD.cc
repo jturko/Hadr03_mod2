@@ -32,6 +32,9 @@
 #include "G4HCofThisEvent.hh"
 #include "G4SDManager.hh"
 #include "G4Step.hh"
+#include "G4StepPoint.hh"
+#include "G4Track.hh"
+#include "G4ParticleDefinition.hh"
 #include "G4ThreeVector.hh"
 #include "G4ios.hh"
 
@@ -63,18 +66,46 @@ G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
 {
     // energy deposit
     G4double edep = step->GetTotalEnergyDeposit();
+    
+    // if no energy deposited, return
+    if (edep == 0.) 
+        return false;
 
-    if (edep == 0.) return false;
+    // time
+    G4double t = step->GetPreStepPoint()->GetGlobalTime();
+
+    // if not triggered yet
+    if(!fTrig) {
+        auto newHit = new PanelHit();
+        newHit->SetTrackID(step->GetTrack()->GetTrackID());
+        newHit->SetEdep(edep);
+        newHit->SetPos(step->GetPostStepPoint()->GetPosition());
+        newHit->SetTime(t);
+        newHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
+        fHitsCollection->insert(newHit);
+
+        //G4cout << "inserting new hit" << G4endl;
+    }
+    // if triggered, but this step has smaller timestamp than hit 
+    else if(fTrig && t < ((PanelHit*)fHitsCollection->GetHit(0))->GetTime()) {
+        auto oldHit = (PanelHit*)fHitsCollection->GetHit(0);
+        oldHit->SetTrackID(step->GetTrack()->GetTrackID());
+        oldHit->AddEdep(edep);
+        oldHit->SetPos(step->GetPostStepPoint()->GetPosition());
+        oldHit->SetTime(t);
+        oldHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
         
-    auto newHit = new PanelHit();
+        //G4cout << "updating old hit with new time/pos" << G4endl;
+    }
+    else { // triggered and time greater, just add edep
+        auto oldHit = (PanelHit*)fHitsCollection->GetHit(0);
+        oldHit->AddEdep(edep);
+        
+        //G4cout << "updating old hit by just summing the edeps" << G4endl;
+    }
 
-    newHit->SetTrackID(step->GetTrack()->GetTrackID());
-    newHit->SetEdep(edep);
-    newHit->SetPos(step->GetPostStepPoint()->GetPosition());
-
-    fHitsCollection->insert(newHit);
-
-    //newHit->Print();
+    // set triggered to true
+    fTrig = true;
 
     return true;
 }
@@ -94,14 +125,23 @@ void PanelSD::EndOfEvent(G4HCofThisEvent*)
 
     G4AnalysisManager* analysis = G4AnalysisManager::Instance();
     for (std::size_t i = 0; i < nofHits; i++) {
-        G4ThreeVector pos = (*fHitsCollection)[i]->GetPos();
+        G4double pid        = (*fHitsCollection)[i]->GetPID();
+        G4double edep       = (*fHitsCollection)[i]->GetEdep();
+        G4double t          = (*fHitsCollection)[i]->GetTime();
+        G4ThreeVector pos   = (*fHitsCollection)[i]->GetPos();
+        
         // 2nd ntuple is for panel hits
         G4int idx = 1;
-        analysis->FillNtupleDColumn(idx, 0, pos.x());
-        analysis->FillNtupleDColumn(idx, 1, pos.y());
-        analysis->FillNtupleDColumn(idx, 2, pos.z());
+        analysis->FillNtupleDColumn(idx, 0, pid);
+        analysis->FillNtupleDColumn(idx, 1, edep);
+        analysis->FillNtupleDColumn(idx, 2, t);
+        analysis->FillNtupleDColumn(idx, 3, pos.x());
+        analysis->FillNtupleDColumn(idx, 4, pos.y());
+        analysis->FillNtupleDColumn(idx, 5, pos.z());
         analysis->AddNtupleRow(idx);
     }
+
+    fTrig = false;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
