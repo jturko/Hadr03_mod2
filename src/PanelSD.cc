@@ -35,6 +35,8 @@
 #include "G4ThreeVector.hh"
 #include "G4ios.hh"
 
+#include "G4AnalysisManager.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PanelSD::PanelSD(const G4String& name, const G4String& hitsCollectionName)
@@ -72,7 +74,7 @@ G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
 
     fHitsCollection->insert(newHit);
 
-    newHit->Print();
+    //newHit->Print();
 
     return true;
 }
@@ -81,12 +83,24 @@ G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
 
 void PanelSD::EndOfEvent(G4HCofThisEvent*)
 {
+    std::size_t nofHits = fHitsCollection->entries();
+    
     if (verboseLevel > 1) {
-        std::size_t nofHits = fHitsCollection->entries();
         G4cout << G4endl << "-------->Hits Collection: in this event they are " << nofHits
             << " hits in the tracker chambers: " << G4endl;
         for (std::size_t i = 0; i < nofHits; i++)
             (*fHitsCollection)[i]->Print();
+    }
+
+    G4AnalysisManager* analysis = G4AnalysisManager::Instance();
+    for (std::size_t i = 0; i < nofHits; i++) {
+        G4ThreeVector pos = (*fHitsCollection)[i]->GetPos();
+        // 2nd ntuple is for panel hits
+        G4int idx = 1;
+        analysis->FillNtupleDColumn(idx, 0, pos.x());
+        analysis->FillNtupleDColumn(idx, 1, pos.y());
+        analysis->FillNtupleDColumn(idx, 2, pos.z());
+        analysis->AddNtupleRow(idx);
     }
 }
 

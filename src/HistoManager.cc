@@ -55,42 +55,14 @@ void HistoManager::Book()
     analysisManager->SetActivation(true);  // enable inactivation of histograms
     analysisManager->SetNtupleMerging(true);
 
-    // Define histograms start values
-    const G4int kMaxHisto = 14;
-    const G4String id[] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"};
-    const G4String title[] = {
-        "dummy",  // 0
-        "kinetic energy of scattered primary particle",  // 1
-        "kinetic energy of gamma",  // 2
-        "kinetic energy of electrons",  // 3
-        "kinetic energy of neutrons",  // 4
-        "kinetic energy of protons",  // 5
-        "kinetic energy of deuterons",  // 6
-        "kinetic energy of alphas",  // 7
-        "kinetic energy of nuclei",  // 8
-        "kinetic energy of mesons",  // 9
-        "kinetic energy of baryons",  // 10
-        "Q = Ekin out - Ekin in",  // 11
-        "Pbalance = mag(P_out - P_in)",  // 12
-        "atomic mass of nuclei"  // 13
-    };
+    G4int idx;
 
-    // Default values (to be reset via /analysis/h1/set command)
-    G4int nbins = 100;
-    G4double vmin = 0.;
-    G4double vmax = 100.;
+    // Ep
+    idx = analysisManager->CreateH1("hEp", "incident proton energy distrib.", 2000, 0, 20);
+    analysisManager->SetH1Activation(idx, true);
 
-    // Create all histograms as inactivated
-    // as we have not yet set nbins, vmin, vmax
-    for (G4int k = 0; k < kMaxHisto; k++) {
-        G4int ih = analysisManager->CreateH1(id[k], title[k], nbins, vmin, vmax);
-        analysisManager->SetH1Activation(ih, false);
-    }
-    G4int ii = analysisManager->CreateH1("hEp", "incident proton energy distrib.", 2000, 0, 20);
-    analysisManager->SetH1Activation(ii, true);
-
-    // ntuple
-    analysisManager->CreateNtuple("tree", "spectrum of outgoing particles");
+    // ntuple for generating phase space
+    idx = analysisManager->CreateNtuple("tree", "spectrum of outgoing particles");
     analysisManager->CreateNtupleDColumn("particle");
     analysisManager->CreateNtupleDColumn("Ekin");
     analysisManager->CreateNtupleDColumn("t");
@@ -101,7 +73,15 @@ void HistoManager::Book()
     analysisManager->CreateNtupleDColumn("py");
     analysisManager->CreateNtupleDColumn("pz");
     analysisManager->FinishNtuple();
-
+    G4cout << " Created ntuple \"tree\" (id " << idx << ") for neutron phase space" << G4endl;
+    
+    // ntuple for detector hits
+    idx = analysisManager->CreateNtuple("hits", "detector hits");
+    analysisManager->CreateNtupleDColumn("x");
+    analysisManager->CreateNtupleDColumn("y");
+    analysisManager->CreateNtupleDColumn("z");
+    analysisManager->FinishNtuple();
+    G4cout << " Created ntuple \"hits\" (id " << idx << ") for detector hits" << G4endl;
 
 }
 
