@@ -23,80 +23,72 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file DetectorConstruction.hh
-/// \brief Definition of the DetectorConstruction class
 //
-//
+/// \file B2/B2a/src/TrackerSD.cc
+/// \brief Implementation of the B2::TrackerSD class
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+#include "PanelSD.hh"
 
-#ifndef DetectorConstruction_h
-#define DetectorConstruction_h 1
-
-#include "G4VUserDetectorConstruction.hh"
-#include "globals.hh"
-
-class G4LogicalVolume;
-class G4Material;
-class DetectorMessenger;
+#include "G4HCofThisEvent.hh"
+#include "G4SDManager.hh"
+#include "G4Step.hh"
+#include "G4ThreeVector.hh"
+#include "G4ios.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class DetectorConstruction : public G4VUserDetectorConstruction
+PanelSD::PanelSD(const G4String& name, const G4String& hitsCollectionName)
+    : G4VSensitiveDetector(name)
 {
-  public:
-    DetectorConstruction();
-    ~DetectorConstruction() override;
-
-  public:
-    G4VPhysicalVolume* Construct() override;
-    void ConstructSDandField() override;
-
-    G4Material* MaterialWithSingleIsotope(G4String, G4String, G4double, G4int, G4int);
-
-    void SetCatcherZ(G4double);
-    void SetCatcherMaterial(G4String);
-
-  public:
-    const G4VPhysicalVolume* GetWorld() { return fPWorld; };
-    const G4VPhysicalVolume* GetCatcher() { return fPCatcher; };
-
-    G4double GetCatcherZ() { return fCatcherZ; };
-    G4Material* GetCatcherMaterial() { return fCatcherMaterial; };
-
-    void PrintParameters();
-
-  private:
-    G4VPhysicalVolume*  fPWorld = nullptr;
-    G4LogicalVolume*    fLWorld = nullptr;
-    G4double fWorldXYZ;
-    
-    G4VPhysicalVolume*  fPCatcher = nullptr;
-    G4LogicalVolume*    fLCatcher = nullptr;
-    G4double            fCatcherXY;
-    G4double            fCatcherZ;
-    G4Material*         fCatcherMaterial = nullptr;
-    
-    G4double            fCollimatorXY;
-    G4double            fCollimatorZ;
-    G4double            fCollimatorDistance;
-    G4double            fCollimatorSpacing;
-    G4Material*         fCollimatorMaterial = nullptr;
-
-    G4VPhysicalVolume*  fPDetector = nullptr;
-    G4LogicalVolume*    fLDetector = nullptr;
-    G4double            fDetectorXY;
-    G4double            fDetectorZ;
-    G4Material*         fDetectorMaterial = nullptr;
-
-    DetectorMessenger* fDetectorMessenger = nullptr;
-
-  private:
-    void DefineMaterials();
-    G4VPhysicalVolume* ConstructVolumes();
-};
+    collectionName.insert(hitsCollectionName);
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif
+void PanelSD::Initialize(G4HCofThisEvent* hce)
+{
+    // Create hits collection
+    fHitsCollection = new PanelHitsCollection(SensitiveDetectorName, collectionName[0]);
+
+    // Add this collection in hce
+    G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
+    hce->AddHitsCollection(hcID, fHitsCollection);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
+{
+    // energy deposit
+    G4double edep = step->GetTotalEnergyDeposit();
+
+    if (edep == 0.) return false;
+        
+    auto newHit = new PanelHit();
+
+    newHit->SetTrackID(step->GetTrack()->GetTrackID());
+    newHit->SetEdep(edep);
+    newHit->SetPos(step->GetPostStepPoint()->GetPosition());
+
+    fHitsCollection->insert(newHit);
+
+    newHit->Print();
+
+    return true;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PanelSD::EndOfEvent(G4HCofThisEvent*)
+{
+    if (verboseLevel > 1) {
+        std::size_t nofHits = fHitsCollection->entries();
+        G4cout << G4endl << "-------->Hits Collection: in this event they are " << nofHits
+            << " hits in the tracker chambers: " << G4endl;
+        for (std::size_t i = 0; i < nofHits; i++)
+            (*fHitsCollection)[i]->Print();
+    }
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+

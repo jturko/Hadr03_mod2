@@ -34,6 +34,8 @@
 #include "DetectorConstruction.hh"
 
 #include "DetectorMessenger.hh"
+#include "PanelSD.hh"
+
 
 #include "G4Box.hh"
 #include "G4Tubs.hh"
@@ -52,6 +54,7 @@
 
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
+#include "G4SDManager.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -61,7 +64,7 @@ DetectorConstruction::DetectorConstruction()
 
     fCatcherXY = 5 * cm;
     fCatcherZ = 3 * mm;
-    
+
     fCollimatorXY = 5 * cm;
     fCollimatorZ = 5 * cm;
     fCollimatorDistance = 10 * cm;
@@ -92,39 +95,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 void DetectorConstruction::DefineMaterials()
 {
-    //  // define a Material from isotopes
-    //  //
-    //  MaterialWithSingleIsotope("Molybdenum98", "Mo98", 10.28 * g / cm3, 42, 98);
-
-    //  // NE213
-    //  G4Element* H = new G4Element("Hydrogen", "H", 1., 1.01 * g / mole);
-    //  G4Element* C = new G4Element("Carbon", "C", 6., 12.00 * g / mole);
-    //  G4Material* ne213 = new G4Material("NE213", 0.874 * g / cm3, 2);
-    //  ne213->AddElement(H, 9.2 * perCent);
-    //  ne213->AddElement(C, 90.8 * perCent);
-
-    //  G4Material* hydrogen = new G4Material("hydrogen", 1.0 * g / cm3, 1);
-    //  hydrogen->AddElement(H, 1);
-
-    //  G4Material* carbon = new G4Material("carbon", 1.0 * g / cm3, 1);
-    //  carbon->AddElement(C, 1);
-
-    //  G4Material* plastic = new G4Material("plastic", 1.0 * g / cm3, 2);
-    //  plastic->AddElement(H, 1);
-    //  plastic->AddElement(C, 1);
-
-    //  // or use G4-NIST materials data base
-    //  //
-    //  G4NistManager* man = G4NistManager::Instance();
-    //  man->FindOrBuildMaterial("G4_B");
-
-    //  G4Element* O = man->FindOrBuildElement("O");
-    //  G4Element* Hf = man->FindOrBuildElement("Hf");
-
-    //  G4Material* HfO2 = new G4Material("HfO2", 9.68 * g / cm3, 2);
-    //  HfO2->AddElement(Hf, 1);
-    //  HfO2->AddElement(O, 2);
-
     // borated PE
     G4Element* H  = new G4Element("Hydrogen", "H", 1., 1.0079*g/mole);
     G4Element* C  = new G4Element("Carbon",   "C", 6., 12.01*g/mole);
@@ -138,7 +108,6 @@ void DetectorConstruction::DefineMaterials()
     BoratedPE->AddElement(B, fractionB);
     BoratedPE->AddElement(C, 0.857*fractionPE);  // Polyethylene is (CH2)n
     BoratedPE->AddElement(H, 0.143*fractionPE);
-
 
     /// G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
@@ -194,72 +163,71 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             false,                  // no boolean operation
             0);                     // copy number
 
-
     // catcher volume
-    G4Box* sCatcher = new G4Box("catcher_solid",  // its name
+    G4Box* sCatcher = new G4Box("sCatcher",  // its name
             fCatcherXY/2., fCatcherXY/2., fCatcherZ/2.);  // its dimensions
+    fCatcherMaterial = man->FindOrBuildMaterial("G4_Li");
     fLCatcher = new G4LogicalVolume(sCatcher,   // its shape
             fCatcherMaterial,                      // its material
-            fCatcherMaterial->GetName());          // its name
+            "lCatcher");          // its name
     fLCatcher->SetVisAttributes(new G4VisAttributes(true, G4Colour::Green()));
     fPCatcher = new G4PVPlacement(0,// no rotation
             G4ThreeVector(),        // at (0,0,0)
-            fLCatcher,                  // its logical volume
-            fCatcherMaterial->GetName(),   // its name
+            fLCatcher,              // its logical volume
+            "pCatcher",             // its name
             fLWorld,                // its mother  volume
             false,                  // no boolean operation
             0);                     // copy number
-
 
     // extra parameters for collimator
     G4double cut_extra = 1*cm;
 
     // collimator solid and logical
-    G4Box* sCol1_PreCut = new G4Box("col1_precut_solid",
+    G4Box* sCol_PreCut = new G4Box("sColPrecut",
             fCollimatorXY, fCollimatorXY, fCollimatorZ/2.);
-    G4Box* sCol1_Cut = new G4Box("col1_cut_solid",
+    G4Box* sCol_Cut = new G4Box("sColCut",
             fCollimatorXY/2., fCollimatorXY/2., fCollimatorZ/2. + cut_extra);
-    G4SubtractionSolid* sCol1 = new G4SubtractionSolid("col1_solid",
-            sCol1_PreCut, sCol1_Cut);
+    G4SubtractionSolid* sCol = new G4SubtractionSolid("sCol",
+            sCol_PreCut, sCol_Cut);
     material = man->FindOrBuildMaterial("BoratedPE");
-    G4LogicalVolume* lCol1 = new G4LogicalVolume(sCol1,
+    G4LogicalVolume* lCol = new G4LogicalVolume(sCol,
             material,
-            material->GetName());
-    lCol1->SetVisAttributes(new G4VisAttributes(true, G4Colour::White()));
+            "lCol");
+    lCol->SetVisAttributes(new G4VisAttributes(true, G4Colour::White()));
 
     // first collimator
     G4VPhysicalVolume* pCol1 = new G4PVPlacement(0,
             G4ThreeVector(0., 0., fCollimatorDistance),
-            lCol1,
+            lCol,
             "pCol1",
             fLWorld,
             false,
             0);
-    
+
     // second collimator
     G4VPhysicalVolume* pCol2 = new G4PVPlacement(0,
             G4ThreeVector(0., 0., fCollimatorDistance + fCollimatorSpacing),
-            lCol1,
+            lCol,
             "pCol2",
             fLWorld,
             false,
             1);
-    
+
     // third collimator
     G4VPhysicalVolume* pCol3 = new G4PVPlacement(0,
             G4ThreeVector(0., 0., fCollimatorDistance + 2*fCollimatorSpacing),
-            lCol1,
+            lCol,
             "pCol3",
             fLWorld,
             false,
             2);
- 
+
     // sample
-    G4Tubs * sSampleCyl = new G4Tubs("sample_cyl_solid", 0, 1.*cm, 5.*cm / 2., 0., 2.*M_PI);
+    G4Tubs * sSampleCyl = new G4Tubs("sSampleCyl", 0, 1.*cm, 5.*cm / 2., 0., 2.*M_PI);
     material = man->FindOrBuildMaterial("G4_Pb");
     G4LogicalVolume * lSampleCyl = new G4LogicalVolume(sSampleCyl,
             material,
-            material->GetName());
+            "lSampleCyl");
     lSampleCyl->SetVisAttributes(new G4VisAttributes(true, G4Colour::Red()));
     G4VPhysicalVolume* pSampleCyl = new G4PVPlacement(0,
             G4ThreeVector(1.*cm, 1.*cm, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm),
@@ -270,25 +238,39 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             0); 
 
     // detector 
-    G4Box* sDetector = new G4Box("detector_solid",  // its name
+    G4Box* sDetector = new G4Box("sPanel",  // its name
             fDetectorXY/2., fDetectorXY/2., fDetectorZ/2.);  // its dimensions
     fDetectorMaterial = man->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
     fLDetector = new G4LogicalVolume(sDetector,   // its shape
             fDetectorMaterial,                      // its material
-            fDetectorMaterial->GetName());          // its name
+            "lPanel");          // its name
     fLDetector->SetVisAttributes(new G4VisAttributes(true, G4Colour::Blue()));
     fPDetector = new G4PVPlacement(0,// no rotation
             G4ThreeVector(0, 0, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm + 10.*cm),
-            fLDetector,                  // its logical volume
-            fDetectorMaterial->GetName(),   // its name
+            fLDetector,             // its logical volume
+            "pPanel",               // its name
             fLWorld,                // its mother  volume
             false,                  // no boolean operation
             0);                     // copy number
 
-    PrintParameters();
+    //PrintParameters();
+    G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 
     // always return the root volume
     return fPWorld;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::ConstructSDandField()
+{
+    // Sensitive detectors
+    G4String panelSDname = "/PanelSD";
+    auto panelSD = new PanelSD(panelSDname, "PanelHitsCollection");
+    G4SDManager::GetSDMpointer()->AddNewDetector(panelSD);
+    // Setting trackerSD to all logical volumes with the same name
+    // of "Chamber_LV".
+    SetSensitiveDetector("lPanel", panelSD);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

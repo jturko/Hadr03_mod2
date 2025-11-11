@@ -5,23 +5,13 @@
 /run/verbose 1
 #
 #/tracking/verbose 1
-#/run/numberOfThreads 1
-#
-#/testhadr/det/setCatcherMat G4_Cu
-/testhadr/det/setCatcherMat G4_Li
-#
-/testhadr/det/setCatcherZ 3 mm
+/run/numberOfThreads 1
 #
 /run/initialize
 #
 #/process/inactivate hadElastic
 #
-#/gun/particle deuteron
-/gun/particle proton
-/gun/energy 5 MeV
-#
 #/control/execute vis_vrml.mac
 #/control/execute vis.mac
 #
-#/run/printProgress 100000
-/run/beamOn        1000000000
+/run/beamOn        100

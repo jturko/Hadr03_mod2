@@ -109,9 +109,6 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         if(fUseNeutronPhaseSpace) {
             double val[7]; // time, x, y, z, px, py, pz
             fhNeutronPhaseSpace->GetRandom(val);
-            G4cout  << "gonna generate a neutron at t = " << val[0] << " ns at (" 
-                    << val[1] << ", " << val[2] << ", " << val[3] << ") mm with p = ("
-                    << val[4] << ", " << val[5] << ", " << val[6] << ") MeV/c, ";
 
             G4ThreeVector pos(val[1], val[2], val[3]);
             G4ThreeVector mom(val[4], val[5], val[6]);
@@ -123,9 +120,13 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
             G4double m_n = particle->GetPDGMass();
             double ekin = sqrt(mom.mag()*mom.mag() + m_n*m_n) - m_n; // kinetic energy (MeV)
-            G4cout << "Ekin = " << ekin << " MeV" << G4endl;
             fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(mom.unit());
             fGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(ekin);
+            
+            //G4cout  << "gonna generate a neutron at t = " << val[0] << " ns at (" 
+            //        << val[1] << ", " << val[2] << ", " << val[3] << ") mm with p = ("
+            //        << val[4] << ", " << val[5] << ", " << val[6] << ") MeV/c, ";
+            //G4cout << "Ekin = " << ekin << " MeV" << G4endl;
 
             fGPS->GeneratePrimaryVertex(anEvent);
         }
