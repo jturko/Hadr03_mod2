@@ -45,93 +45,18 @@
 
 DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
 {
-  fTesthadDir = new G4UIdirectory("/testhadr/");
-  fTesthadDir->SetGuidance("commands specific to this example");
-
-  fDetDir = new G4UIdirectory("/testhadr/det/");
-  fDetDir->SetGuidance("detector construction commands");
-
-  fCatcherMaterialCmd = new G4UIcmdWithAString("/testhadr/det/setCatcherMat", this);
-  fCatcherMaterialCmd->SetGuidance("Select material of the catcher.");
-  fCatcherMaterialCmd->SetParameterName("choice", false);
-  fCatcherMaterialCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
-  fCatcherMaterialCmd->SetToBeBroadcasted(false);
-
-  fCatcherZCmd = new G4UIcmdWithADoubleAndUnit("/testhadr/det/setCatcherZ", this);
-  fCatcherZCmd->SetGuidance("Set the thickness of the catcher");
-  fCatcherZCmd->SetParameterName("Size", false);
-  fCatcherZCmd->SetRange("Size>0.");
-  fCatcherZCmd->SetUnitCategory("Length");
-  fCatcherZCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
-  fCatcherZCmd->SetToBeBroadcasted(false);
-
-  fIsotopeCmd = new G4UIcommand("/testhadr/det/setIsotopeMat", this);
-  fIsotopeCmd->SetGuidance("Build and select a material with single isotope");
-  fIsotopeCmd->SetGuidance("  symbol of isotope, Z, A, density of material");
-  //
-  G4UIparameter* symbPrm = new G4UIparameter("isotope", 's', false);
-  symbPrm->SetGuidance("isotope symbol");
-  fIsotopeCmd->SetParameter(symbPrm);
-  //
-  G4UIparameter* ZPrm = new G4UIparameter("Z", 'i', false);
-  ZPrm->SetGuidance("Z");
-  ZPrm->SetParameterRange("Z>0");
-  fIsotopeCmd->SetParameter(ZPrm);
-  //
-  G4UIparameter* APrm = new G4UIparameter("A", 'i', false);
-  APrm->SetGuidance("A");
-  APrm->SetParameterRange("A>0");
-  fIsotopeCmd->SetParameter(APrm);
-  //
-  G4UIparameter* densityPrm = new G4UIparameter("density", 'd', false);
-  densityPrm->SetGuidance("density of material");
-  densityPrm->SetParameterRange("density>0.");
-  fIsotopeCmd->SetParameter(densityPrm);
-  //
-  G4UIparameter* unitPrm = new G4UIparameter("unit", 's', false);
-  unitPrm->SetGuidance("unit of density");
-  G4String unitList = G4UIcommand::UnitsList(G4UIcommand::CategoryOf("g/cm3"));
-  unitPrm->SetParameterCandidates(unitList);
-  fIsotopeCmd->SetParameter(unitPrm);
-  //
-  fIsotopeCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
-  fIsotopeCmd->SetToBeBroadcasted(false);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorMessenger::~DetectorMessenger()
 {
-  delete fCatcherMaterialCmd;
-  delete fCatcherZCmd;
-  delete fIsotopeCmd;
-  delete fDetDir;
-  delete fTesthadDir;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
-  if (command == fCatcherMaterialCmd) {
-    fDetector->SetCatcherMaterial(newValue);
-  }
-
-  if (command == fCatcherZCmd) {
-    fDetector->SetCatcherZ(fCatcherZCmd->GetNewDoubleValue(newValue));
-  }
-
-  if (command == fIsotopeCmd) {
-    G4int Z;
-    G4int A;
-    G4double dens;
-    G4String name, unt;
-    std::istringstream is(newValue);
-    is >> name >> Z >> A >> dens >> unt;
-    dens *= G4UIcommand::ValueOf(unt);
-    fDetector->MaterialWithSingleIsotope(name, name, dens, Z, A);
-    fDetector->SetCatcherMaterial(name);
-  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

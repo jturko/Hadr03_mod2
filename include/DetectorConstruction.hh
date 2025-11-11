@@ -53,19 +53,12 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* Construct() override;
     void ConstructSDandField() override;
 
-    G4Material* MaterialWithSingleIsotope(G4String, G4String, G4double, G4int, G4int);
-
-    void SetCatcherZ(G4double);
-    void SetCatcherMaterial(G4String);
-
   public:
     const G4VPhysicalVolume* GetWorld() { return fPWorld; };
     const G4VPhysicalVolume* GetCatcher() { return fPCatcher; };
 
     G4double GetCatcherZ() { return fCatcherZ; };
     G4Material* GetCatcherMaterial() { return fCatcherMaterial; };
-
-    void PrintParameters();
 
   private:
     G4VPhysicalVolume*  fPWorld = nullptr;

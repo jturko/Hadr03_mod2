@@ -114,27 +114,6 @@ void DetectorConstruction::DefineMaterials()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4Material* DetectorConstruction::MaterialWithSingleIsotope(G4String name, G4String symbol,
-        G4double density, G4int Z, G4int A)
-{
-    // define a material from an isotope
-    //
-    G4int ncomponents;
-    G4double abundance, massfraction;
-
-    G4Isotope* isotope = new G4Isotope(symbol, Z, A);
-
-    G4Element* element = new G4Element(name, symbol, ncomponents = 1);
-    element->AddIsotope(isotope, abundance = 100. * perCent);
-
-    G4Material* material = new G4Material(name, density, ncomponents = 1);
-    material->AddElement(element, massfraction = 100. * perCent);
-
-    return material;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 {
     // Cleanup old geometry
@@ -275,41 +254,3 @@ void DetectorConstruction::ConstructSDandField()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::PrintParameters()
-{
-    G4cout << "\n The catcher is " << G4BestUnit(fCatcherZ, "Length") << " of " << fCatcherMaterial->GetName()
-        << "\n \n"
-        << fCatcherMaterial << G4endl;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void DetectorConstruction::SetCatcherMaterial(G4String materialChoice)
-{
-    // search the material by its name
-    G4Material* pttoMaterial = G4NistManager::Instance()->FindOrBuildMaterial(materialChoice);
-
-    if (pttoMaterial) {
-        if (fCatcherMaterial != pttoMaterial) {
-            fCatcherMaterial = pttoMaterial;
-            if (fLCatcher) {
-                fLCatcher->SetMaterial(pttoMaterial);
-            }
-            G4RunManager::GetRunManager()->PhysicsHasBeenModified();
-        }
-    }
-    else {
-        G4cout << "\n--> warning from DetectorConstruction::SetMaterial : " << materialChoice
-            << " not found" << G4endl;
-    }
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void DetectorConstruction::SetCatcherZ(G4double value)
-{
-    fCatcherZ = value;
-    G4RunManager::GetRunManager()->ReinitializeGeometry();
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
