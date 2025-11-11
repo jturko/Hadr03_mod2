@@ -163,7 +163,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 
     // collimator solid and logical
     G4Box* sCol_PreCut = new G4Box("sColPrecut",
-            fCollimatorXY, fCollimatorXY, fCollimatorZ/2.);
+            4.*fCollimatorXY, 4.*fCollimatorXY, fCollimatorZ/2.);
     G4Box* sCol_Cut = new G4Box("sColCut",
             fCollimatorXY/2., fCollimatorXY/2., fCollimatorZ/2. + cut_extra);
     G4SubtractionSolid* sCol = new G4SubtractionSolid("sCol",

@@ -41,20 +41,23 @@
 #include "Randomize.hh"
 
 #include "HistoManager.hh"
+#include "RootManager.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDetector(det)
 {
-    fUseGPS = true;
     fUseNeutronPhaseSpace = true;
 
+    // configured for neutrons generated from phase space file
     fParticleGun = new G4ParticleGun(1);
-    G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
+    G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("neutron");
     fParticleGun->SetParticleDefinition(particle);
-    fParticleGun->SetParticleEnergy(1 * MeV);
-    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(1., 0., 0.));
+    fNeutronMass = particle->GetPDGMass();
+    //fParticleGun->SetParticleEnergy(1 * MeV);
+    //fParticleGun->SetParticleMomentumDirection(G4ThreeVector(1., 0., 0.));
 
+    // configured for protons incident on the catcher
     fGPS = new G4GeneralParticleSource;
     fGPS->SetParticleDefinition(particle);
     fGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Lin");
@@ -88,54 +91,65 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
     G4AnalysisManager* analysis = G4AnalysisManager::Instance();
     
-    if(!fUseGPS) {
-        // this function is called at the begining of event
-        //
-        G4double halfSize = 0.5 * (fDetector->GetCatcherZ());
-        //G4double x0 = -halfSize + 1. * nm;
-        G4double x0 = -halfSize - 1. * cm;
+    // using neutron file phase space
+    if(fUseNeutronPhaseSpace) {
+        double val[7]; // time, x, y, z, px, py, pz
+        //fhNeutronPhaseSpace->GetRandom(val);
 
-        // randomize (y0,z0)
-        //
-        G4double beam = 0.8 * halfSize;
-        G4double y0 = (2 * G4UniformRand() - 1.) * beam;
-        G4double z0 = (2 * G4UniformRand() - 1.) * beam;
+        // get the ROOT manager
+        RootManager& rootManager = RootManager::GetInstance();
+        if (!rootManager.IsInitialized()) {
+            G4ExceptionDescription desc;
+            desc << "RootManager not initialized!";
+            G4Exception("YourPrimaryGeneratorAction::GeneratePrimaries", 
+                       "RootNotInitialized", FatalException, desc);
+            return;
+        }
+        rootManager.SampleEvent(val);
+        
+        // set particle
+        // neutron, set in constructor
+        //fGPS->GetCurrentSource()->SetParticleDefinition(particle);
 
-        fParticleGun->SetParticlePosition(G4ThreeVector(x0, y0, z0));
+        // set time
+        G4double time = val[0];
+        fParticleGun->SetParticleTime(time);
+        //fGPS->SetParticleTime(time);
+
+        // set position
+        G4ThreeVector pos(val[1], val[2], val[3]);
+        fParticleGun->SetParticlePosition(pos);
+        //fGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Point");
+        //fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(pos);
+
+        // set momentum
+        G4ThreeVector mom(val[4], val[5], val[6]);
+        fParticleGun->SetParticleMomentumDirection(mom.unit());
+        //fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(mom.unit());
+        
+        // set kinetic energy
+        G4double ekin = sqrt(mom.mag()*mom.mag() + fNeutronMass*fNeutronMass) - fNeutronMass; // kinetic energy (MeV)
+        fParticleGun->SetParticleEnergy(ekin);
+        //G4double m_n = particle->GetPDGMass();
+        //G4double ekin = sqrt(mom.mag()*mom.mag() + m_n*m_n) - m_n; // kinetic energy (MeV)
+        //fGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(ekin);
+        
+        // print values
+        //G4cout << G4endl<< G4endl<< G4endl<< G4endl<< G4endl<< G4endl;
+        //G4cout  << "gonna generate a neutron at t = " << val[0] << " ns at (" 
+        //        << val[1] << ", " << val[2] << ", " << val[3] << ") mm with p = ("
+        //        << val[4] << ", " << val[5] << ", " << val[6] << ") MeV/c, "
+        //        << "Ekin = " << ekin << " MeV" << G4endl;
+
+        // generate the vertex
         fParticleGun->GeneratePrimaryVertex(anEvent);
+        //fGPS->GeneratePrimaryVertex(anEvent);
     }
+    // protons incident on catcher
     else {
-
-        if(fUseNeutronPhaseSpace) {
-            double val[7]; // time, x, y, z, px, py, pz
-            fhNeutronPhaseSpace->GetRandom(val);
-
-            G4ThreeVector pos(val[1], val[2], val[3]);
-            G4ThreeVector mom(val[4], val[5], val[6]);
-
-            G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("neutron");
-            fGPS->GetCurrentSource()->SetParticleDefinition(particle);
-            fGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Point");
-            fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(pos);
-
-            G4double m_n = particle->GetPDGMass();
-            double ekin = sqrt(mom.mag()*mom.mag() + m_n*m_n) - m_n; // kinetic energy (MeV)
-            fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(mom.unit());
-            fGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(ekin);
-            
-            //G4cout  << "gonna generate a neutron at t = " << val[0] << " ns at (" 
-            //        << val[1] << ", " << val[2] << ", " << val[3] << ") mm with p = ("
-            //        << val[4] << ", " << val[5] << ", " << val[6] << ") MeV/c, ";
-            //G4cout << "Ekin = " << ekin << " MeV" << G4endl;
-
-            fGPS->GeneratePrimaryVertex(anEvent);
-        }
-        else {
-            fGPS->GeneratePrimaryVertex(anEvent);
-            
-            double Ep = fGPS->GetParticleEnergy();
-            analysis->FillH1(14, Ep);
-        }
+        fGPS->GeneratePrimaryVertex(anEvent);
+        G4double Ep = fGPS->GetParticleEnergy();
+        analysis->FillH1(0, Ep);
     }
 }
 

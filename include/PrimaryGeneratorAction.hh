@@ -64,7 +64,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4GeneralParticleSource* fGPS;
     DetectorConstruction* fDetector = nullptr;
 
-    G4bool fUseGPS;
+    G4double fNeutronMass;
 
     G4bool fUseNeutronPhaseSpace;
     std::shared_ptr<THnSparseD> fhNeutronPhaseSpace;

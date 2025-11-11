@@ -55,7 +55,7 @@ void ActionInitialization::Build() const
 
   RunAction* runAction = new RunAction(fDetector, primary);
   SetUserAction(runAction);
-  primary->SetNeutronPhaseSpace(runAction->GetNeutronPhaseSpace());
+  //primary->SetNeutronPhaseSpace(runAction->GetNeutronPhaseSpace());
 
   SteppingAction* steppingAction = new SteppingAction(fDetector);
   SetUserAction(steppingAction);

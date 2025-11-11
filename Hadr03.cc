@@ -44,10 +44,23 @@
 #include "G4VisExecutive.hh"
 #include "Randomize.hh"
 
+#include "RootManager.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 int main(int argc, char** argv)
 {
+    TFile::SetCacheFileDir("/tmp/root_cache"); // Optional: set cache dir
+    // Initialize ROOT manager
+    RootManager& rootManager = RootManager::GetInstance();
+    rootManager.Initialize("root_files/G4Li_3mm_1e9_phase.root", "hsparse");
+    
+    if (!rootManager.IsInitialized()) {
+        G4cerr << "Failed to initialize RootManager! Exiting." << G4endl;
+        return 1;
+    }
+
+
     // detect interactive mode (if no arguments) and define UI session
     G4UIExecutive* ui = nullptr;
     if (argc == 1) ui = new G4UIExecutive(argc, argv);
@@ -103,6 +116,8 @@ int main(int argc, char** argv)
     // job termination
     delete visManager;
     delete runManager;
+
+    rootManager.Cleanup();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -68,7 +68,7 @@ class RunAction : public G4UserRunAction
     void SetPrintFlag(G4bool);
     ProgressBar * GetProgBar() { return fProgBar; }
 
-    std::shared_ptr<THnSparseD> GetNeutronPhaseSpace() { return fhNeutronPhaseSpace; }
+    //std::shared_ptr<THnSparseD> GetNeutronPhaseSpace() { return fhNeutronPhaseSpace; }
 
   private:
     DetectorConstruction* fDetector = nullptr;
@@ -80,7 +80,7 @@ class RunAction : public G4UserRunAction
     G4bool fPrint = true;  // optional printing
     ProgressBar* fProgBar; 
     
-    std::shared_ptr<THnSparseD> fhNeutronPhaseSpace;
+    //std::shared_ptr<THnSparseD> fhNeutronPhaseSpace;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
