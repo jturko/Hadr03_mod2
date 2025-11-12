@@ -44,12 +44,17 @@
 #include "G4VisExecutive.hh"
 #include "Randomize.hh"
 
+#include "TROOT.h"
+#include "TH1.h"
 #include "RootManager.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 int main(int argc, char** argv)
 {
+    gROOT->SetBatch(kTRUE);
+    TH1::AddDirectory(kFALSE);
+
     TFile::SetCacheFileDir("/tmp/root_cache"); // Optional: set cache dir
     // Initialize ROOT manager
     RootManager& rootManager = RootManager::GetInstance();

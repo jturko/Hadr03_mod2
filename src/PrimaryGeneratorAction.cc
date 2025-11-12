@@ -59,6 +59,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDet
 
     // configured for protons incident on the catcher
     fGPS = new G4GeneralParticleSource;
+    particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
     fGPS->SetParticleDefinition(particle);
     fGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Lin");
     fGPS->GetCurrentSource()->GetEneDist()->SetEmin(1.*MeV);
