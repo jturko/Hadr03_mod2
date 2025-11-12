@@ -33,6 +33,9 @@
 #include "PrimaryGeneratorAction.hh"
 
 #include "DetectorConstruction.hh"
+#include "HistoManager.hh"
+#include "RootManager.hh"
+#include "PrimaryGeneratorMessenger.hh"
 
 #include "G4Event.hh"
 #include "G4ParticleDefinition.hh"
@@ -40,13 +43,15 @@
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
 
-#include "HistoManager.hh"
-#include "RootManager.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDetector(det)
 {
+    // setup messenger
+    fPrimaryGeneratorMessenger = new PrimaryGeneratorMessenger(this);
+
+    // use phase space?
     fUseNeutronPhaseSpace = true;
 
     // configured for neutrons generated from phase space file
@@ -152,6 +157,20 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         G4double Ep = fGPS->GetParticleEnergy();
         analysis->FillH1(0, Ep);
     }
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGeneratorAction::SetProtons() {
+    fUseNeutronPhaseSpace = false;
+    G4cout << " ---> Setting incident proton beam" << G4endl;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGeneratorAction::SetNeutrons() {
+    fUseNeutronPhaseSpace = true;
+    G4cout << " ---> Setting neutrons from catcher" << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

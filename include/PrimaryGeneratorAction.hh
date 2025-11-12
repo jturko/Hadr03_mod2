@@ -43,6 +43,7 @@
 
 class G4Event;
 class DetectorConstruction;
+class PrimaryGeneratorMessenger;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -54,8 +55,14 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
   public:
     void GeneratePrimaries(G4Event*) override;
+    
+    // guns
     G4ParticleGun* GetParticleGun() { return fParticleGun; };
     G4GeneralParticleSource* GetGPS() { return fGPS; };
+
+    // for messenger commands
+    void SetProtons();
+    void SetNeutrons();
 
     void SetNeutronPhaseSpace(std::shared_ptr<THnSparseD>);
 
@@ -63,6 +70,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4ParticleGun* fParticleGun = nullptr;
     G4GeneralParticleSource* fGPS;
     DetectorConstruction* fDetector = nullptr;
+    PrimaryGeneratorMessenger* fPrimaryGeneratorMessenger;
 
     G4double fNeutronMass;
 
