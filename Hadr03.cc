@@ -52,17 +52,27 @@
 
 int main(int argc, char** argv)
 {
+    // ROOT memory management
     gROOT->SetBatch(kTRUE);
     TH1::AddDirectory(kFALSE);
 
+    // set seed
+    G4Random::setTheSeed(time(NULL));
+    G4Random::showEngineStatus();
+
+    // initialize ROOT manager for phase space sampling
     TFile::SetCacheFileDir("/tmp/root_cache"); // Optional: set cache dir
-    // Initialize ROOT manager
     RootManager& rootManager = RootManager::GetInstance();
     rootManager.Initialize("root_files/G4Li_3mm_1e9_phase.root", "hsparse");
-    
     if (!rootManager.IsInitialized()) {
         G4cerr << "Failed to initialize RootManager! Exiting." << G4endl;
         return 1;
+    }
+
+    // file number
+    if(argc > 2) {
+        G4int fileNum = atoi(argv[2]);
+        rootManager.SetFileNum(fileNum);
     }
 
 

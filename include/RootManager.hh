@@ -19,7 +19,10 @@ public:
     void Initialize(const std::string& filename, const std::string& histname);
     void SampleEvent(Double_t* values);
     bool IsInitialized() const { return fInitialized; }
-    
+
+    void SetFileNum(int num) { fFileNum = num;  }
+    int  GetFileNum()        { return fFileNum; }
+
     // Cleanup method to call at end of program
     void Cleanup();
 
@@ -38,6 +41,8 @@ private:
     // Thread-local storage key (conceptual)
     static thread_local std::unique_ptr<THnSparseD> fThreadLocalSparse;
     static thread_local std::unique_ptr<TRandom3> fThreadLocalRandom;
+
+    int fFileNum = -1;
 };
 
 #endif

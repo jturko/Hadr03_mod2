@@ -77,8 +77,6 @@ void RootManager::Initialize(const std::string& filename, const std::string& his
         
         G4cout << "Successfully cloned THnSparse histogram" << G4endl;
         
-        // Calculate event rate
-        
         fInitialized = true;
         
         G4cout << "RootManager initialization completed successfully" << G4endl;

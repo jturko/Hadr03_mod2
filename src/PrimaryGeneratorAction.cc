@@ -59,8 +59,6 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDet
     G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("neutron");
     fParticleGun->SetParticleDefinition(particle);
     fNeutronMass = particle->GetPDGMass();
-    //fParticleGun->SetParticleEnergy(1 * MeV);
-    //fParticleGun->SetParticleMomentumDirection(G4ThreeVector(1., 0., 0.));
 
     // configured for protons incident on the catcher
     fGPS = new G4GeneralParticleSource;
@@ -77,8 +75,8 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDet
     auto posDist = fGPS->GetCurrentSource()->GetPosDist();
     posDist->SetPosDisType("Beam");
     //posDist->SetCentreCoords(G4ThreeVector(0., 0., -1*cm));
-    //posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()-10*mm));
-    posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()+1*um)); // start in target
+    posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()-10*mm));
+    //posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()+1*um)); // start in target
     posDist->SetBeamSigmaInX(2.*mm);
     posDist->SetBeamSigmaInY(2.*mm);
 }
