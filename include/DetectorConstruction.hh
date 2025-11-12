@@ -36,6 +36,7 @@
 
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
+#include "G4ThreeVector.hh"
 
 class G4LogicalVolume;
 class G4Material;
@@ -45,49 +46,68 @@ class DetectorMessenger;
 
 class DetectorConstruction : public G4VUserDetectorConstruction
 {
-  public:
-    DetectorConstruction();
-    ~DetectorConstruction() override;
+    public:
+        DetectorConstruction();
+        ~DetectorConstruction() override;
 
-  public:
-    G4VPhysicalVolume* Construct() override;
-    void ConstructSDandField() override;
+    public:
+        G4VPhysicalVolume* Construct() override;
+        void ConstructSDandField() override;
 
-  public:
-    const G4VPhysicalVolume* GetWorld() { return fPWorld; };
-    const G4VPhysicalVolume* GetCatcher() { return fPCatcher; };
+    public:
+        const G4VPhysicalVolume* GetWorld()     { return fPWorld; };
+        const G4VPhysicalVolume* GetCatcher()   { return fPCatcher; };
 
-    G4double GetCatcherZ() { return fCatcherZ; };
-    G4Material* GetCatcherMaterial() { return fCatcherMaterial; };
+        G4double GetCatcherZ()                  { return fCatcherZ; };
+        G4Material* GetCatcherMaterial()        { return fCatcherMaterial; };
 
-  private:
-    G4VPhysicalVolume*  fPWorld = nullptr;
-    G4LogicalVolume*    fLWorld = nullptr;
-    G4double fWorldXYZ;
-    
-    G4VPhysicalVolume*  fPCatcher = nullptr;
-    G4LogicalVolume*    fLCatcher = nullptr;
-    G4double            fCatcherXY;
-    G4double            fCatcherZ;
-    G4Material*         fCatcherMaterial = nullptr;
-    
-    G4double            fCollimatorXY;
-    G4double            fCollimatorZ;
-    G4double            fCollimatorDistance;
-    G4double            fCollimatorSpacing;
-    G4Material*         fCollimatorMaterial = nullptr;
+        // for messenger
+        //
+        // placement
+        void SetPosition(G4ThreeVector pos)     { fPosition = pos; };
+        void SetRotation(G4ThreeVector rot)     { fRotation = rot; };
+        // collimator
+        void SetCollimatorXY(G4double val)          { fCollimatorXY = val; };
+        void SetCollimatorZ(G4double val)           { fCollimatorZ = val; };
+        void SetCollimatorInnerXY(G4double val)     { fCollimatorInnerXY = val; };
+        void PlaceCollimator();
 
-    G4VPhysicalVolume*  fPDetector = nullptr;
-    G4LogicalVolume*    fLDetector = nullptr;
-    G4double            fDetectorXY;
-    G4double            fDetectorZ;
-    G4Material*         fDetectorMaterial = nullptr;
+    private:
+        DetectorMessenger* fDetectorMessenger = nullptr;
 
-    DetectorMessenger* fDetectorMessenger = nullptr;
+        // for next placed volume
+        G4ThreeVector       fPosition;
+        G4ThreeVector       fRotation;
 
-  private:
-    void DefineMaterials();
-    G4VPhysicalVolume* ConstructVolumes();
+        // world
+        G4VPhysicalVolume*  fPWorld = nullptr;
+        G4LogicalVolume*    fLWorld = nullptr;
+        G4double            fWorldXYZ;
+
+        // catcher
+        G4VPhysicalVolume*  fPCatcher = nullptr;
+        G4LogicalVolume*    fLCatcher = nullptr;
+        G4double            fCatcherXY;
+        G4double            fCatcherZ;
+        G4Material*         fCatcherMaterial = nullptr;
+
+        // collimator
+        G4double            fCollimatorXY;
+        G4double            fCollimatorZ;
+        G4double            fCollimatorInnerXY;
+        G4Material*         fCollimatorMaterial = nullptr;
+
+        // detector
+        G4VPhysicalVolume*  fPDetector = nullptr;
+        G4LogicalVolume*    fLDetector = nullptr;
+        G4double            fDetectorXY;
+        G4double            fDetectorZ;
+        G4Material*         fDetectorMaterial = nullptr;
+
+
+    private:
+        void DefineMaterials();
+        G4VPhysicalVolume* ConstructVolumes();
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

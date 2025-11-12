@@ -36,6 +36,7 @@
 #include "DetectorMessenger.hh"
 #include "PanelSD.hh"
 
+#include "GeometryCollimator.hh"   
 
 #include "G4Box.hh"
 #include "G4Tubs.hh"
@@ -60,15 +61,18 @@
 
 DetectorConstruction::DetectorConstruction()
 {
+    fPosition = G4ThreeVector(0., 0., 0.);
+    fRotation = G4ThreeVector(0., 0., 0.);
+
     fWorldXYZ = 5 * m;
 
     fCatcherXY = 5 * cm;
     fCatcherZ = 3 * mm;
 
-    fCollimatorXY = 5 * cm;
-    fCollimatorZ = 5 * cm;
-    fCollimatorDistance = 10 * cm;
-    fCollimatorSpacing = 10 * cm;
+    //fCollimatorXY = 5 * cm;
+    //fCollimatorZ = 5 * cm;
+    //fCollimatorDistance = 10 * cm;
+    //fCollimatorSpacing = 10 * cm;
 
     fDetectorXY = 20.*cm;
     fDetectorZ = 1.*cm;
@@ -95,19 +99,19 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 void DetectorConstruction::DefineMaterials()
 {
-    // borated PE
-    G4Element* H  = new G4Element("Hydrogen", "H", 1., 1.0079*g/mole);
-    G4Element* C  = new G4Element("Carbon",   "C", 6., 12.01*g/mole);
-    G4Element* B  = new G4Element("Boron",    "B", 5., 10.81*g/mole);
-    // Assume 5% boron by mass
-    G4double fractionB = 0.05;
-    G4double fractionPE = 1.0 - fractionB;
-    // Density of borated polyethylene
-    G4double density = 0.95*g/cm3;  // typical value
-    G4Material* BoratedPE = new G4Material("BoratedPE", density, 3);
-    BoratedPE->AddElement(B, fractionB);
-    BoratedPE->AddElement(C, 0.857*fractionPE);  // Polyethylene is (CH2)n
-    BoratedPE->AddElement(H, 0.143*fractionPE);
+    //// borated PE
+    //G4Element* H  = new G4Element("Hydrogen", "H", 1., 1.0079*g/mole);
+    //G4Element* C  = new G4Element("Carbon",   "C", 6., 12.01*g/mole);
+    //G4Element* B  = new G4Element("Boron",    "B", 5., 10.81*g/mole);
+    //// Assume 5% boron by mass
+    //G4double fractionB = 0.05;
+    //G4double fractionPE = 1.0 - fractionB;
+    //// Density of borated polyethylene
+    //G4double density = 0.95*g/cm3;  // typical value
+    //G4Material* BoratedPE = new G4Material("BoratedPE", density, 3);
+    //BoratedPE->AddElement(B, fractionB);
+    //BoratedPE->AddElement(C, 0.857*fractionPE);  // Polyethylene is (CH2)n
+    //BoratedPE->AddElement(H, 0.143*fractionPE);
 
     /// G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
@@ -159,47 +163,47 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             0);                     // copy number
 
     // extra parameters for collimator
-    G4double cut_extra = 1*cm;
+    //G4double cut_extra = 1*cm;
+    //
+    //// collimator solid and logical
+    //G4Box* sCol_PreCut = new G4Box("sColPrecut",
+    //        4.*fCollimatorXY, 4.*fCollimatorXY, fCollimatorZ/2.);
+    //G4Box* sCol_Cut = new G4Box("sColCut",
+    //        fCollimatorXY/2., fCollimatorXY/2., fCollimatorZ/2. + cut_extra);
+    //G4SubtractionSolid* sCol = new G4SubtractionSolid("sCol",
+    //        sCol_PreCut, sCol_Cut);
+    //material = man->FindOrBuildMaterial("BoratedPE");
+    //G4LogicalVolume* lCol = new G4LogicalVolume(sCol,
+    //        material,
+    //        "lCol");
+    //lCol->SetVisAttributes(new G4VisAttributes(true, G4Colour::White()));
 
-    // collimator solid and logical
-    G4Box* sCol_PreCut = new G4Box("sColPrecut",
-            4.*fCollimatorXY, 4.*fCollimatorXY, fCollimatorZ/2.);
-    G4Box* sCol_Cut = new G4Box("sColCut",
-            fCollimatorXY/2., fCollimatorXY/2., fCollimatorZ/2. + cut_extra);
-    G4SubtractionSolid* sCol = new G4SubtractionSolid("sCol",
-            sCol_PreCut, sCol_Cut);
-    material = man->FindOrBuildMaterial("BoratedPE");
-    G4LogicalVolume* lCol = new G4LogicalVolume(sCol,
-            material,
-            "lCol");
-    lCol->SetVisAttributes(new G4VisAttributes(true, G4Colour::White()));
+    //// first collimator
+    //G4VPhysicalVolume* pCol1 = new G4PVPlacement(0,
+    //        G4ThreeVector(0., 0., fCollimatorDistance),
+    //        lCol,
+    //        "pCol1",
+    //        fLWorld,
+    //        false,
+    //        0);
 
-    // first collimator
-    G4VPhysicalVolume* pCol1 = new G4PVPlacement(0,
-            G4ThreeVector(0., 0., fCollimatorDistance),
-            lCol,
-            "pCol1",
-            fLWorld,
-            false,
-            0);
+    //// second collimator
+    //G4VPhysicalVolume* pCol2 = new G4PVPlacement(0,
+    //        G4ThreeVector(0., 0., fCollimatorDistance + fCollimatorSpacing),
+    //        lCol,
+    //        "pCol2",
+    //        fLWorld,
+    //        false,
+    //        1);
 
-    // second collimator
-    G4VPhysicalVolume* pCol2 = new G4PVPlacement(0,
-            G4ThreeVector(0., 0., fCollimatorDistance + fCollimatorSpacing),
-            lCol,
-            "pCol2",
-            fLWorld,
-            false,
-            1);
-
-    // third collimator
-    G4VPhysicalVolume* pCol3 = new G4PVPlacement(0,
-            G4ThreeVector(0., 0., fCollimatorDistance + 2*fCollimatorSpacing),
-            lCol,
-            "pCol3",
-            fLWorld,
-            false,
-            2);
+    //// third collimator
+    //G4VPhysicalVolume* pCol3 = new G4PVPlacement(0,
+    //        G4ThreeVector(0., 0., fCollimatorDistance + 2*fCollimatorSpacing),
+    //        lCol,
+    //        "pCol3",
+    //        fLWorld,
+    //        false,
+    //        2);
 
     // sample
     G4Tubs * sSampleCyl = new G4Tubs("sSampleCyl", 0, 1.*cm, 5.*cm / 2., 0., 2.*M_PI);
@@ -209,7 +213,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             "lSampleCyl");
     lSampleCyl->SetVisAttributes(new G4VisAttributes(true, G4Colour::Red()));
     G4VPhysicalVolume* pSampleCyl = new G4PVPlacement(0,
-            G4ThreeVector(1.*cm, 1.*cm, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm),
+            //G4ThreeVector(1.*cm, 1.*cm, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm),
+            G4ThreeVector(1.*cm, 1.*cm, 50.*cm),
             lSampleCyl,
             "pSampleCyl",
             fLWorld,
@@ -225,7 +230,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             "lPanel");          // its name
     fLDetector->SetVisAttributes(new G4VisAttributes(true, G4Colour::Blue()));
     fPDetector = new G4PVPlacement(0,// no rotation
-            G4ThreeVector(0, 0, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm + 10.*cm),
+            //G4ThreeVector(0, 0, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm + 10.*cm),
+            G4ThreeVector(0, 0, 60.*cm),
             fLDetector,             // its logical volume
             "pPanel",               // its name
             fLWorld,                // its mother  volume
@@ -250,6 +256,26 @@ void DetectorConstruction::ConstructSDandField()
     // Setting trackerSD to all logical volumes with the same name
     // of "Chamber_LV".
     SetSensitiveDetector("lPanel", panelSD);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::PlaceCollimator() 
+{
+    G4cout << " ---> Placing a collimator... " << G4endl;
+    
+    GeometryCollimator* col = new GeometryCollimator();
+    col->SetXY      (fCollimatorXY);    
+    col->SetZ       (fCollimatorZ);    
+    col->SetInnerXY (fCollimatorInnerXY);
+    col->Build();
+
+    G4RotationMatrix* rotate = new G4RotationMatrix();
+    rotate->rotateX(fRotation.x()*M_PI/180.);
+    rotate->rotateY(fRotation.y()*M_PI/180.);
+    rotate->rotateZ(fRotation.z()*M_PI/180.);    
+    
+    col->PlaceDetector(fLWorld, fPosition, rotate);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

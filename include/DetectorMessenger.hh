@@ -42,6 +42,8 @@ class G4UIcommand;
 class G4UIcmdWithAString;
 class G4UIcmdWithADoubleAndUnit;
 class G4UIcmdWithoutParameter;
+class G4UIcmdWith3Vector;
+class G4UIcmdWith3VectorAndUnit;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -55,6 +57,16 @@ class DetectorMessenger : public G4UImessenger
 
   private:
     DetectorConstruction* fDetector = nullptr;
+
+    G4UIdirectory* fDir = nullptr;
+
+    G4UIcmdWith3VectorAndUnit*  fSetPositionCmd = nullptr;
+    G4UIcmdWith3Vector*         fSetRotationCmd = nullptr;
+
+    G4UIcmdWithADoubleAndUnit*  fSetCollimatorXYCmd         = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetCollimatorInnerXYCmd    = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetCollimatorZCmd          = nullptr;
+    G4UIcmdWithoutParameter*    fPlaceCollimatorCmd         = nullptr;
 
 };
 
