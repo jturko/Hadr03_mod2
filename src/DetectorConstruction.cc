@@ -37,6 +37,7 @@
 #include "PanelSD.hh"
 
 #include "GeometryCollimator.hh"   
+#include "GeometryCatcher.hh"   
 
 #include "G4Box.hh"
 #include "G4Tubs.hh"
@@ -66,14 +67,18 @@ DetectorConstruction::DetectorConstruction()
 
     fWorldXYZ = 5 * m;
 
-    fCatcherXY = 5 * cm;
-    fCatcherZ = 3 * mm;
+    // default catcher params
+    fCatcherRadius = 2.5 * cm;
+    fCatcherZ = 2 * mm;
+    fCatcherMaterialName = "G4_Be";
 
-    //fCollimatorXY = 5 * cm;
-    //fCollimatorZ = 5 * cm;
-    //fCollimatorDistance = 10 * cm;
-    //fCollimatorSpacing = 10 * cm;
+    // default collimator params
+    fCollimatorXY = 5 * cm;
+    fCollimatorZ = 5 * cm;
 
+    // default sample params
+
+    // default detector params
     fDetectorXY = 20.*cm;
     fDetectorZ = 1.*cm;
 
@@ -147,20 +152,20 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             0);                     // copy number
 
     // catcher volume
-    G4Box* sCatcher = new G4Box("sCatcher",  // its name
-            fCatcherXY/2., fCatcherXY/2., fCatcherZ/2.);  // its dimensions
-    fCatcherMaterial = man->FindOrBuildMaterial("G4_Li");
-    fLCatcher = new G4LogicalVolume(sCatcher,   // its shape
-            fCatcherMaterial,                      // its material
-            "lCatcher");          // its name
-    fLCatcher->SetVisAttributes(new G4VisAttributes(true, G4Colour::Green()));
-    fPCatcher = new G4PVPlacement(0,// no rotation
-            G4ThreeVector(),        // at (0,0,0)
-            fLCatcher,              // its logical volume
-            "pCatcher",             // its name
-            fLWorld,                // its mother  volume
-            false,                  // no boolean operation
-            0);                     // copy number
+    //G4Box* sCatcher = new G4Box("sCatcher",  // its name
+    //        fCatcherXY/2., fCatcherXY/2., fCatcherZ/2.);  // its dimensions
+    //fCatcherMaterial = man->FindOrBuildMaterial("G4_Li");
+    //fLCatcher = new G4LogicalVolume(sCatcher,   // its shape
+    //        fCatcherMaterial,                      // its material
+    //        "lCatcher");          // its name
+    //fLCatcher->SetVisAttributes(new G4VisAttributes(true, G4Colour::Green()));
+    //fPCatcher = new G4PVPlacement(0,// no rotation
+    //        G4ThreeVector(),        // at (0,0,0)
+    //        fLCatcher,              // its logical volume
+    //        "pCatcher",             // its name
+    //        fLWorld,                // its mother  volume
+    //        false,                  // no boolean operation
+    //        0);                     // copy number
 
     // extra parameters for collimator
     //G4double cut_extra = 1*cm;
@@ -280,3 +285,22 @@ void DetectorConstruction::PlaceCollimator()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void DetectorConstruction::PlaceCatcher() 
+{
+    G4cout << " ---> Placing a catcher... " << G4endl;
+    
+    GeometryCatcher* catcher = new GeometryCatcher();
+    catcher->SetRadius      (fCatcherRadius);    
+    catcher->SetZ           (fCatcherZ);    
+    catcher->SetMaterialName(fCatcherMaterialName);    
+    catcher->Build();
+
+    G4RotationMatrix* rotate = new G4RotationMatrix();
+    rotate->rotateX(fRotation.x()*M_PI/180.);
+    rotate->rotateY(fRotation.y()*M_PI/180.);
+    rotate->rotateZ(fRotation.z()*M_PI/180.);    
+    
+    catcher->PlaceDetector(fLWorld, fPosition, rotate);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

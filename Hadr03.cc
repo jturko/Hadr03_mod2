@@ -86,10 +86,10 @@ int main(int argc, char** argv)
 
     // construct the run manager
     auto runManager = G4RunManagerFactory::CreateRunManager();
-    if (argc == 3) {
-        G4int nThreads = G4UIcommand::ConvertToInt(argv[2]);
-        runManager->SetNumberOfThreads(nThreads);
-    }
+    //if (argc == 3) {
+    //    G4int nThreads = G4UIcommand::ConvertToInt(argv[2]);
+    //    runManager->SetNumberOfThreads(nThreads);
+    //}
 
     // set mandatory initialization classes
     DetectorConstruction* det = new DetectorConstruction;

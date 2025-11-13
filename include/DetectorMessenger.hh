@@ -58,11 +58,17 @@ class DetectorMessenger : public G4UImessenger
   private:
     DetectorConstruction* fDetector = nullptr;
 
+    // directory
     G4UIdirectory* fDir = nullptr;
-
+    // placement
     G4UIcmdWith3VectorAndUnit*  fSetPositionCmd = nullptr;
     G4UIcmdWith3Vector*         fSetRotationCmd = nullptr;
-
+    // catcher
+    G4UIcmdWithADoubleAndUnit*  fSetCatcherRadiusCmd     = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetCatcherZCmd          = nullptr;
+    G4UIcmdWithAString*         fSetCatcherMaterialNameCmd = nullptr;
+    G4UIcmdWithoutParameter*    fPlaceCatcherCmd         = nullptr;
+    // collimator
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorXYCmd         = nullptr;
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorInnerXYCmd    = nullptr;
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorZCmd          = nullptr;

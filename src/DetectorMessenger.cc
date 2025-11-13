@@ -61,6 +61,23 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     fSetRotationCmd->SetGuidance("set the rotation of the next volume (in degrees)");
     fSetRotationCmd->AvailableForStates(G4State_Idle);
     
+    // catcher
+    fSetCatcherRadiusCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setCatcherRadius", this);
+    fSetCatcherRadiusCmd->SetGuidance("set catcher radius");
+    fSetCatcherRadiusCmd->AvailableForStates(G4State_Idle);
+
+    fSetCatcherZCmd   = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setCatcherZ", this);
+    fSetCatcherZCmd->SetGuidance("set catcher Z (thickness) dimension");
+    fSetCatcherZCmd->AvailableForStates(G4State_Idle);
+    
+    fSetCatcherMaterialNameCmd  = new G4UIcmdWithAString("/LDRS/det/setCatcherMaterial", this);
+    fSetCatcherMaterialNameCmd->SetGuidance("set catcher material name");
+    fSetCatcherMaterialNameCmd->AvailableForStates(G4State_Idle);
+
+    fPlaceCatcherCmd = new G4UIcmdWithoutParameter("/LDRS/det/placeCatcher", this);
+    fPlaceCatcherCmd->SetGuidance("place a catcher");
+    fPlaceCatcherCmd->AvailableForStates(G4State_Idle);
+    
     // collimator
     fSetCollimatorXYCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setCollimatorXY", this);
     fSetCollimatorXYCmd->SetGuidance("set collimator outer XY dimensions");
@@ -88,6 +105,11 @@ DetectorMessenger::~DetectorMessenger()
     
     delete fSetPositionCmd;
     delete fSetRotationCmd;
+    
+    delete fSetCatcherRadiusCmd;
+    delete fSetCatcherZCmd;
+    delete fSetCatcherMaterialNameCmd;
+    delete fPlaceCatcherCmd;
 
     delete fSetCollimatorXYCmd;
     delete fSetCollimatorZCmd;
@@ -105,6 +127,20 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String value)
     }
     if(command == fSetRotationCmd) {
         fDetector->SetRotation(fSetRotationCmd->GetNew3VectorValue(value));
+    }
+    
+    // catcher
+    if(command == fSetCatcherRadiusCmd) {
+        fDetector->SetCatcherRadius(fSetCatcherRadiusCmd->GetNewDoubleValue(value));
+    }
+    if(command == fSetCatcherZCmd) {
+        fDetector->SetCatcherZ(fSetCatcherZCmd->GetNewDoubleValue(value));
+    }
+    if(command == fSetCatcherMaterialNameCmd) {
+        fDetector->SetCatcherMaterialName(value);
+    }
+    if(command == fPlaceCatcherCmd) {
+        fDetector->PlaceCatcher();
     }
     
     // collimator

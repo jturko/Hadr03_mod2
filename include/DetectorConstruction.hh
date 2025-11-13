@@ -58,14 +58,17 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         const G4VPhysicalVolume* GetWorld()     { return fPWorld; };
         const G4VPhysicalVolume* GetCatcher()   { return fPCatcher; };
 
-        G4double GetCatcherZ()                  { return fCatcherZ; };
-        G4Material* GetCatcherMaterial()        { return fCatcherMaterial; };
-
         // for messenger
         //
         // placement
         void SetPosition(G4ThreeVector pos)     { fPosition = pos; };
         void SetRotation(G4ThreeVector rot)     { fRotation = rot; };
+        // catcher
+        void SetCatcherRadius(G4double val)         { fCatcherRadius = val; };
+        void SetCatcherZ(G4double val)              { fCatcherZ = val; };
+        void SetCatcherMaterialName(G4String val)   { fCatcherMaterialName = val; };
+        void PlaceCatcher();
+        G4double GetCatcherZ()                      { return fCatcherZ; };
         // collimator
         void SetCollimatorXY(G4double val)          { fCollimatorXY = val; };
         void SetCollimatorZ(G4double val)           { fCollimatorZ = val; };
@@ -87,8 +90,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         // catcher
         G4VPhysicalVolume*  fPCatcher = nullptr;
         G4LogicalVolume*    fLCatcher = nullptr;
-        G4double            fCatcherXY;
+        G4double            fCatcherRadius;
         G4double            fCatcherZ;
+        G4String            fCatcherMaterialName;
         G4Material*         fCatcherMaterial = nullptr;
 
         // collimator
