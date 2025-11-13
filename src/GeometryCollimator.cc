@@ -78,7 +78,7 @@ G4int GeometryCollimator::Build()
     fCollimatorLog->SetVisAttributes(new G4VisAttributes(true, fColour));
 
     // add to assembly
-    move = G4ThreeVector(0., 0., 0.);
+    move = G4ThreeVector(0., 0., fZ/2.);
     rotate = new G4RotationMatrix();
     fCollimatorAssembly->AddPlacedVolume(fCollimatorLog, move, rotate);
 
