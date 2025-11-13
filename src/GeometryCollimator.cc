@@ -34,12 +34,15 @@ GeometryCollimator::GeometryCollimator() :
     fXY = 10.*cm;
     fZ = 5.*cm;
     fInnerXY = 5.*cm;
+    fPbZ = 2.*cm;
 
-    // material
-    fMaterialName = "BoratedPE";
+    // materials
+    fBoratedPEMaterialName = "BoratedPE";
+    fPbMaterialName = "G4_Pb";
 
-    // colour
-    fColour = G4Colour::White();
+    // colours
+    fBoratedPEColour = G4Colour::White();
+    fPbColour = G4Colour::Brown();
 
     // copy number
     fCopyNo = 0;
@@ -59,28 +62,45 @@ G4int GeometryCollimator::Build()
     G4RotationMatrix* rotate = NULL;
 
     G4NistManager* manager = G4NistManager::Instance();
-    G4Material* material = manager->FindOrBuildMaterial(fMaterialName);
+    G4Material* material;
 
     // extra parameters 
     G4double cut_extra = 1.*cm;
 
+    // borated PE
+    // material
+    material = manager->FindOrBuildMaterial(fBoratedPEMaterialName);
     // solid
     G4Box* sCol_PreCut = new G4Box("sColPrecut",    fXY/2.,         fXY/2.,         fZ/2.);
     G4Box* sCol_Cut = new G4Box("sColCut",          fInnerXY/2.,    fInnerXY/2.,    fZ/2. + cut_extra);
     G4SubtractionSolid* sCol = new G4SubtractionSolid("sCol", sCol_PreCut, sCol_Cut);
-
     // logical
-    fCollimatorLog = new G4LogicalVolume(sCol, // solid volume
+    fBoratedPELog = new G4LogicalVolume(sCol, // solid volume
             material,                          // material
-            "CollimatorLog");                  // name
-                                               
+            "BoratedPELog");                  // name
     // vis attributes                                              
-    fCollimatorLog->SetVisAttributes(new G4VisAttributes(true, fColour));
-
+    fBoratedPELog->SetVisAttributes(new G4VisAttributes(true, fBoratedPEColour));
     // add to assembly
     move = G4ThreeVector(0., 0., fZ/2.);
     rotate = new G4RotationMatrix();
-    fCollimatorAssembly->AddPlacedVolume(fCollimatorLog, move, rotate);
+    fCollimatorAssembly->AddPlacedVolume(fBoratedPELog, move, rotate);
+
+    // Pb layer
+    // material
+    material = manager->FindOrBuildMaterial(fPbMaterialName);
+    // solid
+    G4Box* sColPb_PreCut = new G4Box("sColPbPrecut",    fXY/2.,         fXY/2.,         fPbZ/2.);
+    G4SubtractionSolid* sColPb = new G4SubtractionSolid("sColPb", sColPb_PreCut, sCol_Cut);
+    // logical
+    fPbLog = new G4LogicalVolume(sColPb, // solid volume
+            material,                          // material
+            "PbLog");                  // name
+    // vis attributes                                              
+    fPbLog->SetVisAttributes(new G4VisAttributes(true, fPbColour));
+    // add to assembly
+    move = G4ThreeVector(0., 0., fPbZ/2. + fZ);
+    rotate = new G4RotationMatrix();
+    fCollimatorAssembly->AddPlacedVolume(fPbLog, move, rotate);
 
     return 1;
 }

@@ -74,8 +74,10 @@ DetectorConstruction::DetectorConstruction()
     fCatcherMaterialName = "G4_Be";
 
     // default collimator params
-    fCollimatorXY = 5 * cm;
-    fCollimatorZ = 5 * cm;
+    fCollimatorXY = 20 * cm;
+    fCollimatorZ = 20 * cm;
+    fCollimatorInnerXY = 5 * cm;
+    fCollimatorPbZ = 2 * cm;
 
     // default sample params
     fSampleRadius = 5. * mm; 
@@ -303,6 +305,7 @@ void DetectorConstruction::PlaceCollimator()
     col->SetXY      (fCollimatorXY);    
     col->SetZ       (fCollimatorZ);    
     col->SetInnerXY (fCollimatorInnerXY);
+    col->SetPbZ     (fCollimatorPbZ);
     col->Build();
 
     G4RotationMatrix* rotate = new G4RotationMatrix();

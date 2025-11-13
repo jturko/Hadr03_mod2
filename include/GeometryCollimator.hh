@@ -21,19 +21,25 @@ class GeometryCollimator
     void SetXY(G4double val)        { fXY = val; };
     void SetZ(G4double val)         { fZ = val; };
     void SetInnerXY(G4double val)   { fInnerXY = val; };
+    void SetPbZ(G4double val)       { fPbZ = val; };
 
     void BuildMaterials();
 
   private:
     G4AssemblyVolume* fCollimatorAssembly;
-    G4LogicalVolume* fCollimatorLog;
+    G4LogicalVolume* fBoratedPELog;
+    G4LogicalVolume* fPbLog;
 
     G4double fXY;
     G4double fZ;
     G4double fInnerXY;
+    G4double fPbZ;
 
-    G4String fMaterialName;
-    G4Colour fColour;
+    G4String fBoratedPEMaterialName;
+    G4String fPbMaterialName;
+
+    G4Colour fBoratedPEColour;
+    G4Colour fPbColour;
 
     G4int fCopyNo;
 };

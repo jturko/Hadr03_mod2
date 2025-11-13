@@ -73,6 +73,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         void SetCollimatorXY(G4double val)          { fCollimatorXY = val; };
         void SetCollimatorZ(G4double val)           { fCollimatorZ = val; };
         void SetCollimatorInnerXY(G4double val)     { fCollimatorInnerXY = val; };
+        void SetCollimatorPbZ(G4double val)         { fCollimatorPbZ = val; };
         void PlaceCollimator();
         // sample (cylinder)
         void SetSampleRadius(G4double val)         { fSampleRadius = val; };
@@ -104,6 +105,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         G4double            fCollimatorXY;
         G4double            fCollimatorZ;
         G4double            fCollimatorInnerXY;
+        G4double            fCollimatorPbZ;
         G4Material*         fCollimatorMaterial = nullptr;
         
         // sample
@@ -118,7 +120,6 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         G4double            fDetectorXY;
         G4double            fDetectorZ;
         G4Material*         fDetectorMaterial = nullptr;
-
 
     private:
         void DefineMaterials();
