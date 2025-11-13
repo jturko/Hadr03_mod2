@@ -301,6 +301,11 @@ void DetectorConstruction::PlaceCatcher()
     rotate->rotateZ(fRotation.z()*M_PI/180.);    
     
     catcher->PlaceDetector(fLWorld, fPosition, rotate);
+
+    // after catcher placed, we can set the PV
+    G4cout << " ---> Trying to assign catcher physical volume: " << catcher->GetCatcherPhys() << G4endl;
+    fPCatcher = catcher->GetCatcherPhys();
+    //G4cout << " ---> Set the DetectorConstruction's catcher PV to: " << fPCatcher->GetName() << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -62,23 +62,38 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDet
 
     // configured for protons incident on the catcher
     fGPS = new G4GeneralParticleSource;
+    // set particle
     particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
     fGPS->SetParticleDefinition(particle);
+    // set energy dist.
     fGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Lin");
     fGPS->GetCurrentSource()->GetEneDist()->SetEmin(1.*MeV);
     fGPS->GetCurrentSource()->GetEneDist()->SetEmax(10.*MeV);
     fGPS->GetCurrentSource()->GetEneDist()->SetInterCept(1);
     fGPS->GetCurrentSource()->GetEneDist()->SetGradient(0);
-    auto angDist = fGPS->GetCurrentSource()->GetAngDist();
-    angDist->SetAngDistType("planar");
-    angDist->SetParticleMomentumDirection(G4ThreeVector(0., 0., 1.));
-    auto posDist = fGPS->GetCurrentSource()->GetPosDist();
-    posDist->SetPosDisType("Beam");
-    //posDist->SetCentreCoords(G4ThreeVector(0., 0., -1*cm));
-    posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()-10*mm));
-    //posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()+1*um)); // start in target
-    posDist->SetBeamSigmaInX(2.*mm);
-    posDist->SetBeamSigmaInY(2.*mm);
+    // set angular dist.
+    fGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("iso");
+    fGPS->GetCurrentSource()->GetAngDist()->SetMinTheta(0.*deg);
+    fGPS->GetCurrentSource()->GetAngDist()->SetMaxTheta(20.*deg);
+    fGPS->GetCurrentSource()->GetAngDist()->SetMinPhi(0.*deg);
+    fGPS->GetCurrentSource()->GetAngDist()->SetMaxPhi(360.*deg);
+    //fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(0.,1.,0.));
+    fGPS->GetCurrentSource()->GetAngDist()->DefineAngRefAxes("angref1", G4ThreeVector(-1, 0, 0));
+    fGPS->GetCurrentSource()->GetAngDist()->DefineAngRefAxes("angref2", G4ThreeVector(0, 1, 0));
+    // set pos dist.
+    fGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Point");
+    fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0.,0.,0.));
+
+    //auto angDist = fGPS->GetCurrentSource()->GetAngDist();
+    //angDist->SetAngDistType("Point");
+    //angDist->SetParticleMomentumDirection(G4ThreeVector(0., 0., 1.));
+    //auto posDist = fGPS->GetCurrentSource()->GetPosDist();
+    //posDist->SetPosDisType("Beam");
+    ////posDist->SetCentreCoords(G4ThreeVector(0., 0., -1*cm));
+    //posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()-10*mm));
+    ////posDist->SetCentreCoords(G4ThreeVector(0., 0., -0.5*fDetector->GetCatcherZ()+1*um)); // start in target
+    //posDist->SetBeamSigmaInX(2.*mm);
+    //posDist->SetBeamSigmaInY(2.*mm);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -94,23 +109,23 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
     G4AnalysisManager* analysis = G4AnalysisManager::Instance();
-    
+
     // using neutron file phase space
     if(fUseNeutronPhaseSpace) {
         double val[7]; // time, x, y, z, px, py, pz
-        //fhNeutronPhaseSpace->GetRandom(val);
+                       //fhNeutronPhaseSpace->GetRandom(val);
 
-        // get the ROOT manager
+                       // get the ROOT manager
         RootManager& rootManager = RootManager::GetInstance();
         if (!rootManager.IsInitialized()) {
             G4ExceptionDescription desc;
             desc << "RootManager not initialized!";
             G4Exception("YourPrimaryGeneratorAction::GeneratePrimaries", 
-                       "RootNotInitialized", FatalException, desc);
+                    "RootNotInitialized", FatalException, desc);
             return;
         }
         rootManager.SampleEvent(val);
-        
+
         // set particle
         // neutron, set in constructor
         //fGPS->GetCurrentSource()->SetParticleDefinition(particle);
@@ -130,14 +145,14 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         G4ThreeVector mom(val[4], val[5], val[6]);
         fParticleGun->SetParticleMomentumDirection(mom.unit());
         //fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(mom.unit());
-        
+
         // set kinetic energy
         G4double ekin = sqrt(mom.mag()*mom.mag() + fNeutronMass*fNeutronMass) - fNeutronMass; // kinetic energy (MeV)
         fParticleGun->SetParticleEnergy(ekin);
         //G4double m_n = particle->GetPDGMass();
         //G4double ekin = sqrt(mom.mag()*mom.mag() + m_n*m_n) - m_n; // kinetic energy (MeV)
         //fGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(ekin);
-        
+
         // print values
         //G4cout << G4endl<< G4endl<< G4endl<< G4endl<< G4endl<< G4endl;
         //G4cout  << "gonna generate a neutron at t = " << val[0] << " ns at (" 
@@ -153,6 +168,17 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     else {
         fGPS->GeneratePrimaryVertex(anEvent);
         G4double Ep = fGPS->GetParticleEnergy();
+
+        G4PrimaryVertex* vertex = anEvent->GetPrimaryVertex();
+        if (vertex && vertex->GetNumberOfParticle() > 0) {
+            G4PrimaryParticle* primary = vertex->GetPrimary(0);
+            G4ThreeVector momentumDir = primary->GetMomentumDirection();
+            G4double theta = momentumDir.theta();
+            if(momentumDir.x() < 0) theta*= -1;
+            G4double energy = primary->GetKineticEnergy();
+            //G4cout << "Direction: " << momentumDir << " Energy: " << energy/MeV << " MeV" << G4endl;
+            analysis->FillH2(0, 180./M_PI*theta, energy, abs(1./sin(theta)));
+        }
         analysis->FillH1(0, Ep);
     }
 }

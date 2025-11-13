@@ -70,6 +70,10 @@ void HistoManager::Book()
     // Ep
     idx = analysisManager->CreateH1("hEp", "incident proton energy distrib.", 2000, 0, 20);
     analysisManager->SetH1Activation(idx, true);
+    
+    // Ep vs theta
+    idx = analysisManager->CreateH2("hEpTheta", "incident proton energy vs theta distrib.", 180, -90, 90, 20, 0, 20);
+    analysisManager->SetH2Activation(idx, true);
 
     // ntuple for generating phase space
     idx = analysisManager->CreateNtuple("tree", "spectrum of outgoing particles");

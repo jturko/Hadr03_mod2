@@ -53,7 +53,7 @@ G4int GeometryCatcher::Build()
     BuildMaterials();
 
     fCatcherAssembly = new G4AssemblyVolume();
-    
+
     G4ThreeVector move, direction;
     G4RotationMatrix* rotate = NULL;
 
@@ -67,7 +67,7 @@ G4int GeometryCatcher::Build()
     fCatcherLog = new G4LogicalVolume(sCatcher, // solid volume
             material,                          // material
             "CatcherLog");                  // name
-                                               
+
     // vis attributes                                              
     fCatcherLog->SetVisAttributes(new G4VisAttributes(true, fColour));
 
@@ -83,6 +83,17 @@ G4int GeometryCatcher::PlaceDetector(G4LogicalVolume* logic_world, G4ThreeVector
 {
     G4bool surfCheck = true;
     fCatcherAssembly->MakeImprint(logic_world, move, rotate, fCopyNo, surfCheck);
+
+    // loop over PVs, find catcher log, set to member variable (for tracking what leaves the catcher in stepping action)
+    auto pvIter = fCatcherAssembly->GetVolumesIterator();
+    for (size_t i = 0; i < fCatcherAssembly->TotalImprintedVolumes(); i++) {
+        G4VPhysicalVolume* physVol = *pvIter;
+        if(physVol->GetName().find("CatcherLog") != G4String::npos) {
+            fCatcherPhys = physVol;
+        }
+        pvIter++;
+    }
+
     return fCopyNo++;
 }
 
