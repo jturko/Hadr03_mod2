@@ -94,6 +94,23 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     fPlaceCollimatorCmd = new G4UIcmdWithoutParameter("/LDRS/det/placeCollimator", this);
     fPlaceCollimatorCmd->SetGuidance("place a collimator");
     fPlaceCollimatorCmd->AvailableForStates(G4State_Idle);
+    
+    // sample
+    fSetSampleRadiusCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setSampleRadius", this);
+    fSetSampleRadiusCmd->SetGuidance("set sample radius");
+    fSetSampleRadiusCmd->AvailableForStates(G4State_Idle);
+
+    fSetSampleZCmd   = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setSampleZ", this);
+    fSetSampleZCmd->SetGuidance("set sample Z (thickness) dimension");
+    fSetSampleZCmd->AvailableForStates(G4State_Idle);
+    
+    fSetSampleMaterialNameCmd  = new G4UIcmdWithAString("/LDRS/det/setSampleMaterial", this);
+    fSetSampleMaterialNameCmd->SetGuidance("set sample material name");
+    fSetSampleMaterialNameCmd->AvailableForStates(G4State_Idle);
+
+    fPlaceSampleCmd = new G4UIcmdWithoutParameter("/LDRS/det/placeSample", this);
+    fPlaceSampleCmd->SetGuidance("place a sample");
+    fPlaceSampleCmd->AvailableForStates(G4State_Idle);
 
 }
 
@@ -115,6 +132,11 @@ DetectorMessenger::~DetectorMessenger()
     delete fSetCollimatorZCmd;
     delete fSetCollimatorInnerXYCmd;
     delete fPlaceCollimatorCmd;
+    
+    delete fSetSampleRadiusCmd;
+    delete fSetSampleZCmd;
+    delete fSetSampleMaterialNameCmd;
+    delete fPlaceSampleCmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -155,6 +177,20 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String value)
     }
     if(command == fPlaceCollimatorCmd) {
         fDetector->PlaceCollimator();
+    }
+    
+    // sample
+    if(command == fSetSampleRadiusCmd) {
+        fDetector->SetSampleRadius(fSetSampleRadiusCmd->GetNewDoubleValue(value));
+    }
+    if(command == fSetSampleZCmd) {
+        fDetector->SetSampleZ(fSetSampleZCmd->GetNewDoubleValue(value));
+    }
+    if(command == fSetSampleMaterialNameCmd) {
+        fDetector->SetSampleMaterialName(value);
+    }
+    if(command == fPlaceSampleCmd) {
+        fDetector->PlaceSample();
     }
 
 }

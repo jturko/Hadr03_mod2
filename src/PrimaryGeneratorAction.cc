@@ -72,7 +72,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDet
     fGPS->GetCurrentSource()->GetEneDist()->SetInterCept(1);
     fGPS->GetCurrentSource()->GetEneDist()->SetGradient(0);
     // set angular dist.
-    fGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("iso");
+    fGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("cos");
     fGPS->GetCurrentSource()->GetAngDist()->SetMinTheta(0.*deg);
     fGPS->GetCurrentSource()->GetAngDist()->SetMaxTheta(20.*deg);
     fGPS->GetCurrentSource()->GetAngDist()->SetMinPhi(0.*deg);

@@ -15,7 +15,7 @@ PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(PrimaryGeneratorAction* gun
 :fPrimaryGeneratorAction(gun)
 {
     // directory
-    fDir = new G4UIdirectory("LDRS/gun/");
+    fDir = new G4UIdirectory("/LDRS/gun/");
     fDir->SetGuidance("primary generator commands");
 
     // set incident protons (with GeneralParticleSource)

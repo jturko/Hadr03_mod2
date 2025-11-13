@@ -69,6 +69,11 @@ class DetectorMessenger : public G4UImessenger
     G4UIcmdWithAString*         fSetCatcherMaterialNameCmd = nullptr;
     G4UIcmdWithoutParameter*    fPlaceCatcherCmd         = nullptr;
     // collimator
+    G4UIcmdWithADoubleAndUnit*  fSetSampleRadiusCmd         = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetSampleZCmd              = nullptr;
+    G4UIcmdWithAString*         fSetSampleMaterialNameCmd   = nullptr;
+    G4UIcmdWithoutParameter*    fPlaceSampleCmd             = nullptr;
+    // collimator
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorXYCmd         = nullptr;
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorInnerXYCmd    = nullptr;
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorZCmd          = nullptr;

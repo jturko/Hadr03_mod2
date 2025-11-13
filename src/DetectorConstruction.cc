@@ -38,6 +38,7 @@
 
 #include "GeometryCollimator.hh"   
 #include "GeometryCatcher.hh"   
+#include "GeometrySample.hh"   
 
 #include "G4Box.hh"
 #include "G4Tubs.hh"
@@ -77,6 +78,9 @@ DetectorConstruction::DetectorConstruction()
     fCollimatorZ = 5 * cm;
 
     // default sample params
+    fSampleRadius = 5. * mm; 
+    fSampleZ = 5. * cm;
+    fSampleMaterialName = "G4_Pb";
 
     // default detector params
     fDetectorXY = 20.*cm;
@@ -84,6 +88,7 @@ DetectorConstruction::DetectorConstruction()
 
     DefineMaterials();
     fDetectorMessenger = new DetectorMessenger(this);
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -210,21 +215,21 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
     //        false,
     //        2);
 
-    // sample
-    G4Tubs * sSampleCyl = new G4Tubs("sSampleCyl", 0, 1.*cm, 5.*cm / 2., 0., 2.*M_PI);
-    material = man->FindOrBuildMaterial("G4_Pb");
-    G4LogicalVolume * lSampleCyl = new G4LogicalVolume(sSampleCyl,
-            material,
-            "lSampleCyl");
-    lSampleCyl->SetVisAttributes(new G4VisAttributes(true, G4Colour::Red()));
-    G4VPhysicalVolume* pSampleCyl = new G4PVPlacement(0,
-            //G4ThreeVector(1.*cm, 1.*cm, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm),
-            G4ThreeVector(1.*cm, 1.*cm, 50.*cm),
-            lSampleCyl,
-            "pSampleCyl",
-            fLWorld,
-            false,
-            0); 
+    //// sample
+    //G4Tubs * sSampleCyl = new G4Tubs("sSampleCyl", 0, 1.*cm, 5.*cm / 2., 0., 2.*M_PI);
+    //material = man->FindOrBuildMaterial("G4_Pb");
+    //G4LogicalVolume * lSampleCyl = new G4LogicalVolume(sSampleCyl,
+    //        material,
+    //        "lSampleCyl");
+    //lSampleCyl->SetVisAttributes(new G4VisAttributes(true, G4Colour::Red()));
+    //G4VPhysicalVolume* pSampleCyl = new G4PVPlacement(0,
+    //        //G4ThreeVector(1.*cm, 1.*cm, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm),
+    //        G4ThreeVector(1.*cm, 1.*cm, 50.*cm),
+    //        lSampleCyl,
+    //        "pSampleCyl",
+    //        fLWorld,
+    //        false,
+    //        0); 
 
     // detector 
     G4Box* sDetector = new G4Box("sPanel",  // its name
@@ -265,26 +270,6 @@ void DetectorConstruction::ConstructSDandField()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::PlaceCollimator() 
-{
-    G4cout << " ---> Placing a collimator... " << G4endl;
-    
-    GeometryCollimator* col = new GeometryCollimator();
-    col->SetXY      (fCollimatorXY);    
-    col->SetZ       (fCollimatorZ);    
-    col->SetInnerXY (fCollimatorInnerXY);
-    col->Build();
-
-    G4RotationMatrix* rotate = new G4RotationMatrix();
-    rotate->rotateX(fRotation.x()*M_PI/180.);
-    rotate->rotateY(fRotation.y()*M_PI/180.);
-    rotate->rotateZ(fRotation.z()*M_PI/180.);    
-    
-    col->PlaceDetector(fLWorld, fPosition, rotate);
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void DetectorConstruction::PlaceCatcher() 
 {
     G4cout << " ---> Placing a catcher... " << G4endl;
@@ -306,6 +291,46 @@ void DetectorConstruction::PlaceCatcher()
     G4cout << " ---> Trying to assign catcher physical volume: " << catcher->GetCatcherPhys() << G4endl;
     fPCatcher = catcher->GetCatcherPhys();
     //G4cout << " ---> Set the DetectorConstruction's catcher PV to: " << fPCatcher->GetName() << G4endl;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//
+void DetectorConstruction::PlaceCollimator() 
+{
+    G4cout << " ---> Placing a collimator... " << G4endl;
+    
+    GeometryCollimator* col = new GeometryCollimator();
+    col->SetXY      (fCollimatorXY);    
+    col->SetZ       (fCollimatorZ);    
+    col->SetInnerXY (fCollimatorInnerXY);
+    col->Build();
+
+    G4RotationMatrix* rotate = new G4RotationMatrix();
+    rotate->rotateX(fRotation.x()*M_PI/180.);
+    rotate->rotateY(fRotation.y()*M_PI/180.);
+    rotate->rotateZ(fRotation.z()*M_PI/180.);    
+    
+    col->PlaceDetector(fLWorld, fPosition, rotate);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::PlaceSample() 
+{
+    G4cout << " ---> Placing a sample... " << G4endl;
+    
+    GeometrySample* sample = new GeometrySample();
+    sample->SetRadius      (fSampleRadius);    
+    sample->SetZ           (fSampleZ);    
+    sample->SetMaterialName(fSampleMaterialName);    
+    sample->Build();
+
+    G4RotationMatrix* rotate = new G4RotationMatrix();
+    rotate->rotateX(fRotation.x()*M_PI/180.);
+    rotate->rotateY(fRotation.y()*M_PI/180.);
+    rotate->rotateZ(fRotation.z()*M_PI/180.);    
+    
+    sample->PlaceDetector(fLWorld, fPosition, rotate);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
