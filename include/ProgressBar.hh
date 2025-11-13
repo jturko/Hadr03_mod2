@@ -31,6 +31,7 @@ class ProgressBar {
         fNextToReplace = 0;
 
         fCounter = 0;
+        time(&fStartTime);
     }
     ~ProgressBar() {}
 
@@ -62,6 +63,11 @@ class ProgressBar {
             else
               fNextToReplace = 0;  
 
+            int timeRunningSeconds = double(fThisTime-fStartTime);
+            int timeRunningMinutes = timeRunningSeconds/60;
+            int timeRunningHours   = timeRunningMinutes/60;
+
+
             cout << "\33[2K\r  -> [";
             for(int i=0; i<fBarWidth; i++) {
                 if(i<percent*fBarWidth) cout << "=";
@@ -79,6 +85,7 @@ class ProgressBar {
                      << timeLeftMinutes%60 << "m " << timeLeftSeconds%60 << "s left @ " << (int)rate << " evts/s" << flush;
                 //cout << "] processing evt " << event+1 << " / " << fMaxEvents << " (" << Form("%.1f",(100*percent)) << "%), " << timeLeftHours << "h " 
                 //     << timeLeftMinutes%60 << "m " << timeLeftSeconds%60 << "s left @ " << (int)rate << " evts/s" << flush;
+                cout << ", " << timeRunningHours << "h " << timeRunningMinutes%60 << "m " << timeRunningSeconds%60 << "s elapsed" << flush;
             fCounter++;
         }
         return printing;
@@ -102,6 +109,7 @@ class ProgressBar {
     uint64_t fLastEvent;
     time_t fLastTime;
     time_t fThisTime;
+    time_t fStartTime;
     int fTimeInterval;
 
     int fBarWidth;
