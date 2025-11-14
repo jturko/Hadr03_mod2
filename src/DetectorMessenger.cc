@@ -82,14 +82,18 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     fSetCollimatorXYCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setCollimatorXY", this);
     fSetCollimatorXYCmd->SetGuidance("set collimator outer XY dimensions");
     fSetCollimatorXYCmd->AvailableForStates(G4State_Idle);
+    
+    fSetCollimatorInnerXYCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setCollimatorInnerXY", this);
+    fSetCollimatorInnerXYCmd->SetGuidance("set collimator inner XY dimensions");
+    fSetCollimatorInnerXYCmd->AvailableForStates(G4State_Idle);
 
     fSetCollimatorZCmd   = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setCollimatorZ", this);
     fSetCollimatorZCmd->SetGuidance("set collimator Z (thickness) dimension");
     fSetCollimatorZCmd->AvailableForStates(G4State_Idle);
     
-    fSetCollimatorInnerXYCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setCollimatorInnerXY", this);
-    fSetCollimatorInnerXYCmd->SetGuidance("set collimator inner XY dimensions");
-    fSetCollimatorInnerXYCmd->AvailableForStates(G4State_Idle);
+    fSetCollimatorPbZCmd   = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setCollimatorPbZ", this);
+    fSetCollimatorPbZCmd->SetGuidance("set collimator Pb Z (thickness) dimension");
+    fSetCollimatorPbZCmd->AvailableForStates(G4State_Idle);
 
     fPlaceCollimatorCmd = new G4UIcmdWithoutParameter("/LDRS/det/placeCollimator", this);
     fPlaceCollimatorCmd->SetGuidance("place a collimator");
@@ -121,9 +125,9 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     fSetDetectorPanelZCmd->SetGuidance("set detector panel Z (thickness) dimension");
     //fSetDetectorPanelZCmd->AvailableForStates(G4State_Idle);
     
-    fPlaceDetectorPanelCmd = new G4UIcmdWithoutParameter("/LDRS/det/placePanel", this);
-    fPlaceDetectorPanelCmd->SetGuidance("place a detector panel");
-    fPlaceDetectorPanelCmd->AvailableForStates(G4State_Idle);
+    //fPlaceDetectorPanelCmd = new G4UIcmdWithoutParameter("/LDRS/det/placePanel", this);
+    //fPlaceDetectorPanelCmd->SetGuidance("place a detector panel");
+    //fPlaceDetectorPanelCmd->AvailableForStates(G4State_Idle);
 
 }
 
@@ -142,8 +146,9 @@ DetectorMessenger::~DetectorMessenger()
     delete fPlaceCatcherCmd;
 
     delete fSetCollimatorXYCmd;
-    delete fSetCollimatorZCmd;
     delete fSetCollimatorInnerXYCmd;
+    delete fSetCollimatorZCmd;
+    delete fSetCollimatorPbZCmd;
     delete fPlaceCollimatorCmd;
     
     delete fSetSampleRadiusCmd;
@@ -153,7 +158,7 @@ DetectorMessenger::~DetectorMessenger()
     
     delete fSetDetectorPanelXYCmd;
     delete fSetDetectorPanelZCmd;
-    delete fPlaceDetectorPanelCmd;
+    //delete fPlaceDetectorPanelCmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -186,11 +191,14 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String value)
     if(command == fSetCollimatorXYCmd) {
         fDetector->SetCollimatorXY(fSetCollimatorXYCmd->GetNewDoubleValue(value));
     }
+    if(command == fSetCollimatorInnerXYCmd) {
+        fDetector->SetCollimatorInnerXY(fSetCollimatorInnerXYCmd->GetNewDoubleValue(value));
+    }
     if(command == fSetCollimatorZCmd) {
         fDetector->SetCollimatorZ(fSetCollimatorZCmd->GetNewDoubleValue(value));
     }
-    if(command == fSetCollimatorInnerXYCmd) {
-        fDetector->SetCollimatorInnerXY(fSetCollimatorInnerXYCmd->GetNewDoubleValue(value));
+    if(command == fSetCollimatorPbZCmd) {
+        fDetector->SetCollimatorPbZ(fSetCollimatorPbZCmd->GetNewDoubleValue(value));
     }
     if(command == fPlaceCollimatorCmd) {
         fDetector->PlaceCollimator();

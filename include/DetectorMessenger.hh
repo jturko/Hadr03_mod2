@@ -77,6 +77,7 @@ class DetectorMessenger : public G4UImessenger
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorXYCmd         = nullptr;
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorInnerXYCmd    = nullptr;
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorZCmd          = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetCollimatorPbZCmd          = nullptr;
     G4UIcmdWithoutParameter*    fPlaceCollimatorCmd         = nullptr;
     // detector panel
     G4UIcmdWithADoubleAndUnit*  fSetDetectorPanelXYCmd         = nullptr;
