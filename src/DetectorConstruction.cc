@@ -39,6 +39,7 @@
 #include "GeometryCollimator.hh"   
 #include "GeometryCatcher.hh"   
 #include "GeometrySample.hh"   
+#include "GeometryDetectorPanel.hh"   
 
 #include "G4Box.hh"
 #include "G4Tubs.hh"
@@ -85,8 +86,8 @@ DetectorConstruction::DetectorConstruction()
     fSampleMaterialName = "G4_Pb";
 
     // default detector params
-    fDetectorXY = 20.*cm;
-    fDetectorZ = 1.*cm;
+    fDetectorPanelXY = 5.*cm;
+    fDetectorPanelZ = 1.*cm;
 
     DefineMaterials();
     fDetectorMessenger = new DetectorMessenger(this);
@@ -233,22 +234,35 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
     //        false,
     //        0); 
 
-    // detector 
-    G4Box* sDetector = new G4Box("sPanel",  // its name
-            fDetectorXY/2., fDetectorXY/2., fDetectorZ/2.);  // its dimensions
-    fDetectorMaterial = man->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
-    fLDetector = new G4LogicalVolume(sDetector,   // its shape
-            fDetectorMaterial,                      // its material
-            "lPanel");          // its name
-    fLDetector->SetVisAttributes(new G4VisAttributes(true, G4Colour::Blue()));
-    fPDetector = new G4PVPlacement(0,// no rotation
-            //G4ThreeVector(0, 0, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm + 10.*cm),
-            G4ThreeVector(0, 0, 60.*cm),
-            fLDetector,             // its logical volume
-            "pPanel",               // its name
-            fLWorld,                // its mother  volume
-            false,                  // no boolean operation
-            0);                     // copy number
+    // // detector 
+    // G4Box* sDetectorPanel = new G4Box("sPanel",  // its name
+    //         fDetectorPanelXY/2., fDetectorPanelXY/2., fDetectorPanelZ/2.);  // its dimensions
+    // fDetectorPanelMaterial = man->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
+    // fLDetectorPanel = new G4LogicalVolume(sDetectorPanel,   // its shape
+    //         fDetectorPanelMaterial,                      // its material
+    //         "lPanel");          // its name
+    // fLDetectorPanel->SetVisAttributes(new G4VisAttributes(true, G4Colour::Blue()));
+    // fPDetectorPanel = new G4PVPlacement(0,// no rotation
+    //         //G4ThreeVector(0, 0, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm + 10.*cm),
+    //         G4ThreeVector(0, 0, 60.*cm),
+    //         fLDetectorPanel,             // its logical volume
+    //         "pPanel",               // its name
+    //         fLWorld,                // its mother  volume
+    //         false,                  // no boolean operation
+    //         0);                     // copy number
+
+
+
+    GeometryDetectorPanel* panel = new GeometryDetectorPanel();
+    panel->SetXY(fDetectorPanelXY);
+    panel->SetZ(fDetectorPanelZ);
+    panel->Build();
+    G4RotationMatrix* rotate = new G4RotationMatrix();
+    rotate->rotateX(fRotation.x()*M_PI/180.);
+    rotate->rotateY(fRotation.y()*M_PI/180.);
+    rotate->rotateZ(fRotation.z()*M_PI/180.);    
+    panel->PlaceDetector(fLWorld, fPosition, rotate);
+    fLDetectorPanel = panel->GetScintiLog();
 
     //PrintParameters();
     G4cout << *(G4Material::GetMaterialTable()) << G4endl;
@@ -267,7 +281,8 @@ void DetectorConstruction::ConstructSDandField()
     G4SDManager::GetSDMpointer()->AddNewDetector(panelSD);
     // Setting trackerSD to all logical volumes with the same name
     // of "Chamber_LV".
-    SetSensitiveDetector("lPanel", panelSD);
+    SetSensitiveDetector(fLDetectorPanel, panelSD);
+    //SetSensitiveDetector("lPanel", panelSD);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

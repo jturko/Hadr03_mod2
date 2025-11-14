@@ -80,6 +80,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         void SetSampleZ(G4double val)              { fSampleZ = val; };
         void SetSampleMaterialName(G4String val)   { fSampleMaterialName = val; };
         void PlaceSample();
+        // detector
+        void SetDetectorPanelXY(G4double val)          { fDetectorPanelXY = val; };
+        void SetDetectorPanelZ(G4double val)           { fDetectorPanelZ = val; };
 
     private:
         DetectorMessenger* fDetectorMessenger = nullptr;
@@ -115,11 +118,11 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         G4Material*         fSampleMaterial = nullptr;
 
         // detector
-        G4VPhysicalVolume*  fPDetector = nullptr;
-        G4LogicalVolume*    fLDetector = nullptr;
-        G4double            fDetectorXY;
-        G4double            fDetectorZ;
-        G4Material*         fDetectorMaterial = nullptr;
+        G4VPhysicalVolume*  fPDetectorPanel = nullptr;
+        G4LogicalVolume*    fLDetectorPanel = nullptr;
+        G4double            fDetectorPanelXY;
+        G4double            fDetectorPanelZ;
+        G4Material*         fDetectorPanelMaterial = nullptr;
 
     private:
         void DefineMaterials();

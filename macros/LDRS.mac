@@ -7,25 +7,49 @@
 #/tracking/verbose 1
 #/run/numberOfThreads 1
 #
+/LDRS/det/setPanelXY    50 cm
+/LDRS/det/setPanelZ     0.5 cm
+/LDRS/det/setPosition   0 0 42 cm
+#
 /run/initialize
 #
 #/process/inactivate hadElastic
 #
+# gun
+#/LDRS/gun/setProtons
+/LDRS/gun/setNeutrons
+#
+# catcher
+/LDRS/det/setCatcherRadius   2.5 cm
+/LDRS/det/setCatcherZ        2 mm
+/LDRS/det/setCatcherMaterial G4_Be
+/LDRS/det/setPosition        0 0 5 cm
+/LDRS/det/placeCatcher
+#
 # collimator
-/LDRS/det/setCollimatorXY       50 cm
-/LDRS/det/setCollimatorZ        5  cm
+/LDRS/det/setCollimatorXY       20 cm
+/LDRS/det/setCollimatorZ        20 cm
 /LDRS/det/setCollimatorInnerXY  5  cm
-# place 1st
 /LDRS/det/setPosition           0 0 10 cm
 /LDRS/det/placeCollimator
-# place 2nd
-/LDRS/det/setPosition           0 0 20 cm
-/LDRS/det/placeCollimator
-# place 3rd
-/LDRS/det/setPosition           0 0 30 cm
-/LDRS/det/placeCollimator
+#
+/LDRS/det/setSampleRadius       5 mm
+/LDRS/det/setSampleZ            5 cm
+/LDRS/det/setSampleMaterial     G4_Pb
+/LDRS/det/setPosition           1 1 35 cm
+/LDRS/det/placeSample
+#
+#/LDRS/det/setPanelXY    50 cm
+#/LDRS/det/setPanelZ     0.1 cm
+#/LDRS/det/setPosition   0 0 42 cm
+#/LDRS/det/setPosition   0 0 2 cm
+#/LDRS/det/placePanel
+#
+/analysis/setFileName tmp
 #
 #/control/execute vis_vrml.mac
+#/control/execute vis_ogl.mac
 /control/execute vis.mac
 #
-/run/beamOn        100
+/run/beamOn        1000
+#

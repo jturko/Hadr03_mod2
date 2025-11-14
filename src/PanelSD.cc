@@ -66,7 +66,9 @@ G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
 {
     // energy deposit
     G4double edep = step->GetTotalEnergyDeposit();
-    
+ 
+    //G4cout << " ---> In PanelSD::ProcessHits() ... " << G4endl;
+
     // if no energy deposited, return
     if (edep == 0.) 
         return false;

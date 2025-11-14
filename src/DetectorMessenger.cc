@@ -55,11 +55,11 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     fSetPositionCmd = new G4UIcmdWith3VectorAndUnit("/LDRS/det/setPosition",this);
     fSetPositionCmd->SetGuidance("set the position of the next volume");
     fSetPositionCmd->SetDefaultUnit("mm");
-    fSetPositionCmd->AvailableForStates(G4State_Idle);
+    //fSetPositionCmd->AvailableForStates(G4State_Idle);
     
     fSetRotationCmd = new G4UIcmdWith3Vector("/LDRS/det/setRotation",this);
     fSetRotationCmd->SetGuidance("set the rotation of the next volume (in degrees)");
-    fSetRotationCmd->AvailableForStates(G4State_Idle);
+    //fSetRotationCmd->AvailableForStates(G4State_Idle);
     
     // catcher
     fSetCatcherRadiusCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setCatcherRadius", this);
@@ -111,6 +111,19 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     fPlaceSampleCmd = new G4UIcmdWithoutParameter("/LDRS/det/placeSample", this);
     fPlaceSampleCmd->SetGuidance("place a sample");
     fPlaceSampleCmd->AvailableForStates(G4State_Idle);
+    
+    // detector panel
+    fSetDetectorPanelXYCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setPanelXY", this);
+    fSetDetectorPanelXYCmd->SetGuidance("set detector panel outer XY dimensions");
+    //fSetDetectorPanelXYCmd->AvailableForStates(G4State_Idle);
+
+    fSetDetectorPanelZCmd   = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setPanelZ", this);
+    fSetDetectorPanelZCmd->SetGuidance("set detector panel Z (thickness) dimension");
+    //fSetDetectorPanelZCmd->AvailableForStates(G4State_Idle);
+    
+    fPlaceDetectorPanelCmd = new G4UIcmdWithoutParameter("/LDRS/det/placePanel", this);
+    fPlaceDetectorPanelCmd->SetGuidance("place a detector panel");
+    fPlaceDetectorPanelCmd->AvailableForStates(G4State_Idle);
 
 }
 
@@ -137,6 +150,10 @@ DetectorMessenger::~DetectorMessenger()
     delete fSetSampleZCmd;
     delete fSetSampleMaterialNameCmd;
     delete fPlaceSampleCmd;
+    
+    delete fSetDetectorPanelXYCmd;
+    delete fSetDetectorPanelZCmd;
+    delete fPlaceDetectorPanelCmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -192,6 +209,17 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String value)
     if(command == fPlaceSampleCmd) {
         fDetector->PlaceSample();
     }
+    
+     // detector panel
+     if(command == fSetDetectorPanelXYCmd) {
+         fDetector->SetDetectorPanelXY(fSetDetectorPanelXYCmd->GetNewDoubleValue(value));
+     }
+     if(command == fSetDetectorPanelZCmd) {
+         fDetector->SetDetectorPanelZ(fSetDetectorPanelZCmd->GetNewDoubleValue(value));
+     }
+    // if(command == fPlaceDetectorPanelCmd) {
+    //     fDetector->PlaceDetectorPanel();
+    // }
 
 }
 
