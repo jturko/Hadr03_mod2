@@ -69,6 +69,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         void SetCatcherMaterialName(G4String val)   { fCatcherMaterialName = val; };
         void PlaceCatcher();
         G4double GetCatcherZ()                      { return fCatcherZ; };
+        G4double GetCatcherRadius()                 { return fCatcherRadius; };
         // collimator
         void SetCollimatorXY(G4double val)          { fCollimatorXY = val; };
         void SetCollimatorZ(G4double val)           { fCollimatorZ = val; };

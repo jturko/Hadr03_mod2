@@ -72,7 +72,11 @@ void HistoManager::Book()
     analysisManager->SetH1Activation(idx, true);
     
     // Ep vs theta
-    idx = analysisManager->CreateH2("hEpTheta", "incident proton energy vs theta distrib.", 180, -90, 90, 20, 0, 20);
+    idx = analysisManager->CreateH2("hEpTheta", "incident proton energy vs theta distrib.", 180, -90, 90, 200, 0, 20);
+    analysisManager->SetH2Activation(idx, true);
+    
+    // Ep vs cos(theta)
+    idx = analysisManager->CreateH2("hEpCosTheta", "incident proton energy vs cos(theta) distrib.", 1800, -1, 1, 200, 0, 20);
     analysisManager->SetH2Activation(idx, true);
 
     // ntuple for generating phase space

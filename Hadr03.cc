@@ -63,7 +63,8 @@ int main(int argc, char** argv)
     // initialize ROOT manager for phase space sampling
     TFile::SetCacheFileDir("/tmp/root_cache"); // Optional: set cache dir
     RootManager& rootManager = RootManager::GetInstance();
-    rootManager.Initialize("root_files/G4Li_3mm_1e9_phase.root", "hsparse");
+    //rootManager.Initialize("root_files/G4Li_3mm_1e9_phase.root", "hsparse");
+    rootManager.Initialize("root_files/catchers/protons_iso_Be_1e8_phase.root", "hsparse2");
     if (!rootManager.IsInitialized()) {
         G4cerr << "Failed to initialize RootManager! Exiting." << G4endl;
         return 1;
