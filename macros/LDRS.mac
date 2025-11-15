@@ -1,42 +1,51 @@
 #
-# Macro file for "Hadr03.cc"
-#
 /control/verbose 1
 /run/verbose 1
 #
 #/tracking/verbose 1
 #/run/numberOfThreads 1
 #
-/LDRS/det/setPanelXY    50 cm
-/LDRS/det/setPanelZ     0.5 cm
-/LDRS/det/setPosition   0 0 42 cm
-#
+# panel detector
+/LDRS/det/setPanelXY    8 cm
+/LDRS/det/setPanelZ     2 cm
+/LDRS/det/setPosition   0 0 105 cm
+# initialize the run
 /run/initialize
-#
-#/process/inactivate hadElastic
-#
 # gun
 #/LDRS/gun/setProtons
 /LDRS/gun/setNeutrons
-#
 # catcher
 /LDRS/det/setCatcherRadius   2.5 cm
 /LDRS/det/setCatcherZ        2 mm
 /LDRS/det/setCatcherMaterial G4_Be
 /LDRS/det/setPosition        0 0 5 cm
 /LDRS/det/placeCatcher
-#
 # collimator
 /LDRS/det/setCollimatorXY       20 cm
+/LDRS/det/setCollimatorInnerXY  5 cm
 /LDRS/det/setCollimatorZ        20 cm
-/LDRS/det/setCollimatorInnerXY  5  cm
+/LDRS/det/setCollimatorPbZ      2 cm
 /LDRS/det/setPosition           0 0 10 cm
 /LDRS/det/placeCollimator
-#
+# collimator
+/LDRS/det/setCollimatorXY       20 cm
+/LDRS/det/setCollimatorInnerXY  5 cm
+/LDRS/det/setCollimatorZ        20 cm
+/LDRS/det/setCollimatorPbZ      2 cm
+/LDRS/det/setPosition           0 0 40 cm
+/LDRS/det/placeCollimator
+# collimator
+/LDRS/det/setCollimatorXY       20 cm
+/LDRS/det/setCollimatorInnerXY  5 cm
+/LDRS/det/setCollimatorZ        20 cm
+/LDRS/det/setCollimatorPbZ      2 cm
+/LDRS/det/setPosition           0 0 70 cm
+/LDRS/det/placeCollimator
+# sample
 /LDRS/det/setSampleRadius       5 mm
 /LDRS/det/setSampleZ            5 cm
 /LDRS/det/setSampleMaterial     G4_Pb
-/LDRS/det/setPosition           1 1 35 cm
+/LDRS/det/setPosition           1 1 95 cm
 /LDRS/det/placeSample
 #
 #/LDRS/det/setPanelXY    50 cm
@@ -46,10 +55,16 @@
 #/LDRS/det/placePanel
 #
 /analysis/setFileName tmp
+#/analysis/setFileName neutrons_cos_Be_1e9
 #
-#/control/execute vis_vrml.mac
+# select visualization
+/control/execute vis_vrml.mac
 #/control/execute vis_ogl.mac
-/control/execute vis.mac
+#/control/execute vis.mac
 #
+# add filtering
+/control/execute vis_filterSD.mac
+#
+# start the run
 /run/beamOn        1000
 #
