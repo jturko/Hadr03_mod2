@@ -2,6 +2,11 @@
 #include <TTree.h>
 #include <iostream>
 
+#include <libgen.h>
+#include <filesystem>
+
+std::string getParticleName(long pid, bool for_root=false);
+
 void analysis_script(const char* inputFileName = "hadr03.root") {
     TFile* file = TFile::Open(inputFileName);
     if (!file || file->IsZombie()) {
@@ -14,14 +19,29 @@ void analysis_script(const char* inputFileName = "hadr03.root") {
         std::cerr << "Error: Could not retrieve TTree 'tree'" << std::endl;
         return;
     }
-
-    std::map<Double_t, Int_t> particleMap;
-
+    
+    // particle IDs
     Double_t protonID = 2212;
     Double_t neutronID = 2112;
     Double_t gammaID = 22;
     Double_t electronID = 11;
 
+    // maps from particle ID to counts / histograms
+    std::map<Double_t, Int_t> particleCountMap;
+    std::map<Double_t, TH2D*> particleHistEkinCosThetaMap;
+    std::map<Double_t, TH1D*> particleHistTimeMap;
+
+    // binning
+    const int nbinEkin = 1000;
+    double lbinEkin = 0., hbinEkin = 10.;
+
+    const int nbinCosTheta = 360;
+    double lbinCosTheta = -1., hbinCosTheta = 1.;
+    
+    const int nbinTime = 10000;
+    double lbinTime = 0., hbinTime = 100.;
+
+    // tree branches
     Double_t particle;
     Double_t Ekin;
     Double_t t;
@@ -45,25 +65,9 @@ void analysis_script(const char* inputFileName = "hadr03.root") {
     tree->SetBranchAddress("py", &py);
     tree->SetBranchAddress("pz", &pz);
 
-    TFile* outfilehists = new TFile("histograms.root", "RECREATE");
-
-    TH1D * hTimeN = new TH1D("hTimeN", "emission time of neutrons from catcher;#it{t} / ns;Counts",  1000, 0, 10);          hTimeN->SetLineColor(kBlack);
-    TH1D * hTimeG = new TH1D("hTimeG", "emission time of gammas from catcher;#it{t} / ns;Counts",    1000, 0, 10);          hTimeG->SetLineColor(kRed);
-    TH1D * hTimeE = new TH1D("hTimeE", "emission time of electrons from catcher;#it{t} / ns;Counts", 1000, 0, 10);          hTimeE->SetLineColor(kBlue);
-    
-    TH1D * hCosThetaN = new TH1D("hCosThetaN", "cos(#theta) distribution of neutrons from catcher;cos(#theta);Counts",  180,-1,1);         hCosThetaN->SetLineColor(kBlack);
-    TH1D * hCosThetaG = new TH1D("hCosThetaG", "cos(#theta) distribution of gammas from catcher;cos(#theta);Counts",    180,-1,1);         hCosThetaG->SetLineColor(kRed);
-    TH1D * hCosThetaE = new TH1D("hCosThetaE", "cos(#theta) distribution of electrons from catcher;cos(#theta);Counts", 180,-1,1);         hCosThetaE->SetLineColor(kBlue);
-    
-    TH1D * hAngDistN = new TH1D("hAngDistN", "angular distribution of neutrons from catcher;#theta / #circ;Counts",  180, 0, 180);         hAngDistN->SetLineColor(kBlack);
-    TH1D * hAngDistG = new TH1D("hAngDistG", "angular distribution of gammas from catcher;#theta / #circ;Counts",    180, 0, 180);         hAngDistG->SetLineColor(kRed);
-    TH1D * hAngDistE = new TH1D("hAngDistE", "angular distribution of electrons from catcher;#theta / #circ;Counts", 180, 0, 180);         hAngDistE->SetLineColor(kBlue);
-    
-    TH2D * hEkinCosThetaN = new TH2D("hEkinCosThetaN", "#it{E}_{kin} vs cos(#theta) distribution of neutrons from catcher;cos(#theta);#it{E}_{kin} / MeV;Counts",  180,-1,1, 2000, 0, 20); 
-    TH2D * hEkinCosThetaG = new TH2D("hEkinCosThetaG", "#it{E}_{kin} vs cos(#theta) distribution of gammas from catcher;cos(#theta);#it{E}_{kin} / MeV;Counts",    180,-1,1, 2000, 0, 20); 
-    TH2D * hEkinCosThetaE = new TH2D("hEkinCosThetaE", "#it{E}_{kin} vs cos(#theta) distribution of electrons from catcher;cos(#theta);#it{E}_{kin} / MeV;Counts", 180,-1,1, 2000, 0, 20); 
-    
-    TH2D * hTimeEkinN = new TH2D("hTimeEkinN", "emission time vs kinetic energy of neutrons from catcher;#it{E}_{kin} / MeV;#it{t} / ns;Counts", 2000, 0, 20, 1000, 0, 10);
+    // histogram output file
+    std::string histFileName = std::filesystem::path(inputFileName).stem().string() + "_histograms.root";
+    TFile* outfilehists = new TFile(histFileName.c_str(), "RECREATE");
 
     // sparse histogram with neutron phase-space
     const int nDim = 7; // time,    x,    y,    z,    px,    py,   pz
@@ -78,98 +82,206 @@ void analysis_script(const char* inputFileName = "hadr03.root") {
     double xMin2[nDim] = {     0,  0,    0    };
     double xMax2[nDim] = {    10,  10,   M_PI };
     int    xBin2[nDim] = {   100,  100,  90   };
+    //int    xBin2[nDim] = {  1000,  1000, 900   };
     THnSparseD * hsparse2 = new THnSparseD("hsparse2", "hsparse2", nDim2, xBin2, xMin2, xMax2);
 
     for (Long64_t i = 0; i < nEntries_tree; ++i) {
-        tree->GetEntry(i);
-        // Process data for each entry
-        
-        particleMap[particle]++;
+        if(i % 1000000 == 0)
+            cout << " ---> entry " << i << " / " << nEntries_tree << " processed ... " << endl;
 
+        tree->GetEntry(i);
+        
+        // check if ID found
+        if(particleCountMap[particle] == 0) {
+            // if not, initialize histogram
+            particleHistEkinCosThetaMap[particle] = new TH2D(Form("hEkinCosTheta_%s", getParticleName(particle).c_str()), 
+                                                             Form("hEkinCosTheta_%s;cos(#theta);#it{E} / MeV;Counts", getParticleName(particle).c_str()), 
+                                                             nbinCosTheta,  lbinCosTheta,   hbinCosTheta,
+                                                             nbinEkin,      lbinEkin,       hbinEkin);
+            particleHistTimeMap        [particle] = new TH1D(Form("hTime_%s", getParticleName(particle).c_str()), 
+                                                             Form("hTime_%s;#it{t} / ns;Counts", getParticleName(particle).c_str()), 
+                                                             nbinTime,      lbinTime,       hbinTime);
+        }
+
+        // setup vectors
         TVector3 pos(x,y,z);
         TVector3 mom(px,py,pz);
+        
+        // fill maps
+        particleCountMap[particle]++;
+        particleHistEkinCosThetaMap[particle]->Fill(cos(mom.Theta()), Ekin);
+        particleHistTimeMap[particle]->Fill(t);
 
         if(particle == neutronID) {
-            hTimeN->Fill(t);
-            hTimeEkinN->Fill(Ekin, t);
-            hAngDistN->Fill(180./M_PI * mom.Theta(), abs(1./sin(mom.Theta())));
-            hCosThetaN->Fill(cos(mom.Theta()));
-            hEkinCosThetaN->Fill(cos(mom.Theta()), Ekin);
-
+            // 7D neutron phase space
             double val[nDim] = { t, x, y, z, px, py, pz };
             hsparse->Fill(val);
 
-            // only fill for theta < 45 deg
-            if(mom.Theta() < M_PI/4.) {
+            // 3D neutron phase space (only for particle emitted w. limited theta)
+            //if(mom.Theta() < M_PI/4.) {
+            if(mom.Theta() < M_PI/8.) {
+            //if(1) {
                 double val2[nDim] = { t, Ekin, mom.Theta() };
                 hsparse2->Fill(val2);
             }
         }
-        else if(particle == gammaID) {
-            hTimeG->Fill(t);
-            hAngDistG->Fill(180./M_PI * mom.Theta(), abs(1./sin(mom.Theta())));
-            hCosThetaG->Fill(cos(mom.Theta()));
-            hEkinCosThetaG->Fill(cos(mom.Theta()), Ekin);
-        }
-        else if(particle == electronID) {
-            hTimeE->Fill(t);
-            hAngDistE->Fill(180./M_PI * mom.Theta(), abs(1./sin(mom.Theta())));
-            hCosThetaE->Fill(cos(mom.Theta()));
-            hEkinCosThetaE->Fill(cos(mom.Theta()), Ekin);
-        }
- 
     }
 
-    for(auto it : particleMap) {
-        cout << "PID: " << Long64_t(it.first) << ", count: " << it.second << endl;
+    // canvases
+    TCanvas* cEkin = new TCanvas;
+    TCanvas* cCosTheta = new TCanvas;
+    TCanvas* cTime = new TCanvas;
+    
+    // color counter
+    int counter = 0;
+
+    // print particle IDs
+    for(auto it : particleCountMap) {
+        TString opts = (counter == 0) ? "hist e1" : "hist e1 same";
+
+        cout << "PID: " << Long64_t(it.first) << ", name: " << getParticleName(it.first) << ", count: " << it.second << endl;
+        if(it.second < 1000) 
+            continue;
+
+        cEkin->cd();
+        auto h = particleHistEkinCosThetaMap[it.first]->ProjectionY();
+        h->Scale(1./1e9);
+        h->SetTitle(getParticleName(it.first, true).c_str());
+        h->SetLineColor(counter+1);
+        h->SetMarkerColor(counter+1);
+        h->Draw(opts);
+        
+        cCosTheta->cd();
+        h = particleHistEkinCosThetaMap[it.first]->ProjectionX();
+        h->Scale(1./1e9);
+        h->SetTitle(getParticleName(it.first, true).c_str());
+        h->SetLineColor(counter+1);
+        h->SetMarkerColor(counter+1);
+        h->Draw(opts);
+        
+        cTime->cd();
+        h = particleHistTimeMap[it.first];
+        h->Scale(1./1e9);
+        h->SetTitle(getParticleName(it.first, true).c_str());
+        h->SetLineColor(counter+1);
+        h->SetMarkerColor(counter+1);
+        h->Draw(opts);
+
+        counter++;
     }
 
+    // particle count hist
+    const int nparticles = particleCountMap.size();
+    TH1F* hParticle = new TH1F("hParticle","hParticle",nparticles,0,nparticles);
+    counter = 0;
+    for(auto it : particleCountMap) {
+        hParticle->SetBinContent(counter+1, it.second/1e9);
+        hParticle->GetXaxis()->SetBinLabel(counter+1, getParticleName(it.first,true).c_str());
+        counter++;
+    } 
     new TCanvas;
-    hTimeN->Draw();
-    hTimeG->Draw("same");
-    hTimeE->Draw("same");
-    gPad->SetLogy();
-    
-    new TCanvas;
-    hAngDistN->Draw("hist");
-    hAngDistG->Draw("hist same");
-    hAngDistE->Draw("hist same");
-    gPad->SetLogy();
-    
-    new TCanvas;
-    hCosThetaN->Draw("hist");
-    hCosThetaG->Draw("hist same");
-    hCosThetaE->Draw("hist same");
-    gPad->SetLogy();
-    
-    new TCanvas;
-    hEkinCosThetaN->Draw("colz");
-    new TCanvas;
-    hEkinCosThetaG->Draw("colz");
-    new TCanvas;
-    hEkinCosThetaE->Draw("colz");
+    hParticle->Draw();
 
-    //new TCanvas;
-    //hTimeEkinN->Draw("colz");
-    //// test sampling from THnSparseD
-    //const int nSamples = 10000000;
-    //TH2D * hTimeEkinN_sampled = new TH2D("hTimeEkinN_sampled", "sampled emission time vs kinetic energy of neutrons from catcher;#it{E}_{kin} / MeV;#it{t} / ns;Counts", 2000, 0, 20, 1000, 0, 10);
-    //for(int i=0; i<nSamples; i++) {
-    //    double val[nDim];
-    //    hsparse->GetRandom(val);
-    //    double Ek = (val[4]*val[4] + val[5]*val[5] + val[6]*val[6])/(2.*939);
-    //    hTimeEkinN_sampled->Fill(Ek, val[0]);
-    //}
-    //new TCanvas;
-    //hTimeEkinN_sampled->Draw("colz");
-
-    TFile* outfile = new TFile("phase_space.root", "RECREATE");
+    // save phase space
+    std::string phaseFileName = std::filesystem::path(inputFileName).stem().string() + "_phase.root";
+    TFile* outfile = new TFile(phaseFileName.c_str(), "RECREATE");
     outfile->cd();
     hsparse->Write();
     hsparse2->Write();
     outfile->Close();
 
+    // write histograms file
     outfilehists->Write();
-
-    //file->Close();
 }
+
+
+
+
+#include <string>
+#include <unordered_map>
+#include <cmath>
+
+std::string getParticleName(long pid, bool for_root) {
+    // Map for common particles (you can extend this as needed)
+    static const std::unordered_map<long, std::string> commonParticles = {
+        {11, "electron"},
+        {-11, "positron"},
+        {12, "nu_e"},
+        {-12, "anti_nu_e"},
+        {13, "mu-"},
+        {-13, "mu+"},
+        {14, "nu_mu"},
+        {-14, "anti_nu_mu"},
+        {15, "tau-"},
+        {-15, "tau+"},
+        {16, "nu_tau"},
+        {-16, "anti_nu_tau"},
+        {22, "gamma"},
+        {111, "pi0"},
+        {211, "pi+"},
+        {-211, "pi-"},
+        {130, "K_L0"},
+        {310, "K_S0"},
+        {311, "K0"},
+        {321, "K+"},
+        {-321, "K-"},
+        {2112, "neutron"},
+        {2212, "proton"},
+        {-2212, "anti_proton"},
+        {3122, "Lambda"},
+        {3222, "Sigma+"},
+        {3212, "Sigma0"},
+        {3112, "Sigma-"},
+        {3322, "Xi0"},
+        {3312, "Xi-"},
+        {3334, "Omega-"}
+    };
+
+    // Check if it's a common particle
+    auto it = commonParticles.find(pid);
+    if (it != commonParticles.end()) {
+        return it->second;
+    }
+
+    // Handle ions (PDG numbering scheme for nuclei: 10LZZZAAAI)
+    // For ions: ±10LZZZAAAI, where L=0, ZZZ=Z, AAA=A, I=isomer level
+    if (std::abs(pid) > 1000000000) {
+        long absPid = std::abs(pid);
+
+        // Extract Z and A from PDG code: ±10LZZZAAAI
+        int Z = (absPid / 10000) % 1000;
+        int A = (absPid / 10) % 1000;
+
+        // Get element symbol from Z
+        static const std::string elements[] = {
+            "n", "H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne",
+            "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca",
+            "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
+            "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr",
+            "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn",
+            "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd",
+            "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb",
+            "Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg",
+            "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th",
+            "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm",
+            "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds",
+            "Rg", "Cn", "Nh", "Fl", "Mc", "Lv", "Ts", "Og"
+        };
+
+        std::string symbol;
+        if (Z < static_cast<int>(sizeof(elements)/sizeof(elements[0]))) {
+            symbol = elements[Z];
+        } else {
+            symbol = "UnknownElement";
+        }
+
+        if(for_root)
+            return "^{" + std::to_string(A) + "}" + symbol;
+        else
+            return symbol + "" + std::to_string(A);
+    }
+
+    // Unknown particle
+    return "unknown_" + std::to_string(pid);
+}
+
