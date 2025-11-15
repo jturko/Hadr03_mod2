@@ -67,7 +67,7 @@ DetectorConstruction::DetectorConstruction()
     fPosition = G4ThreeVector(0., 0., 0.);
     fRotation = G4ThreeVector(0., 0., 0.);
 
-    fWorldXYZ = 5 * m;
+    fWorldXYZ = 10 * m;
 
     // default catcher params
     fCatcherRadius = 2.5 * cm;
@@ -276,7 +276,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 void DetectorConstruction::ConstructSDandField()
 {
     // Sensitive detectors
-    G4String panelSDname = "/PanelSD";
+    G4String panelSDname = "PanelSD";
     auto panelSD = new PanelSD(panelSDname, "PanelHitsCollection");
     G4SDManager::GetSDMpointer()->AddNewDetector(panelSD);
     // Setting trackerSD to all logical volumes with the same name

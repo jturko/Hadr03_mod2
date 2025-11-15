@@ -42,6 +42,7 @@
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
 #include "Randomize.hh"
+#include "G4PhysicalVolumeStore.hh"
 
 #include "ProgressBar.hh"
 
@@ -126,7 +127,24 @@ void RunAction::BeginOfRunAction(const G4Run* run)
 
 void RunAction::EndOfRunAction(const G4Run*)
 {
-    if (isMaster) fRun->EndOfRun(fPrint);
+
+    if (isMaster) {
+        // volumes
+        G4cout << " -------------- Volumes in this run -------------- " << G4endl;
+        G4PhysicalVolumeStore* PVStore = G4PhysicalVolumeStore::GetInstance();
+        for (auto it = PVStore->begin(); it != PVStore->end(); ++it) {
+            G4VPhysicalVolume* currentVolume = *it;
+            G4String volumeName = currentVolume->GetName();
+            G4cout << " - " << volumeName << G4endl;
+        }
+        G4cout << " ------------------------------------------------- " << G4endl;
+        
+        // run info
+        fRun->EndOfRun(fPrint);
+        
+        // show Rndm status
+        G4Random::showEngineStatus();
+    }
 
     // save histograms
     G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
@@ -134,9 +152,6 @@ void RunAction::EndOfRunAction(const G4Run*)
         analysisManager->Write();
         analysisManager->CloseFile();
     }
-
-    // show Rndm status
-    if (isMaster) G4Random::showEngineStatus();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
