@@ -7,7 +7,7 @@
 
 std::string getParticleName(long pid, bool for_root=false);
 
-void analysis_script(const char* inputFileName = "hadr03.root") {
+void analysis_catcher(const char* inputFileName = "hadr03.root") {
     TFile* file = TFile::Open(inputFileName);
     if (!file || file->IsZombie()) {
         std::cerr << "Error: Could not open file " << inputFileName << std::endl;
