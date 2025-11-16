@@ -57,6 +57,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     public:
         const G4VPhysicalVolume* GetWorld()     { return fPWorld; };
         const G4VPhysicalVolume* GetCatcher()   { return fPCatcher; };
+        const G4VPhysicalVolume* GetShieldingTracker()   { return fPShieldingTracker; };
 
         // for messenger
         //
@@ -84,6 +85,12 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         // detector
         void SetDetectorPanelXY(G4double val)          { fDetectorPanelXY = val; };
         void SetDetectorPanelZ(G4double val)           { fDetectorPanelZ = val; };
+        // shielding
+        void SetShieldingInnerXY(G4double val)              { fShieldingInnerXY = val; };
+        void SetShieldingInnerZ(G4double val)               { fShieldingInnerZ = val; };
+        void SetShieldingBoratedPEThickness(G4double val)   { fShieldingBoratedPEThickness = val; };
+        void SetShieldingPbThickness(G4double val)          { fShieldingPbThickness = val; };
+        void PlaceShielding();
 
     private:
         DetectorMessenger* fDetectorMessenger = nullptr;
@@ -124,6 +131,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         G4double            fDetectorPanelXY;
         G4double            fDetectorPanelZ;
         G4Material*         fDetectorPanelMaterial = nullptr;
+
+        // shielding
+        G4VPhysicalVolume*  fPShieldingTracker = nullptr;
+        G4double fShieldingInnerXY;
+        G4double fShieldingInnerZ;
+        G4double fShieldingBoratedPEThickness;
+        G4double fShieldingPbThickness;
 
     private:
         void DefineMaterials();

@@ -40,6 +40,7 @@
 #include "GeometryCatcher.hh"   
 #include "GeometrySample.hh"   
 #include "GeometryDetectorPanel.hh"   
+#include "GeometryShielding.hh"   
 
 #include "G4Box.hh"
 #include "G4Tubs.hh"
@@ -89,6 +90,12 @@ DetectorConstruction::DetectorConstruction()
     fDetectorPanelXY = 5.*cm;
     fDetectorPanelZ = 1.*cm;
 
+    // default shielding params
+    fShieldingInnerXY = 2.*m;
+    fShieldingInnerZ = 4.*m;
+    fShieldingBoratedPEThickness = 10.*cm;
+    fShieldingPbThickness = 2.*cm;
+
     DefineMaterials();
     fDetectorMessenger = new DetectorMessenger(this);
 
@@ -112,21 +119,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 void DetectorConstruction::DefineMaterials()
 {
-    //// borated PE
-    //G4Element* H  = new G4Element("Hydrogen", "H", 1., 1.0079*g/mole);
-    //G4Element* C  = new G4Element("Carbon",   "C", 6., 12.01*g/mole);
-    //G4Element* B  = new G4Element("Boron",    "B", 5., 10.81*g/mole);
-    //// Assume 5% boron by mass
-    //G4double fractionB = 0.05;
-    //G4double fractionPE = 1.0 - fractionB;
-    //// Density of borated polyethylene
-    //G4double density = 0.95*g/cm3;  // typical value
-    //G4Material* BoratedPE = new G4Material("BoratedPE", density, 3);
-    //BoratedPE->AddElement(B, fractionB);
-    //BoratedPE->AddElement(C, 0.857*fractionPE);  // Polyethylene is (CH2)n
-    //BoratedPE->AddElement(H, 0.143*fractionPE);
-
-    /// G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -159,100 +151,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             false,                  // no boolean operation
             0);                     // copy number
 
-    // catcher volume
-    //G4Box* sCatcher = new G4Box("sCatcher",  // its name
-    //        fCatcherXY/2., fCatcherXY/2., fCatcherZ/2.);  // its dimensions
-    //fCatcherMaterial = man->FindOrBuildMaterial("G4_Li");
-    //fLCatcher = new G4LogicalVolume(sCatcher,   // its shape
-    //        fCatcherMaterial,                      // its material
-    //        "lCatcher");          // its name
-    //fLCatcher->SetVisAttributes(new G4VisAttributes(true, G4Colour::Green()));
-    //fPCatcher = new G4PVPlacement(0,// no rotation
-    //        G4ThreeVector(),        // at (0,0,0)
-    //        fLCatcher,              // its logical volume
-    //        "pCatcher",             // its name
-    //        fLWorld,                // its mother  volume
-    //        false,                  // no boolean operation
-    //        0);                     // copy number
 
-    // extra parameters for collimator
-    //G4double cut_extra = 1*cm;
-    //
-    //// collimator solid and logical
-    //G4Box* sCol_PreCut = new G4Box("sColPrecut",
-    //        4.*fCollimatorXY, 4.*fCollimatorXY, fCollimatorZ/2.);
-    //G4Box* sCol_Cut = new G4Box("sColCut",
-    //        fCollimatorXY/2., fCollimatorXY/2., fCollimatorZ/2. + cut_extra);
-    //G4SubtractionSolid* sCol = new G4SubtractionSolid("sCol",
-    //        sCol_PreCut, sCol_Cut);
-    //material = man->FindOrBuildMaterial("BoratedPE");
-    //G4LogicalVolume* lCol = new G4LogicalVolume(sCol,
-    //        material,
-    //        "lCol");
-    //lCol->SetVisAttributes(new G4VisAttributes(true, G4Colour::White()));
-
-    //// first collimator
-    //G4VPhysicalVolume* pCol1 = new G4PVPlacement(0,
-    //        G4ThreeVector(0., 0., fCollimatorDistance),
-    //        lCol,
-    //        "pCol1",
-    //        fLWorld,
-    //        false,
-    //        0);
-
-    //// second collimator
-    //G4VPhysicalVolume* pCol2 = new G4PVPlacement(0,
-    //        G4ThreeVector(0., 0., fCollimatorDistance + fCollimatorSpacing),
-    //        lCol,
-    //        "pCol2",
-    //        fLWorld,
-    //        false,
-    //        1);
-
-    //// third collimator
-    //G4VPhysicalVolume* pCol3 = new G4PVPlacement(0,
-    //        G4ThreeVector(0., 0., fCollimatorDistance + 2*fCollimatorSpacing),
-    //        lCol,
-    //        "pCol3",
-    //        fLWorld,
-    //        false,
-    //        2);
-
-    //// sample
-    //G4Tubs * sSampleCyl = new G4Tubs("sSampleCyl", 0, 1.*cm, 5.*cm / 2., 0., 2.*M_PI);
-    //material = man->FindOrBuildMaterial("G4_Pb");
-    //G4LogicalVolume * lSampleCyl = new G4LogicalVolume(sSampleCyl,
-    //        material,
-    //        "lSampleCyl");
-    //lSampleCyl->SetVisAttributes(new G4VisAttributes(true, G4Colour::Red()));
-    //G4VPhysicalVolume* pSampleCyl = new G4PVPlacement(0,
-    //        //G4ThreeVector(1.*cm, 1.*cm, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm),
-    //        G4ThreeVector(1.*cm, 1.*cm, 50.*cm),
-    //        lSampleCyl,
-    //        "pSampleCyl",
-    //        fLWorld,
-    //        false,
-    //        0); 
-
-    // // detector 
-    // G4Box* sDetectorPanel = new G4Box("sPanel",  // its name
-    //         fDetectorPanelXY/2., fDetectorPanelXY/2., fDetectorPanelZ/2.);  // its dimensions
-    // fDetectorPanelMaterial = man->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
-    // fLDetectorPanel = new G4LogicalVolume(sDetectorPanel,   // its shape
-    //         fDetectorPanelMaterial,                      // its material
-    //         "lPanel");          // its name
-    // fLDetectorPanel->SetVisAttributes(new G4VisAttributes(true, G4Colour::Blue()));
-    // fPDetectorPanel = new G4PVPlacement(0,// no rotation
-    //         //G4ThreeVector(0, 0, fCollimatorDistance + 2*fCollimatorSpacing + 10.*cm + 10.*cm),
-    //         G4ThreeVector(0, 0, 60.*cm),
-    //         fLDetectorPanel,             // its logical volume
-    //         "pPanel",               // its name
-    //         fLWorld,                // its mother  volume
-    //         false,                  // no boolean operation
-    //         0);                     // copy number
-
-
-
+    // detector panel
     GeometryDetectorPanel* panel = new GeometryDetectorPanel();
     panel->SetXY(fDetectorPanelXY);
     panel->SetZ(fDetectorPanelZ);
@@ -265,7 +165,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
     fLDetectorPanel = panel->GetScintiLog();
 
     //PrintParameters();
-    G4cout << *(G4Material::GetMaterialTable()) << G4endl;
+    //G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 
     // always return the root volume
     return fPWorld;
@@ -279,10 +179,7 @@ void DetectorConstruction::ConstructSDandField()
     G4String panelSDname = "PanelSD";
     auto panelSD = new PanelSD(panelSDname, "PanelHitsCollection");
     G4SDManager::GetSDMpointer()->AddNewDetector(panelSD);
-    // Setting trackerSD to all logical volumes with the same name
-    // of "Chamber_LV".
     SetSensitiveDetector(fLDetectorPanel, panelSD);
-    //SetSensitiveDetector("lPanel", panelSD);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -307,7 +204,6 @@ void DetectorConstruction::PlaceCatcher()
     // after catcher placed, we can set the PV
     G4cout << " ---> Trying to assign catcher physical volume: " << catcher->GetCatcherPhys() << G4endl;
     fPCatcher = catcher->GetCatcherPhys();
-    //G4cout << " ---> Set the DetectorConstruction's catcher PV to: " << fPCatcher->GetName() << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -349,6 +245,31 @@ void DetectorConstruction::PlaceSample()
     rotate->rotateZ(fRotation.z()*M_PI/180.);    
     
     sample->PlaceDetector(fLWorld, fPosition, rotate);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::PlaceShielding() 
+{
+    G4cout << " ---> Placing shielding ... " << G4endl;
+    
+    GeometryShielding* shield = new GeometryShielding();
+    shield->SetInnerXY              (fShieldingInnerXY);    
+    shield->SetInnerZ               (fShieldingInnerZ);    
+    shield->SetBoratedPEThickness   (fShieldingBoratedPEThickness);    
+    shield->SetPbThickness          (fShieldingPbThickness);    
+    shield->Build();
+
+    G4RotationMatrix* rotate = new G4RotationMatrix();
+    rotate->rotateX(fRotation.x()*M_PI/180.);
+    rotate->rotateY(fRotation.y()*M_PI/180.);
+    rotate->rotateZ(fRotation.z()*M_PI/180.);    
+    
+    shield->PlaceDetector(fLWorld, fPosition, rotate);
+    
+    // after shielding is placed, we can set the PV
+    G4cout << " ---> Trying to assign shielding tracker physical volume: " << shield->GetTrackerPhys() << G4endl;
+    fPShieldingTracker = shield->GetTrackerPhys();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -103,6 +103,20 @@ void HistoManager::Book()
     analysisManager->CreateNtupleDColumn("z");
     analysisManager->FinishNtuple();
     G4cout << " Created ntuple \"hits\" (id " << idx << ") for detector hits" << G4endl;
+    
+    // ntuple for generating phase space
+    idx = analysisManager->CreateNtuple("shield", "spectrum of outgoing particles of shielding");
+    analysisManager->CreateNtupleDColumn("particle");
+    analysisManager->CreateNtupleDColumn("Ekin");
+    analysisManager->CreateNtupleDColumn("t");
+    analysisManager->CreateNtupleDColumn("x");
+    analysisManager->CreateNtupleDColumn("y");
+    analysisManager->CreateNtupleDColumn("z");
+    analysisManager->CreateNtupleDColumn("px");
+    analysisManager->CreateNtupleDColumn("py");
+    analysisManager->CreateNtupleDColumn("pz");
+    analysisManager->FinishNtuple();
+    G4cout << " Created ntuple \"shield\" (id " << idx << ") for shielding tracker" << G4endl;
 
 }
 

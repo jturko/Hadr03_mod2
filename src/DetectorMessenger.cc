@@ -128,6 +128,27 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     //fPlaceDetectorPanelCmd = new G4UIcmdWithoutParameter("/LDRS/det/placePanel", this);
     //fPlaceDetectorPanelCmd->SetGuidance("place a detector panel");
     //fPlaceDetectorPanelCmd->AvailableForStates(G4State_Idle);
+    
+    // shielding
+    fSetShieldingInnerXYCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setShieldingInnerXY", this);
+    fSetShieldingInnerXYCmd->SetGuidance("set shielding inner XY dimensions");
+    fSetShieldingInnerXYCmd->AvailableForStates(G4State_Idle);
+    
+    fSetShieldingInnerZCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setShieldingInnerZ", this);
+    fSetShieldingInnerZCmd->SetGuidance("set shielding inner Z dimensions");
+    fSetShieldingInnerZCmd->AvailableForStates(G4State_Idle);
+    
+    fSetShieldingBoratedPEThicknessCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setShieldingPEThickness", this);
+    fSetShieldingBoratedPEThicknessCmd->SetGuidance("set shielding borated PE thickness");
+    fSetShieldingBoratedPEThicknessCmd->AvailableForStates(G4State_Idle);
+    
+    fSetShieldingPbThicknessCmd  = new G4UIcmdWithADoubleAndUnit("/LDRS/det/setShieldingPbThickness", this);
+    fSetShieldingPbThicknessCmd->SetGuidance("set shielding Pb thickness");
+    fSetShieldingPbThicknessCmd->AvailableForStates(G4State_Idle);
+
+    fPlaceShieldingCmd = new G4UIcmdWithoutParameter("/LDRS/det/placeShielding", this);
+    fPlaceShieldingCmd->SetGuidance("place shielding");
+    fPlaceShieldingCmd->AvailableForStates(G4State_Idle);
 
 }
 
@@ -159,6 +180,13 @@ DetectorMessenger::~DetectorMessenger()
     delete fSetDetectorPanelXYCmd;
     delete fSetDetectorPanelZCmd;
     //delete fPlaceDetectorPanelCmd;
+    
+    delete fSetShieldingInnerXYCmd;
+    delete fSetShieldingInnerZCmd;
+    delete fSetShieldingBoratedPEThicknessCmd;
+    delete fSetShieldingPbThicknessCmd;
+    delete fPlaceShieldingCmd;
+    
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -228,6 +256,23 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String value)
     // if(command == fPlaceDetectorPanelCmd) {
     //     fDetector->PlaceDetectorPanel();
     // }
+    
+    // shielding
+    if(command == fSetShieldingInnerXYCmd) {
+        fDetector->SetShieldingInnerXY(fSetShieldingInnerXYCmd->GetNewDoubleValue(value));
+    }
+    if(command == fSetShieldingInnerZCmd) {
+        fDetector->SetShieldingInnerZ(fSetShieldingInnerZCmd->GetNewDoubleValue(value));
+    }
+    if(command == fSetShieldingBoratedPEThicknessCmd) {
+        fDetector->SetShieldingBoratedPEThickness(fSetShieldingBoratedPEThicknessCmd->GetNewDoubleValue(value));
+    }
+    if(command == fSetShieldingPbThicknessCmd) {
+        fDetector->SetShieldingPbThickness(fSetShieldingPbThicknessCmd->GetNewDoubleValue(value));
+    }
+    if(command == fPlaceShieldingCmd) {
+        fDetector->PlaceShielding();
+    }
 
 }
 

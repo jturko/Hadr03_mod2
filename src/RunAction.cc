@@ -43,6 +43,7 @@
 #include "G4UnitsTable.hh"
 #include "Randomize.hh"
 #include "G4PhysicalVolumeStore.hh"
+#include "G4Material.hh"
 
 #include "ProgressBar.hh"
 
@@ -101,7 +102,10 @@ G4Run* RunAction::GenerateRun()
 void RunAction::BeginOfRunAction(const G4Run* run)
 {
     // show Rndm status
-    if (isMaster) G4Random::showEngineStatus();
+    if (isMaster) {
+        G4Random::showEngineStatus();
+        G4cout << *(G4Material::GetMaterialTable()) << G4endl;
+    }
 
     // keep run condition
     if (fPrimary) {
@@ -121,6 +125,7 @@ void RunAction::BeginOfRunAction(const G4Run* run)
     if(fProgBar)
         delete fProgBar;
     fProgBar = new ProgressBar(run->GetNumberOfEventToBeProcessed());
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

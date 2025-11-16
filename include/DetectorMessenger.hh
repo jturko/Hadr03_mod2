@@ -64,10 +64,10 @@ class DetectorMessenger : public G4UImessenger
     G4UIcmdWith3VectorAndUnit*  fSetPositionCmd = nullptr;
     G4UIcmdWith3Vector*         fSetRotationCmd = nullptr;
     // catcher
-    G4UIcmdWithADoubleAndUnit*  fSetCatcherRadiusCmd     = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetCatcherZCmd          = nullptr;
-    G4UIcmdWithAString*         fSetCatcherMaterialNameCmd = nullptr;
-    G4UIcmdWithoutParameter*    fPlaceCatcherCmd         = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetCatcherRadiusCmd        = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetCatcherZCmd             = nullptr;
+    G4UIcmdWithAString*         fSetCatcherMaterialNameCmd  = nullptr;
+    G4UIcmdWithoutParameter*    fPlaceCatcherCmd            = nullptr;
     // collimator
     G4UIcmdWithADoubleAndUnit*  fSetSampleRadiusCmd         = nullptr;
     G4UIcmdWithADoubleAndUnit*  fSetSampleZCmd              = nullptr;
@@ -77,12 +77,18 @@ class DetectorMessenger : public G4UImessenger
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorXYCmd         = nullptr;
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorInnerXYCmd    = nullptr;
     G4UIcmdWithADoubleAndUnit*  fSetCollimatorZCmd          = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetCollimatorPbZCmd          = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetCollimatorPbZCmd        = nullptr;
     G4UIcmdWithoutParameter*    fPlaceCollimatorCmd         = nullptr;
     // detector panel
     G4UIcmdWithADoubleAndUnit*  fSetDetectorPanelXYCmd         = nullptr;
     G4UIcmdWithADoubleAndUnit*  fSetDetectorPanelZCmd          = nullptr;
     G4UIcmdWithoutParameter*    fPlaceDetectorPanelCmd         = nullptr;
+    // shielding
+    G4UIcmdWithADoubleAndUnit*  fSetShieldingInnerXYCmd             = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetShieldingInnerZCmd              = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetShieldingBoratedPEThicknessCmd  = nullptr;
+    G4UIcmdWithADoubleAndUnit*  fSetShieldingPbThicknessCmd         = nullptr;
+    G4UIcmdWithoutParameter*    fPlaceShieldingCmd                  = nullptr;
 
 };
 

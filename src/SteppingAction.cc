@@ -93,6 +93,37 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
             analysis->AddNtupleRow(idx);
         }
     }
+    
+    
+    // check if shielding tracker -> world
+    if (aStep->GetPreStepPoint()->GetPhysicalVolume()  == fDetector->GetShieldingTracker() && 
+        aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld()) 
+    {
+        G4double particleID     = aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
+        G4double ekin           = aStep->GetPostStepPoint()->GetKineticEnergy();
+        G4double t              = aStep->GetPostStepPoint()->GetGlobalTime();
+        G4ThreeVector position  = aStep->GetPostStepPoint()->GetPosition();
+        G4ThreeVector momentum  = aStep->GetPostStepPoint()->GetMomentum();
+
+        G4int idx = 2;
+        //if(momentum.z() > 0) {
+        if(1) {
+            //G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
+            //G4String partName = particle->GetParticleName();
+
+            // 0-index ntuple is for generating neutron phase space
+            analysis->FillNtupleDColumn(idx, 0, particleID);
+            analysis->FillNtupleDColumn(idx, 1, ekin / MeV);
+            analysis->FillNtupleDColumn(idx, 2, t / ns);
+            analysis->FillNtupleDColumn(idx, 3, position.x() / mm);
+            analysis->FillNtupleDColumn(idx, 4, position.y() / mm);
+            analysis->FillNtupleDColumn(idx, 5, position.z() / mm);
+            analysis->FillNtupleDColumn(idx, 6, momentum.x());
+            analysis->FillNtupleDColumn(idx, 7, momentum.y());
+            analysis->FillNtupleDColumn(idx, 8, momentum.z());
+            analysis->AddNtupleRow(idx);
+        }
+    }
 
 
     // // 
