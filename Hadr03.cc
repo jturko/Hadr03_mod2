@@ -60,16 +60,18 @@ int main(int argc, char** argv)
     G4Random::setTheSeed(time(NULL));
     G4Random::showEngineStatus();
 
-    // initialize ROOT manager for phase space sampling
+    //// --- CASTOR-MOD: comment the entire rootManager setup out, as we do not have a catcher phase-space file 
+    //// --- to sample from. Instead, we will start with just the a simple G4GeneralParticleSource
+    //// initialize ROOT manager for phase space sampling
     TFile::SetCacheFileDir("/tmp/root_cache"); // Optional: set cache dir
     RootManager& rootManager = RootManager::GetInstance();
-    //rootManager.Initialize("root_files/G4Li_3mm_1e9_phase.root", "hsparse");
-    //rootManager.Initialize("root_files/catchers/protons_iso_Be_1e8_phase.root", "hsparse2");
-    rootManager.Initialize("root_files/catchers/phase/protons_cos_Be_1e9_phase.root", "hsparse2");
-    if (!rootManager.IsInitialized()) {
-        G4cerr << "Failed to initialize RootManager! Exiting." << G4endl;
-        return 1;
-    }
+    ////rootManager.Initialize("root_files/G4Li_3mm_1e9_phase.root", "hsparse");
+    ////rootManager.Initialize("root_files/catchers/protons_iso_Be_1e8_phase.root", "hsparse2");
+    //rootManager.Initialize("root_files/catchers/phase/protons_cos_Be_1e9_phase.root", "hsparse2");
+    //if (!rootManager.IsInitialized()) {
+    //    G4cerr << "Failed to initialize RootManager! Exiting." << G4endl;
+    //    return 1;
+    //}
 
     // file number
     if(argc > 2) {

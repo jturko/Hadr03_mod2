@@ -127,8 +127,8 @@ PhysicsList::PhysicsList()
     
     RegisterPhysics(new G4EmStandardPhysics_option4());
     RegisterPhysics(new G4HadronElasticPhysicsXS(verb));
-        //RegisterPhysics(new G4HadronPhysicsQGSP_BIC_HP(verb));
-        RegisterPhysics(new G4HadronPhysicsQGSP_BIC_AllHP(verb));
+        RegisterPhysics(new G4HadronPhysicsQGSP_BIC_HP(verb));
+        //RegisterPhysics(new G4HadronPhysicsQGSP_BIC_AllHP(verb));
     RegisterPhysics(new G4IonElasticPhysics(verb));
     RegisterPhysics(new G4IonPhysicsXS(verb));
     RegisterPhysics(new GammaNuclearPhysics("gamma"));
