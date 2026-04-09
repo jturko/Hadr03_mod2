@@ -81,10 +81,10 @@ G4int GeometryCLYC::Build()
     BuildMaterials();
     fCLYCAssembly = new G4AssemblyVolume();
     
-    G4double startPhi = 0.0*deg, endPhi = 360.0/2.*deg;
+    G4double startPhi = 0.0*deg, endPhi = 360.0*deg;
     G4ThreeVector move;
     G4RotationMatrix* rotate = NULL;
-    G4bool onlyBuildCLYC = true;
+    G4bool onlyBuildCLYC = false;
 
     G4NistManager* manager = G4NistManager::Instance();
     G4Material* CLYC_material = manager->FindOrBuildMaterial(fCLYCCrystalMatName);

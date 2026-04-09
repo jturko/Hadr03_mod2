@@ -42,6 +42,7 @@
 #include "GeometryDetectorPanel.hh"   
 #include "GeometryShielding.hh"   
 #include "GeometryCLYC.hh"
+#include "GeometryCASTOR440.hh"
 
 #include "G4Box.hh"
 #include "G4Tubs.hh"
@@ -62,6 +63,15 @@
 #include "G4Colour.hh"
 #include "G4SDManager.hh"
 
+
+
+
+
+
+
+
+
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction()
@@ -69,7 +79,7 @@ DetectorConstruction::DetectorConstruction()
     fPosition = G4ThreeVector(0., 0., 0.);
     fRotation = G4ThreeVector(0., 0., 0.);
 
-    fWorldXYZ = 10 * m;
+    fWorldXYZ = 25 * m;
 
     // default catcher params
     fCatcherRadius = 2.5 * cm;
@@ -112,6 +122,13 @@ DetectorConstruction::~DetectorConstruction()
         delete clyc;
     }
     for (auto rot : fCLYCRotations) {
+        delete rot;
+    }
+
+    for (auto castor : fCASTOR440Detectors) {
+        delete castor;
+    }
+    for (auto rot : fCASTOR440Rotations) {
         delete rot;
     }
 }
@@ -175,6 +192,11 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
     for (size_t i = 0; i < fCLYCDetectors.size(); ++i) {
         fCLYCDetectors[i]->Build();
         fCLYCDetectors[i]->PlaceDetector(fLWorld, fCLYCPositions[i], fCLYCRotations[i], i);
+    }
+    
+    for (size_t i = 0; i < fCASTOR440Detectors.size(); ++i) {
+        fCASTOR440Detectors[i]->Build();
+        fCASTOR440Detectors[i]->PlaceDetector(fLWorld, fCASTOR440Positions[i], fCASTOR440Rotations[i], i);
     }
 
     //PrintParameters();
@@ -330,6 +352,20 @@ void DetectorConstruction::SetCLYCCrystalMaterialName(G4String val) { if (!fCLYC
 void DetectorConstruction::SetCLYCAlumMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetAlumMaterialName(val); }
 void DetectorConstruction::SetCLYCPbMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbMaterialName(val); }
 void DetectorConstruction::SetCLYCPEHDMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDMaterialName(val); }
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::AddCASTOR440() 
+{
+    fCASTOR440Detectors.push_back(new GeometryCASTOR440());
+    fCASTOR440Positions.push_back(fPosition);
+    
+    G4RotationMatrix* rot = new G4RotationMatrix();
+    rot->rotateX(fRotation.x()*M_PI/180.);
+    rot->rotateY(fRotation.y()*M_PI/180.);
+    rot->rotateZ(fRotation.z()*M_PI/180.); 
+    fCASTOR440Rotations.push_back(rot);
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

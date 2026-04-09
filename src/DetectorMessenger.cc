@@ -43,6 +43,10 @@
 #include "G4UIdirectory.hh"
 #include "G4UIparameter.hh"
 
+
+
+
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
@@ -187,6 +191,11 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     fSetCLYCPbMaterialNameCmd->AvailableForStates(G4State_PreInit);
     fSetCLYCPEHDMaterialNameCmd = new G4UIcmdWithAString("/LDRS/det/clyc/setPEHDMaterial", this);
     fSetCLYCPEHDMaterialNameCmd->AvailableForStates(G4State_PreInit);
+    
+    // CASTOR 440
+    fAddCASTOR440Cmd = new G4UIcmdWithoutParameter("/LDRS/det/castor440/add", this);
+    fAddCASTOR440Cmd->AvailableForStates(G4State_PreInit);
+
 
 }
 
@@ -244,6 +253,9 @@ DetectorMessenger::~DetectorMessenger()
     delete fSetCLYCAlumMaterialNameCmd;
     delete fSetCLYCPbMaterialNameCmd;
     delete fSetCLYCPEHDMaterialNameCmd;
+    
+    // CASTOR 440
+    delete fAddCASTOR440Cmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -350,6 +362,9 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String value)
     if(command == fSetCLYCAlumMaterialNameCmd) fDetector->SetCLYCAlumMaterialName(value);
     if(command == fSetCLYCPbMaterialNameCmd) fDetector->SetCLYCPbMaterialName(value);
     if(command == fSetCLYCPEHDMaterialNameCmd) fDetector->SetCLYCPEHDMaterialName(value);
+    
+    // CASTOR 440
+    if(command == fAddCASTOR440Cmd) fDetector->AddCASTOR440();
 
 }
 

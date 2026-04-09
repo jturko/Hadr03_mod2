@@ -44,6 +44,7 @@ class G4Material;
 
 class DetectorMessenger;
 class GeometryCLYC;
+class GeometryCASTOR440;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -116,6 +117,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         void SetCLYCPbMaterialName(G4String val);
         void SetCLYCPEHDMaterialName(G4String val);
 
+        void AddCASTOR440();
+
     private:
         DetectorMessenger* fDetectorMessenger = nullptr;
 
@@ -167,6 +170,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         std::vector<GeometryCLYC*> fCLYCDetectors;
         std::vector<G4ThreeVector> fCLYCPositions;
         std::vector<G4RotationMatrix*> fCLYCRotations;
+
+        std::vector<GeometryCASTOR440*> fCASTOR440Detectors;
+        std::vector<G4ThreeVector> fCASTOR440Positions;
+        std::vector<G4RotationMatrix*> fCASTOR440Rotations;
 
     private:
         void DefineMaterials();

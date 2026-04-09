@@ -64,27 +64,27 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDet
 
     // configured for protons incident on the catcher
     fGPS = new G4GeneralParticleSource;
-    // set particle
-    particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
-    fGPS->SetParticleDefinition(particle);
-    // set energy dist.
-    fGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Lin");
-    fGPS->GetCurrentSource()->GetEneDist()->SetEmin(1.*MeV);
-    fGPS->GetCurrentSource()->GetEneDist()->SetEmax(10.*MeV);
-    fGPS->GetCurrentSource()->GetEneDist()->SetInterCept(1);
-    fGPS->GetCurrentSource()->GetEneDist()->SetGradient(0);
-    // set angular dist.
-    fGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("cos");
-    fGPS->GetCurrentSource()->GetAngDist()->SetMinTheta(0.*deg);
-    fGPS->GetCurrentSource()->GetAngDist()->SetMaxTheta(20.*deg);
-    fGPS->GetCurrentSource()->GetAngDist()->SetMinPhi(0.*deg);
-    fGPS->GetCurrentSource()->GetAngDist()->SetMaxPhi(360.*deg);
-    //fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(0.,1.,0.));
-    fGPS->GetCurrentSource()->GetAngDist()->DefineAngRefAxes("angref1", G4ThreeVector(-1, 0, 0));
-    fGPS->GetCurrentSource()->GetAngDist()->DefineAngRefAxes("angref2", G4ThreeVector(0, 1, 0));
-    // set pos dist.
-    fGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Point");
-    fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0.,0.,0.));
+    //// set particle
+    //particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
+    //fGPS->SetParticleDefinition(particle);
+    //// set energy dist.
+    //fGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Lin");
+    //fGPS->GetCurrentSource()->GetEneDist()->SetEmin(1.*MeV);
+    //fGPS->GetCurrentSource()->GetEneDist()->SetEmax(10.*MeV);
+    //fGPS->GetCurrentSource()->GetEneDist()->SetInterCept(1);
+    //fGPS->GetCurrentSource()->GetEneDist()->SetGradient(0);
+    //// set angular dist.
+    //fGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("cos");
+    //fGPS->GetCurrentSource()->GetAngDist()->SetMinTheta(0.*deg);
+    //fGPS->GetCurrentSource()->GetAngDist()->SetMaxTheta(20.*deg);
+    //fGPS->GetCurrentSource()->GetAngDist()->SetMinPhi(0.*deg);
+    //fGPS->GetCurrentSource()->GetAngDist()->SetMaxPhi(360.*deg);
+    ////fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(0.,1.,0.));
+    //fGPS->GetCurrentSource()->GetAngDist()->DefineAngRefAxes("angref1", G4ThreeVector(-1, 0, 0));
+    //fGPS->GetCurrentSource()->GetAngDist()->DefineAngRefAxes("angref2", G4ThreeVector(0, 1, 0));
+    //// set pos dist.
+    //fGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Point");
+    //fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0.,0.,0.));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

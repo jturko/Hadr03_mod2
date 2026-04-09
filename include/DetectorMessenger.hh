@@ -110,6 +110,8 @@ class DetectorMessenger : public G4UImessenger
     G4UIcmdWithAString* fSetCLYCPbMaterialNameCmd = nullptr;
     G4UIcmdWithAString* fSetCLYCPEHDMaterialNameCmd = nullptr;
 
+    G4UIcmdWithoutParameter* fAddCASTOR440Cmd = nullptr;
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
