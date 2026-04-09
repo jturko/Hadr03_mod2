@@ -41,6 +41,7 @@
 #include "GeometrySample.hh"   
 #include "GeometryDetectorPanel.hh"   
 #include "GeometryShielding.hh"   
+#include "GeometryCLYC.hh"
 
 #include "G4Box.hh"
 #include "G4Tubs.hh"
@@ -106,6 +107,13 @@ DetectorConstruction::DetectorConstruction()
 DetectorConstruction::~DetectorConstruction()
 {
     delete fDetectorMessenger;
+
+    for (auto clyc : fCLYCDetectors) {
+        delete clyc;
+    }
+    for (auto rot : fCLYCRotations) {
+        delete rot;
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -152,17 +160,22 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             0);                     // copy number
 
 
-    // detector panel
-    GeometryDetectorPanel* panel = new GeometryDetectorPanel();
-    panel->SetXY(fDetectorPanelXY);
-    panel->SetZ(fDetectorPanelZ);
-    panel->Build();
-    G4RotationMatrix* rotate = new G4RotationMatrix();
-    rotate->rotateX(fRotation.x()*M_PI/180.);
-    rotate->rotateY(fRotation.y()*M_PI/180.);
-    rotate->rotateZ(fRotation.z()*M_PI/180.);    
-    panel->PlaceDetector(fLWorld, fPosition, rotate);
-    fLDetectorPanel = panel->GetScintiLog();
+    //// detector panel
+    //GeometryDetectorPanel* panel = new GeometryDetectorPanel();
+    //panel->SetXY(fDetectorPanelXY);
+    //panel->SetZ(fDetectorPanelZ);
+    //panel->Build();
+    //G4RotationMatrix* rotate = new G4RotationMatrix();
+    //rotate->rotateX(fRotation.x()*M_PI/180.);
+    //rotate->rotateY(fRotation.y()*M_PI/180.);
+    //rotate->rotateZ(fRotation.z()*M_PI/180.);    
+    //panel->PlaceDetector(fLWorld, fPosition, rotate);
+    //fLDetectorPanel = panel->GetScintiLog();
+
+    for (size_t i = 0; i < fCLYCDetectors.size(); ++i) {
+        fCLYCDetectors[i]->Build();
+        fCLYCDetectors[i]->PlaceDetector(fLWorld, fCLYCPositions[i], fCLYCRotations[i], i);
+    }
 
     //PrintParameters();
     //G4cout << *(G4Material::GetMaterialTable()) << G4endl;
@@ -176,10 +189,24 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 void DetectorConstruction::ConstructSDandField()
 {
     // Sensitive detectors
-    G4String panelSDname = "PanelSD";
-    auto panelSD = new PanelSD(panelSDname, "PanelHitsCollection");
-    G4SDManager::GetSDMpointer()->AddNewDetector(panelSD);
-    SetSensitiveDetector(fLDetectorPanel, panelSD);
+    //G4String panelSDname = "PanelSD";
+    //auto panelSD = new PanelSD(panelSDname, "PanelHitsCollection");
+    //G4SDManager::GetSDMpointer()->AddNewDetector(panelSD);
+    //SetSensitiveDetector(fLDetectorPanel, panelSD);
+
+    if (!fCLYCDetectors.empty()) {
+        G4String clycSDname = "ClycSD";
+        auto clycSD = new PanelSD(clycSDname, "ClycHitsCollection"); 
+        G4SDManager::GetSDMpointer()->AddNewDetector(clycSD);
+        
+        for (auto clyc : fCLYCDetectors) {
+            G4LogicalVolume* logVol = clyc->GetCLYCLog();
+            if (logVol) {
+                SetSensitiveDetector(logVol, clycSD);
+            }
+        }
+    }
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -273,3 +300,36 @@ void DetectorConstruction::PlaceShielding()
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::AddCLYC() 
+{
+    fCLYCDetectors.push_back(new GeometryCLYC());
+    fCLYCPositions.push_back(fPosition);
+    
+    G4RotationMatrix* rot = new G4RotationMatrix();
+    rot->rotateX(fRotation.x()*M_PI/180.);
+    rot->rotateY(fRotation.y()*M_PI/180.);
+    rot->rotateZ(fRotation.z()*M_PI/180.); 
+    fCLYCRotations.push_back(rot);
+}
+
+void DetectorConstruction::SetCLYCCrystalRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetCrystalRadius(val); }
+void DetectorConstruction::SetCLYCCrystalLength(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetCrystalLength(val); }
+void DetectorConstruction::SetCLYCAlumThickness(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetAlumCasingThickness(val); }
+void DetectorConstruction::SetCLYCPbCollimatorInnerRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbCollimatorInnerRadius(val); }
+void DetectorConstruction::SetCLYCPbCollimatorOuterRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbCollimatorOuterRadius(val); }
+void DetectorConstruction::SetCLYCPbCollimatorLength(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbCollimatorLength(val); }
+void DetectorConstruction::SetCLYCPEHDCollimatorInnerRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDCollimatorInnerRadius(val); }
+void DetectorConstruction::SetCLYCPEHDCollimatorOuterRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDCollimatorOuterRadius(val); }
+void DetectorConstruction::SetCLYCPEHDCollimatorLength(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDCollimatorLength(val); }
+void DetectorConstruction::SetCLYCPEPlugInnerRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEPlugInnerRadius(val); }
+void DetectorConstruction::SetCLYCPEPlugOuterRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEPlugOuterRadius(val); }
+void DetectorConstruction::SetCLYCPEPlugLength(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEPlugLength(val); }
+
+void DetectorConstruction::SetCLYCCrystalMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetCrystalMaterialName(val); }
+void DetectorConstruction::SetCLYCAlumMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetAlumMaterialName(val); }
+void DetectorConstruction::SetCLYCPbMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbMaterialName(val); }
+void DetectorConstruction::SetCLYCPEHDMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDMaterialName(val); }
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+

@@ -37,10 +37,13 @@
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
 #include "G4ThreeVector.hh"
+#include "G4RotationMatrix.hh"
 
 class G4LogicalVolume;
 class G4Material;
+
 class DetectorMessenger;
+class GeometryCLYC;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -92,6 +95,27 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         void SetShieldingPbThickness(G4double val)          { fShieldingPbThickness = val; };
         void PlaceShielding();
 
+        // FOR DCS MONITOR PROJECT
+        void AddCLYC();
+
+        void SetCLYCCrystalRadius(G4double val);
+        void SetCLYCCrystalLength(G4double val);
+        void SetCLYCAlumThickness(G4double val);
+        void SetCLYCPbCollimatorInnerRadius(G4double val);
+        void SetCLYCPbCollimatorOuterRadius(G4double val);
+        void SetCLYCPbCollimatorLength(G4double val);
+        void SetCLYCPEHDCollimatorInnerRadius(G4double val);
+        void SetCLYCPEHDCollimatorOuterRadius(G4double val);
+        void SetCLYCPEHDCollimatorLength(G4double val);
+        void SetCLYCPEPlugInnerRadius(G4double val);
+        void SetCLYCPEPlugOuterRadius(G4double val);
+        void SetCLYCPEPlugLength(G4double val);
+
+        void SetCLYCCrystalMaterialName(G4String val);
+        void SetCLYCAlumMaterialName(G4String val);
+        void SetCLYCPbMaterialName(G4String val);
+        void SetCLYCPEHDMaterialName(G4String val);
+
     private:
         DetectorMessenger* fDetectorMessenger = nullptr;
 
@@ -138,6 +162,11 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         G4double fShieldingInnerZ;
         G4double fShieldingBoratedPEThickness;
         G4double fShieldingPbThickness;
+
+        // FOR DCS MONITOR PROJECT
+        std::vector<GeometryCLYC*> fCLYCDetectors;
+        std::vector<G4ThreeVector> fCLYCPositions;
+        std::vector<G4RotationMatrix*> fCLYCRotations;
 
     private:
         void DefineMaterials();
