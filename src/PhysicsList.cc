@@ -71,7 +71,7 @@
 #include "GammaNuclearPhysics.hh"
 #include "G4NuclideTable.hh"
 
-
+#include "G4RadioactiveDecayPhysics.hh"
 
 
 
@@ -133,6 +133,7 @@ PhysicsList::PhysicsList()
     RegisterPhysics(new G4IonPhysicsXS(verb));
     RegisterPhysics(new GammaNuclearPhysics("gamma"));
 
+    RegisterPhysics(new G4RadioactiveDecayPhysics());
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

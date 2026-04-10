@@ -116,8 +116,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         void SetCLYCAlumMaterialName(G4String val);
         void SetCLYCPbMaterialName(G4String val);
         void SetCLYCPEHDMaterialName(G4String val);
-
+    
+        // CASTOR 440
         void AddCASTOR440();
+        // 
+        G4int GetNumCASTOR440s() const { return fCASTOR440Detectors.size(); }
+        G4ThreeVector GetCASTOR440Position(G4int index) const { return fCASTOR440Positions[index]; }
+        G4RotationMatrix* GetCASTOR440Rotation(G4int index) const { return fCASTOR440Rotations[index]; }
 
     private:
         DetectorMessenger* fDetectorMessenger = nullptr;

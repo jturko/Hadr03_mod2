@@ -45,6 +45,11 @@ class G4Event;
 class DetectorConstruction;
 class PrimaryGeneratorMessenger;
 
+enum SourceMode {
+    kGPS,
+    kCASTOR440_surface
+};
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
@@ -61,21 +66,26 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4GeneralParticleSource* GetGPS() { return fGPS; };
 
     // for messenger commands
-    void SetProtons();
-    void SetNeutrons();
+
+    void SetSourceMode(SourceMode mode);
+    //void SetProtons();
+    //void SetNeutrons();
 
     void SetNeutronPhaseSpace(std::shared_ptr<THnSparseD>);
 
   private:
     G4ParticleGun* fParticleGun = nullptr;
-    G4GeneralParticleSource* fGPS;
+    G4GeneralParticleSource* fGPS = nullptr;
     DetectorConstruction* fDetector = nullptr;
-    PrimaryGeneratorMessenger* fPrimaryGeneratorMessenger;
+    PrimaryGeneratorMessenger* fPrimaryGeneratorMessenger = nullptr;
 
-    G4double fNeutronMass;
-
-    G4bool fUseNeutronPhaseSpace;
-    std::shared_ptr<THnSparseD> fhNeutronPhaseSpace;
+    SourceMode fSourceMode;
+    
+    void GenerateCASTOR440Flux();
+    
+    //G4double fNeutronMass;
+    //G4bool fUseNeutronPhaseSpace;
+    //std::shared_ptr<THnSparseD> fhNeutronPhaseSpace;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

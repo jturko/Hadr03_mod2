@@ -78,16 +78,27 @@ class ProgressBar {
             fSSPercent.clear();
             fSSPercent << std::fixed << std::setprecision(1) << 100.0*percent;
             
-            if( event == (fMaxEvents-1))
-                cout << "] all done!" << flush << endl;
-            else
+            if( event == (fMaxEvents-1)) {
+                //cout << "] all done! " << endl << " -> average rate was " << rate << " evts/s" << flush << endl << endl;
+                //cout << "] all done!" << flush << endl;
+            }
+            else {
                 cout << "] processing evt " << event+1 << " / " << fMaxEvents << " (" << fSSPercent.str() << "%), " << timeLeftHours << "h " 
                      << timeLeftMinutes%60 << "m " << timeLeftSeconds%60 << "s left @ " << (int)rate << " evts/s" << flush;
                 //cout << "] processing evt " << event+1 << " / " << fMaxEvents << " (" << Form("%.1f",(100*percent)) << "%), " << timeLeftHours << "h " 
                 //     << timeLeftMinutes%60 << "m " << timeLeftSeconds%60 << "s left @ " << (int)rate << " evts/s" << flush;
                 cout << ", " << timeRunningHours << "h " << timeRunningMinutes%60 << "m " << timeRunningSeconds%60 << "s elapsed" << flush;
+            }
             fCounter++;
         }
+            
+        if( event == (fMaxEvents-1) ) {
+            double timeRunningSeconds = difftime(fThisTime,fStartTime);
+            //double timeRunningSeconds = double(fThisTime-fStartTime);
+            double avgRate = double(fMaxEvents)/timeRunningSeconds;
+            cout << "] all done! " << endl << "  -> average rate was " << avgRate << " evts/s" << flush << endl;
+        }
+
         return printing;
     }
 

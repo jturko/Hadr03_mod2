@@ -53,17 +53,23 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDet
     // setup messenger
     fPrimaryGeneratorMessenger = new PrimaryGeneratorMessenger(this);
 
+    // guns
+    fParticleGun = new G4ParticleGun(1);
+    fGPS = new G4GeneralParticleSource;
+
+    // source mode
+    fSourceMode = kGPS;
+    
+
     // use phase space?
-    fUseNeutronPhaseSpace = true;
+    //fUseNeutronPhaseSpace = true;
 
     // configured for neutrons generated from phase space file
-    fParticleGun = new G4ParticleGun(1);
-    G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("neutron");
-    fParticleGun->SetParticleDefinition(particle);
-    fNeutronMass = particle->GetPDGMass();
+    //G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("neutron");
+    //fParticleGun->SetParticleDefinition(particle);
+    //fNeutronMass = particle->GetPDGMass();
 
     // configured for protons incident on the catcher
-    fGPS = new G4GeneralParticleSource;
     //// set particle
     //particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
     //fGPS->SetParticleDefinition(particle);
@@ -101,7 +107,13 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
     G4AnalysisManager* analysis = G4AnalysisManager::Instance();
 
-    fGPS->GeneratePrimaryVertex(anEvent);
+    if(fSourceMode == kCASTOR440_surface) {
+        GenerateCASTOR440Flux();
+        fParticleGun->GeneratePrimaryVertex(anEvent); // for first implementation
+    }
+    else {
+        fGPS->GeneratePrimaryVertex(anEvent);
+    }
 
     //// using neutron file phase space
     //if(fUseNeutronPhaseSpace) {
@@ -219,28 +231,91 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     //}
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void PrimaryGeneratorAction::SetProtons() {
-    fUseNeutronPhaseSpace = false;
-    G4cout << " ---> Setting incident proton beam" << G4endl;
+void PrimaryGeneratorAction::SetSourceMode(SourceMode mode) {
+    fSourceMode = mode; 
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PrimaryGeneratorAction::SetNeutrons() {
-    fUseNeutronPhaseSpace = true;
-    G4cout << " ---> Setting neutrons from catcher" << G4endl;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void PrimaryGeneratorAction::SetNeutronPhaseSpace(std::shared_ptr<THnSparseD> hist) 
+// particle gun implementation
+void PrimaryGeneratorAction::GenerateCASTOR440Flux()
 {
-    if(hist) {
-        fhNeutronPhaseSpace = std::shared_ptr<THnSparseD>((THnSparseD*)hist->Clone());
-        gROOT->GetListOfCleanups()->Remove(fhNeutronPhaseSpace.get());
+    G4int numCasks = fDetector->GetNumCASTOR440s();
+    if (numCasks == 0) return;
+
+    G4int caskIndex = (G4int)(G4UniformRand() * numCasks);
+    G4ThreeVector caskPos = fDetector->GetCASTOR440Position(caskIndex);
+    G4RotationMatrix* caskRot = fDetector->GetCASTOR440Rotation(caskIndex);
+
+    G4double R = 1330.0 * mm;
+    G4double H = 4080.0 * mm;
+    G4double areaTop = M_PI * R * R;
+    G4double areaSide = 2.0 * M_PI * R * H;
+    G4double areaTotal = 2.0 * areaTop + areaSide;
+
+    G4double randArea = G4UniformRand() * areaTotal;
+    G4ThreeVector localPos, localNormal;
+
+    if (randArea < areaTop) {
+        G4double r = R * std::sqrt(G4UniformRand());
+        G4double phi = 2.0 * M_PI * G4UniformRand();
+        localPos = G4ThreeVector(r * std::cos(phi), r * std::sin(phi), H / 2.0);
+        localNormal = G4ThreeVector(0., 0., 1.);
+    } else if (randArea < 2.0 * areaTop) {
+        G4double r = R * std::sqrt(G4UniformRand());
+        G4double phi = 2.0 * M_PI * G4UniformRand();
+        localPos = G4ThreeVector(r * std::cos(phi), r * std::sin(phi), -H / 2.0);
+        localNormal = G4ThreeVector(0., 0., -1.);
+    } else {
+        G4double z = H * (G4UniformRand() - 0.5);
+        G4double phi = 2.0 * M_PI * G4UniformRand();
+        localPos = G4ThreeVector(R * std::cos(phi), R * std::sin(phi), z);
+        localNormal = G4ThreeVector(std::cos(phi), std::sin(phi), 0.);
     }
+
+    G4ThreeVector globalPos = localPos;
+    G4ThreeVector globalNormal = localNormal;
+
+    if (caskRot) {
+        globalPos.transform(*caskRot);
+        globalNormal.transform(*caskRot);
+    }
+    globalPos += caskPos;
+
+    G4double cosTheta = G4UniformRand(); 
+    G4double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
+    G4double phiEmit = 2.0 * M_PI * G4UniformRand();
+
+    G4ThreeVector globalDir(sinTheta * std::cos(phiEmit), sinTheta * std::sin(phiEmit), cosTheta);
+    globalDir.rotateUz(globalNormal); 
+
+    fParticleGun->SetParticlePosition(globalPos);
+    fParticleGun->SetParticleMomentumDirection(globalDir);
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//
+//void PrimaryGeneratorAction::SetProtons() {
+//    fUseNeutronPhaseSpace = false;
+//    G4cout << " ---> Setting incident proton beam" << G4endl;
+//}
+//
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//
+//void PrimaryGeneratorAction::SetNeutrons() {
+//    fUseNeutronPhaseSpace = true;
+//    G4cout << " ---> Setting neutrons from catcher" << G4endl;
+//}
+//
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//
+//void PrimaryGeneratorAction::SetNeutronPhaseSpace(std::shared_ptr<THnSparseD> hist) 
+//{
+//    if(hist) {
+//        fhNeutronPhaseSpace = std::shared_ptr<THnSparseD>((THnSparseD*)hist->Clone());
+//        gROOT->GetListOfCleanups()->Remove(fhNeutronPhaseSpace.get());
+//    }
+//}
+//
+////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

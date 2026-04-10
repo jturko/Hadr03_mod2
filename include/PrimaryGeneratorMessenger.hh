@@ -11,6 +11,7 @@ class G4UIdirectory;
 class G4UIcmdWithAnInteger;
 class G4UIcmdWith3Vector;
 class G4UIcmdWithoutParameter;
+class G4UIcmdWithAString; 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -26,8 +27,12 @@ class PrimaryGeneratorMessenger: public G4UImessenger
         PrimaryGeneratorAction*     fPrimaryGeneratorAction = nullptr;
 
         G4UIdirectory*              fDir = nullptr;
-        G4UIcmdWithoutParameter*    fSetProtonsCmd = nullptr; 
-        G4UIcmdWithoutParameter*    fSetNeutronsCmd = nullptr; 
+
+        
+        G4UIcmdWithAString*         fSourceModeCmd;   
+
+        //G4UIcmdWithoutParameter*    fSetProtonsCmd = nullptr; 
+        //G4UIcmdWithoutParameter*    fSetNeutronsCmd = nullptr; 
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
