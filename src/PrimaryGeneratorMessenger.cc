@@ -22,8 +22,17 @@ PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(PrimaryGeneratorAction* gun
     fSourceModeCmd = new G4UIcmdWithAString("/LDRS/gun/sourceMode", this);
     fSourceModeCmd->SetGuidance("Select the source distribution mode.");
     fSourceModeCmd->SetParameterName("mode", false);
-    fSourceModeCmd->SetCandidates("GPS CASTOR440_surface");
+    fSourceModeCmd->SetCandidates("GPS CASTOR440_surface CASTOR440_fuel");
     fSourceModeCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+    fCaskNumCmd = new G4UIcmdWithAnInteger("/LDRS/gun/caskNum", this);
+    fCaskNumCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+    fFuelNumCmd = new G4UIcmdWithAnInteger("/LDRS/gun/fuelNum", this);
+    fFuelNumCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+    fIsotopeZCmd = new G4UIcmdWithAnInteger("/LDRS/gun/isotopeZ", this);
+    fIsotopeZCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+    fIsotopeACmd = new G4UIcmdWithAnInteger("/LDRS/gun/isotopeA", this);
+    fIsotopeACmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
     //// set incident protons (with GeneralParticleSource)
     //fSetProtonsCmd = new G4UIcmdWithoutParameter("/LDRS/gun/setProtons", this);
@@ -45,6 +54,11 @@ PrimaryGeneratorMessenger::~PrimaryGeneratorMessenger()
     
     delete fSourceModeCmd;
 
+    delete fCaskNumCmd;
+    delete fFuelNumCmd;
+    delete fIsotopeZCmd;
+    delete fIsotopeACmd;
+
     //delete fSetProtonsCmd;
     //delete fSetNeutronsCmd;
 }
@@ -57,10 +71,20 @@ void PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String newVa
             G4cout << " --> Setting source mode to the G4GeneralParticleSource (kGPS)" << G4endl;
             fPrimaryGeneratorAction->SetSourceMode(kGPS);
     }
+    
     if (newValue == "CASTOR440_surface") {
             G4cout << " --> Setting source mode to the CASTOR 440/84 surface flux (kCASTOR440_surface)" << G4endl;
             fPrimaryGeneratorAction->SetSourceMode(kCASTOR440_surface);
     }
+
+    if (newValue == "CASTOR440_fuel") {
+        G4cout << " --> Setting source mode to CASTOR 440/84 fuel element volume flux (kCASTOR440_fuel)" << G4endl;
+        fPrimaryGeneratorAction->SetSourceMode(kCASTOR440_fuel);
+    }
+    if (command == fCaskNumCmd) fPrimaryGeneratorAction->SetCaskNum(fCaskNumCmd->GetNewIntValue(newValue));
+    if (command == fFuelNumCmd) fPrimaryGeneratorAction->SetFuelNum(fFuelNumCmd->GetNewIntValue(newValue));
+    if (command == fIsotopeZCmd) fPrimaryGeneratorAction->SetIsotopeZ(fIsotopeZCmd->GetNewIntValue(newValue));
+    if (command == fIsotopeACmd) fPrimaryGeneratorAction->SetIsotopeA(fIsotopeACmd->GetNewIntValue(newValue));
 
     //if(command == fSetProtonsCmd) {
     //    fPrimaryGeneratorAction->SetProtons();

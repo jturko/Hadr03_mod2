@@ -47,7 +47,8 @@ class PrimaryGeneratorMessenger;
 
 enum SourceMode {
     kGPS,
-    kCASTOR440_surface
+    kCASTOR440_surface,
+    kCASTOR440_fuel
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -65,13 +66,18 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4ParticleGun* GetParticleGun() { return fParticleGun; };
     G4GeneralParticleSource* GetGPS() { return fGPS; };
 
-    // for messenger commands
-
+    // set the source mode (see enum for types)
     void SetSourceMode(SourceMode mode);
+    
+    // For uniform distrib. in a specific cask/fuelrod combo
+    void SetCaskNum(G4int val) { fCaskNum = val; }
+    void SetFuelNum(G4int val) { fFuelNum = val; }
+    void SetIsotopeZ(G4int val) { fIsotopeZ = val; }
+    void SetIsotopeA(G4int val) { fIsotopeA = val; }
+
     //void SetProtons();
     //void SetNeutrons();
-
-    void SetNeutronPhaseSpace(std::shared_ptr<THnSparseD>);
+    //void SetNeutronPhaseSpace(std::shared_ptr<THnSparseD>);
 
   private:
     G4ParticleGun* fParticleGun = nullptr;
@@ -82,7 +88,13 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     SourceMode fSourceMode;
     
     void GenerateCASTOR440Flux();
-    
+
+    void GenerateCASTOR440FuelFlux();
+    G4int fCaskNum = 0;
+    G4int fFuelNum = 0;
+    G4int fIsotopeZ = 27; // Default Co-60
+    G4int fIsotopeA = 60;
+
     //G4double fNeutronMass;
     //G4bool fUseNeutronPhaseSpace;
     //std::shared_ptr<THnSparseD> fhNeutronPhaseSpace;

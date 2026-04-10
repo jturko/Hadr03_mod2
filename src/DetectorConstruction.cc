@@ -360,3 +360,19 @@ void DetectorConstruction::AddCASTOR440()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+// Add at the bottom of the file:
+G4ThreeVector DetectorConstruction::GetCASTOR440FuelGlobalPosition(G4int caskIndex, G4int fuelIndex, G4ThreeVector pointInFuel) const {
+    if (caskIndex < 0 || caskIndex >= fCASTOR440Detectors.size()) return G4ThreeVector();
+
+    G4ThreeVector fuelCenter = fCASTOR440Detectors[caskIndex]->GetFuelPosition(fuelIndex);
+
+    // The cavity is shifted by Z = -150 mm relative to the cask body.
+    G4ThreeVector caskLocalPos = pointInFuel + fuelCenter + G4ThreeVector(0., 0., -150. * mm);
+
+    G4ThreeVector globalPos = caskLocalPos;
+    G4RotationMatrix* rot = fCASTOR440Rotations[caskIndex];
+    if (rot) globalPos.transform(*rot);
+
+    globalPos += fCASTOR440Positions[caskIndex];
+    return globalPos;
+}

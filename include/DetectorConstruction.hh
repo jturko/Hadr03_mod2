@@ -123,6 +123,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         G4int GetNumCASTOR440s() const { return fCASTOR440Detectors.size(); }
         G4ThreeVector GetCASTOR440Position(G4int index) const { return fCASTOR440Positions[index]; }
         G4RotationMatrix* GetCASTOR440Rotation(G4int index) const { return fCASTOR440Rotations[index]; }
+        //
+        G4ThreeVector GetCASTOR440FuelGlobalPosition(G4int caskIndex, G4int fuelIndex, G4ThreeVector pointInFuel) const;
 
     private:
         DetectorMessenger* fDetectorMessenger = nullptr;

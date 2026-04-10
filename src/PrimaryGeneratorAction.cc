@@ -40,6 +40,7 @@
 #include "G4Event.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTable.hh"
+#include "G4IonTable.hh" 
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
 
@@ -109,7 +110,11 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
     if(fSourceMode == kCASTOR440_surface) {
         GenerateCASTOR440Flux();
-        fParticleGun->GeneratePrimaryVertex(anEvent); // for first implementation
+        fParticleGun->GeneratePrimaryVertex(anEvent); 
+    }
+    else if(fSourceMode == kCASTOR440_fuel) { 
+        GenerateCASTOR440FuelFlux();
+        fParticleGun->GeneratePrimaryVertex(anEvent);
     }
     else {
         fGPS->GeneratePrimaryVertex(anEvent);
@@ -292,6 +297,59 @@ void PrimaryGeneratorAction::GenerateCASTOR440Flux()
     fParticleGun->SetParticleMomentumDirection(globalDir);
 }
 
+void PrimaryGeneratorAction::GenerateCASTOR440FuelFlux()
+{
+    G4int numCasks = fDetector->GetNumCASTOR440s();
+    if (fCaskNum < 0 || fCaskNum >= numCasks || fFuelNum < 0 || fFuelNum >= 84) {
+        G4Exception("PrimaryGeneratorAction", "InvalidSelection", JustWarning, "Invalid cask or fuel element index.");
+        return;
+    }
+
+    // 1. Configure the Isotope to decay at rest
+    G4ParticleDefinition* ion = G4IonTable::GetIonTable()->GetIon(fIsotopeZ, fIsotopeA, 0);
+    if (!ion) {
+        G4Exception("PrimaryGeneratorAction", "InvalidIon", JustWarning, "Could not find requested ion Z/A.");
+        return;
+    }
+    fParticleGun->SetParticleDefinition(ion);
+    fParticleGun->SetParticleEnergy(0.*eV); // Decay at rest
+
+    // 2. Uniform Hexagon Sampling (via Triangular Decomposition)
+    G4double R = 70.0 * mm; // Circumscribed radius of the hexagonal G4Polyhedra
+    G4double r1 = G4UniformRand();
+    G4double r2 = G4UniformRand();
+    if (r1 + r2 > 1.0) {
+        r1 = 1.0 - r1;
+        r2 = 1.0 - r2;
+    }
+
+    // Sample within one foundational equilateral triangle
+    G4double x0 = R * r1 + (R / 2.0) * r2;
+    G4double y0 = (R * std::sqrt(3.0) / 2.0) * r2;
+
+    // Rotate into one of the 6 sectors uniformly
+    G4int sector = (G4int)(G4UniformRand() * 6);
+    G4double angle = sector * 60. * deg;
+    G4double localX = x0 * std::cos(angle) - y0 * std::sin(angle);
+    G4double localY = x0 * std::sin(angle) + y0 * std::cos(angle);
+
+    // 3. Uniform Z Sampling
+    G4double cavityHeight = 3500. * mm;
+    G4double fuelHeight = cavityHeight - 200. * mm; // Based on zPlanes in GeometryCASTOR440
+    G4double localZ = (G4UniformRand() - 0.5) * fuelHeight;
+
+    G4ThreeVector sampledLocalPos(localX, localY, localZ);
+
+    // 4. Transform to global and apply
+    G4ThreeVector globalPos = fDetector->GetCASTOR440FuelGlobalPosition(fCaskNum, fFuelNum, sampledLocalPos);
+    fParticleGun->SetParticlePosition(globalPos);
+
+    // Provide generic isotropic momentum direction (required by gun, but physics dictates decay isotropy)
+    G4double cosTheta = 2.0 * G4UniformRand() - 1.0;
+    G4double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
+    G4double phiEmit = 2.0 * M_PI * G4UniformRand();
+    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(sinTheta * std::cos(phiEmit), sinTheta * std::sin(phiEmit), cosTheta));
+}
 
 
 ////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

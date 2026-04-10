@@ -31,6 +31,11 @@ class PrimaryGeneratorMessenger: public G4UImessenger
         
         G4UIcmdWithAString*         fSourceModeCmd;   
 
+        G4UIcmdWithAnInteger* fCaskNumCmd = nullptr;
+        G4UIcmdWithAnInteger* fFuelNumCmd = nullptr;
+        G4UIcmdWithAnInteger* fIsotopeZCmd = nullptr;
+        G4UIcmdWithAnInteger* fIsotopeACmd = nullptr;
+
         //G4UIcmdWithoutParameter*    fSetProtonsCmd = nullptr; 
         //G4UIcmdWithoutParameter*    fSetNeutronsCmd = nullptr; 
 };

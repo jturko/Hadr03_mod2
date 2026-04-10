@@ -42,6 +42,31 @@ GeometryCASTOR440::GeometryCASTOR440() :
 
 GeometryCASTOR440::~GeometryCASTOR440() {}
 
+
+// in the x-z plane:
+// ^ (+x)
+// > (+y)
+
+//               68
+//           62      67
+//       55      61      66
+//   47      54      60      65
+//       46      53      59      64
+//   38      45      52      58      63
+//       37      44      51      57
+//   29      36      43      50      56
+//       28      35      42      49
+//   20      27      34      41      48
+//       19      26      33      40
+//   12      18      25      32      39
+//       11      17      24      31
+//   05      10      16      23      30
+//       04      09      15      22
+//           03      08      14      21
+//               02      07      13
+//                   01      06
+//                       00
+
 G4int GeometryCASTOR440::Build()
 {
     BuildMaterials();
@@ -97,6 +122,7 @@ G4int GeometryCASTOR440::Build()
             // Bound inside the basket and cap exactly at 84 assemblies
             if (std::sqrt(x*x + y*y) < 700. * mm) {
                 if (nPlaced < 84) {
+                    fFuelPositions.push_back(G4ThreeVector(x, y, 0.));
                     new G4PVPlacement(0, G4ThreeVector(x, y, 0.), fFuelAssemblyLog, "FuelPhys", fCavityLog, false, nPlaced);
                     nPlaced++;
                 }
@@ -161,4 +187,11 @@ void GeometryCASTOR440::BuildMaterials()
     G4Material* mat_UO2 = new G4Material("UO2", 10.5 * g/cm3, 2);
     mat_UO2->AddElement(el_U, 1);
     mat_UO2->AddElement(el_O, 2);
+}
+
+G4ThreeVector GeometryCASTOR440::GetFuelPosition(G4int index) const {
+    if (index >= 0 && index < fFuelPositions.size()) {
+        return fFuelPositions[index];
+    }
+    return G4ThreeVector(0., 0., 0.);
 }

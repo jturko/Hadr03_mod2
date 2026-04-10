@@ -19,6 +19,8 @@ class GeometryCASTOR440
     void PlaceDetector(G4LogicalVolume* expHallLog, G4ThreeVector move, G4RotationMatrix* rotate, G4int copyNo);
 
     G4LogicalVolume* GetCASTORLog() { return fCASTORBodyLog; }
+    
+    G4ThreeVector GetFuelPosition(G4int index) const;
 
   private:
     void BuildMaterials();
@@ -43,6 +45,8 @@ class GeometryCASTOR440
     G4String fPEMatName;
     G4String fFuelMatName;
     G4String fSteelMatName;
+
+    std::vector<G4ThreeVector> fFuelPositions;
 };
 
 #endif
