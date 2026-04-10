@@ -1,0 +1,160 @@
+#
+# output verbosity
+# ------------------------------------------
+#/control/verbose 1
+#/run/verbose 1
+#/tracking/verbose 1
+
+# MT settings
+# ------------------------------------------
+/run/numberOfThreads 60
+
+# CLYC detector 1
+# ------------------------------------------
+# position/rotation
+/LDRS/det/setPosition 0 0 -1400 mm
+/LDRS/det/setRotation 0 0 0
+# instantiate the CLYC detector
+/LDRS/det/clyc/add
+
+## CLYC detector 2
+# ------------------------------------------
+## position/rotation
+#/LDRS/det/setPosition 10 0 0 cm
+#/LDRS/det/setRotation 0 0 0
+## CLYC scintillator
+#/LDRS/det/clyc/setCrystalMaterial CLYC
+#/LDRS/det/clyc/setCrystalRadius 12.5 mm
+#/LDRS/det/clyc/setCrystalLength 25.0 mm
+#/LDRS/det/clyc/setCrystalLength 2.0 mm
+## aluminum casing
+#/LDRS/det/clyc/setAlumMaterial G4_Al
+#/LDRS/det/clyc/setAlumThickness 0.5 mm
+#/LDRS/det/clyc/setAlumThickness 2.5 mm
+## Pb collimator
+#/LDRS/det/clyc/setPbMaterial G4_Pb
+#/LDRS/det/clyc/setPbColInnerRadius 14.5 mm
+#/LDRS/det/clyc/setPbColOuterRadius 20.0 mm
+#/LDRS/det/clyc/setPbColLength 50.0 mm
+## PEHD collimator
+#/LDRS/det/clyc/setPEHDMaterial G4_POLYETHYLENE
+#/LDRS/det/clyc/setPEHDColInnerRadius 20.0 mm
+#/LDRS/det/clyc/setPEHDColOuterRadius 25.0 mm
+#/LDRS/det/clyc/setPEHDColLength 50.0 mm
+## PE plug
+#/LDRS/det/clyc/setPEPlugInnerRadius 14.5 mm
+#/LDRS/det/clyc/setPEPlugOuterRadius 25.0 mm
+#/LDRS/det/clyc/setPEPlugLength 45.0 mm
+## instantiate the CLYC detector
+#/LDRS/det/clyc/add
+
+# CASTOR 440/84 pos 1
+# ------------------------------------------
+/LDRS/det/setPosition 0 0 0 m
+/LDRS/det/setRotation -90 0 0
+/LDRS/det/castor440/add
+
+# CASTOR 440/84 pos 2
+# ------------------------------------------
+#/LDRS/det/setPosition 2.00 0 -3.46 m
+#/LDRS/det/setRotation -90 0 0
+#/LDRS/det/castor440/add
+
+# CASTOR 440/84 pos 3
+# ------------------------------------------
+#/LDRS/det/setPosition -2.00 0 -3.46 m
+#/LDRS/det/setRotation -90 0 0
+#/LDRS/det/castor440/add
+
+# initialize the run
+# ------------------------------------------
+/run/initialize
+
+# setup long threshold for radioactive decay
+# ------------------------------------------
+/process/had/rdm/thresholdForVeryLongDecayTime 1e60 year
+
+# sources
+
+# planar source (GPS)
+# ------------------------------------------
+#/LDRS/gun/sourceMode GPS
+#/gps/particle neutron
+#/gps/ene/mono 1.0 MeV
+#/gps/particle gamma
+#/gps/ene/mono 0.662 MeV
+#/gps/pos/type Plane
+#/gps/pos/shape Square
+#/gps/pos/centre 0 0 -1330 mm
+#/gps/pos/halfx 5 cm
+#/gps/pos/halfy 5 cm
+#/gps/ang/type iso
+#/gps/ang/mintheta 135 deg
+#/gps/ang/maxtheta 180 deg
+
+# point/conic source (GPS)
+# ------------------------------------------
+#/LDRS/gun/sourceMode GPS
+# radioactive ion
+#/gps/particle ion
+#/gps/ion 98 252 0 0 # Cf252
+#/gps/ion 11 22 0 0  # Na22
+#/gps/energy 0 MeV
+#/gps/pos/type Point
+# gamma ray
+#/gps/particle gamma
+#/gps/ene/type Mono
+#/gps/ene/min 0 MeV
+#/gps/ene/mono 0.662 MeV
+##/gps/pos/type Point
+#/gps/pos/centre 0 0 0 mm
+#/gps/ang/type iso
+#/gps/ang/mintheta 0 deg
+#/gps/ang/maxtheta 180 deg
+##/gps/ang/mintheta 0 deg
+##/gps/ang/maxtheta 45 deg
+
+# castor source
+# ------------------------------------------
+#/LDRS/gun/sourceMode CASTOR440_surface
+## radioactive ion
+#/gun/particle ion
+##/gun/ion 98 252 0 0 # Cf252
+##/gun/ion 11 22 0 0  # Na22
+#/gun/ion 27 60 # Co60
+#/gun/energy 0 eV
+## gamma ray
+##/gun/particle gamma
+##/gun/energy 0.662 MeV
+
+# castor fuel source
+# ------------------------------------------
+/LDRS/gun/sourceMode CASTOR440_fuel
+/LDRS/gun/caskNum 0
+/LDRS/gun/fuelNum 20
+#/LDRS/gun/isotopeZ 1 
+#/LDRS/gun/isotopeA 1 
+/LDRS/gun/isotopeZ 27 
+/LDRS/gun/isotopeA 60 
+
+# root output
+# ------------------------------------------
+/analysis/setFileName fuel20_Co60_5p75e8
+#/analysis/setFileName tmp
+
+# select visualization
+# ------------------------------------------
+#/control/execute vis_vrml.mac
+#/control/execute vis_ogl.mac
+#/control/execute vis.mac
+
+# add vis filtering
+# ------------------------------------------
+#/control/execute vis_filterSD.mac
+
+# start the run
+# ------------------------------------------
+#/run/beamOn        5750000000000
+/run/beamOn         575000000
+
+
