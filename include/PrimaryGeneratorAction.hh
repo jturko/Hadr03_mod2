@@ -48,7 +48,8 @@ class PrimaryGeneratorMessenger;
 enum SourceMode {
     kGPS,
     kCASTOR440_surface,
-    kCASTOR440_fuel
+    kCASTOR440_fuel,
+    kCASTOR440_fuel_biased
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -94,6 +95,8 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4int fFuelNum = 0;
     G4int fIsotopeZ = 27; // Default Co-60
     G4int fIsotopeA = 60;
+
+    void GenerateCASTOR440FuelFlux_GeometricCLYCbias(G4Event* anEvent);
 
     //G4double fNeutronMass;
     //G4bool fUseNeutronPhaseSpace;

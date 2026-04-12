@@ -7,7 +7,7 @@
 
 # MT settings
 # ------------------------------------------
-/run/numberOfThreads 60
+/run/numberOfThreads 1
 
 # CLYC detector 1
 # ------------------------------------------
@@ -129,23 +129,33 @@
 
 # castor fuel source
 # ------------------------------------------
-/LDRS/gun/sourceMode CASTOR440_fuel
+#/LDRS/gun/sourceMode CASTOR440_fuel
+#/LDRS/gun/caskNum 0
+#/LDRS/gun/fuelNum 20
+#    #/LDRS/gun/isotopeZ 1  # now we use whatever has been set for the particle gun
+#    #/LDRS/gun/isotopeA 1 
+#    #/LDRS/gun/isotopeZ 27 
+#    #/LDRS/gun/isotopeA 60 
+#/gun/particle gamma
+#/gun/energy 1.332 MeV
+
+# castor fuel source, geometry bias for CLYC
+# ------------------------------------------
+/LDRS/gun/sourceMode CASTOR440_fuel_biased
 /LDRS/gun/caskNum 0
 /LDRS/gun/fuelNum 20
-#/LDRS/gun/isotopeZ 1 
-#/LDRS/gun/isotopeA 1 
-/LDRS/gun/isotopeZ 27 
-/LDRS/gun/isotopeA 60 
+/gun/particle geantino
+/gun/energy 1.332 MeV
 
 # root output
 # ------------------------------------------
-/analysis/setFileName fuel20_Co60_5p75e8
-#/analysis/setFileName tmp
+#/analysis/setFileName fuel20_1332keV_2e9
+/analysis/setFileName tmp
 
 # select visualization
 # ------------------------------------------
 #/control/execute vis_vrml.mac
-#/control/execute vis_ogl.mac
+/control/execute vis_ogl.mac
 #/control/execute vis.mac
 
 # add vis filtering
@@ -155,6 +165,9 @@
 # start the run
 # ------------------------------------------
 #/run/beamOn        5750000000000
-/run/beamOn         575000000
+#/run/beamOn        575000000
+#/run/beamOn         2000000000 # max
+#/run/beamOn         2147483647 # max
+/run/beamOn         100
 
 

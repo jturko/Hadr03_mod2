@@ -98,6 +98,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
         // FOR DCS MONITOR PROJECT
         void AddCLYC();
+        G4int GetNumCLYC() const { return fCLYCDetectors.size(); }
+        G4ThreeVector GetCLYCPosition(G4int index) const { return fCLYCPositions[index]; }
 
         void SetCLYCCrystalRadius(G4double val);
         void SetCLYCCrystalLength(G4double val);

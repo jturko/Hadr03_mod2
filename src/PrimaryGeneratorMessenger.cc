@@ -22,7 +22,7 @@ PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(PrimaryGeneratorAction* gun
     fSourceModeCmd = new G4UIcmdWithAString("/LDRS/gun/sourceMode", this);
     fSourceModeCmd->SetGuidance("Select the source distribution mode.");
     fSourceModeCmd->SetParameterName("mode", false);
-    fSourceModeCmd->SetCandidates("GPS CASTOR440_surface CASTOR440_fuel");
+    fSourceModeCmd->SetCandidates("GPS CASTOR440_surface CASTOR440_fuel CASTOR440_fuel_biased");
     fSourceModeCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
     fCaskNumCmd = new G4UIcmdWithAnInteger("/LDRS/gun/caskNum", this);
@@ -85,6 +85,13 @@ void PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String newVa
     if (command == fFuelNumCmd) fPrimaryGeneratorAction->SetFuelNum(fFuelNumCmd->GetNewIntValue(newValue));
     if (command == fIsotopeZCmd) fPrimaryGeneratorAction->SetIsotopeZ(fIsotopeZCmd->GetNewIntValue(newValue));
     if (command == fIsotopeACmd) fPrimaryGeneratorAction->SetIsotopeA(fIsotopeACmd->GetNewIntValue(newValue));
+    
+    if (newValue == "CASTOR440_fuel_biased") {
+        G4cout << " --> Setting source mode to CASTOR 440/84 fuel element volume flux with directional bias (kCASTOR440_fuel_biased)" << G4endl;
+        fPrimaryGeneratorAction->SetSourceMode(kCASTOR440_fuel_biased);
+    }
+
+
 
     //if(command == fSetProtonsCmd) {
     //    fPrimaryGeneratorAction->SetProtons();
