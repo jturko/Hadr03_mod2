@@ -63,6 +63,8 @@
 #include "G4Colour.hh"
 #include "G4SDManager.hh"
 
+#include "GeometryParallelBiasing.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction()
@@ -101,6 +103,8 @@ DetectorConstruction::DetectorConstruction()
     DefineMaterials();
     fDetectorMessenger = new DetectorMessenger(this);
 
+    // biasing
+    RegisterParallelWorld(new GeometryParallelBiasing("ParallelBiasingWorld", this));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

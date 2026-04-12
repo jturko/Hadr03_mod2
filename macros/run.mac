@@ -9,6 +9,10 @@
 # ------------------------------------------
 /run/numberOfThreads 1
 
+# importance biasing 
+# ------------------------------------------
+/LDRS/det/useBiasing true
+
 # CLYC detector 1
 # ------------------------------------------
 # position/rotation
@@ -155,7 +159,7 @@
 # select visualization
 # ------------------------------------------
 #/control/execute vis_vrml.mac
-/control/execute vis_ogl.mac
+#/control/execute vis_ogl.mac
 #/control/execute vis.mac
 
 # add vis filtering
@@ -168,6 +172,6 @@
 #/run/beamOn        575000000
 #/run/beamOn         2000000000 # max
 #/run/beamOn         2147483647 # max
-/run/beamOn         100
+/run/beamOn         1
 
 

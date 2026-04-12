@@ -35,6 +35,7 @@
 #include "G4VSensitiveDetector.hh"
 
 #include <vector>
+#include <map>
 
 class G4Step;
 class G4HCofThisEvent;
@@ -59,6 +60,8 @@ class PanelSD : public G4VSensitiveDetector
   private:
     PanelHitsCollection* fHitsCollection = nullptr;
     G4bool fTrig = false;
+
+    std::map<G4int, G4int> fTrackHitIndexMap;
 };
 
 

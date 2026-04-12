@@ -101,6 +101,8 @@ void HistoManager::Book()
     analysisManager->CreateNtupleDColumn("x");
     analysisManager->CreateNtupleDColumn("y");
     analysisManager->CreateNtupleDColumn("z");
+    analysisManager->CreateNtupleIColumn("det");
+    analysisManager->CreateNtupleDColumn("weight");
     analysisManager->FinishNtuple();
     G4cout << " Created ntuple \"hits\" (id " << idx << ") for detector hits" << G4endl;
     

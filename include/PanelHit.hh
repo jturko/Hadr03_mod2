@@ -67,6 +67,8 @@ class PanelHit : public G4VHit
         void SetPos(G4ThreeVector xyz) { fPos = xyz; };
         void SetTime(G4double t) { fTime = t; };
         void SetPID(G4int pid) { fPID = pid; };
+        void SetDetNum(G4int n){ fDetNum = n; };
+        void SetWeight(G4double w){ fWeight = w; };
 
         // Get methods
         G4int GetTrackID() const { return fTrackID; };
@@ -74,6 +76,8 @@ class PanelHit : public G4VHit
         G4ThreeVector GetPos() const { return fPos; };
         G4double GetTime() const { return fTime; };
         G4int GetPID() const { return fPID; };
+        G4int GetDetNum() const { return fDetNum; };
+        G4double GetWeight() const { return fWeight; };
 
     private:
         G4int           fTrackID = -1;
@@ -81,6 +85,9 @@ class PanelHit : public G4VHit
         G4ThreeVector   fPos;
         G4double        fTime = 0.;
         G4int           fPID = -1;
+        G4int           fDetNum = -1;
+        G4double        fWeight = 1.0;
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -64,53 +64,171 @@ void PanelSD::Initialize(G4HCofThisEvent* hce)
 
 G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
 {
-    // energy deposit
-    G4double edep = step->GetTotalEnergyDeposit();
- 
-    //G4cout << " ---> In PanelSD::ProcessHits() ... " << G4endl;
+    G4int trackID = step->GetTrack()->GetTrackID();
+    G4int parentID = step->GetTrack()->GetParentID();
+    G4int hitIndex = -1;
 
-    // if no energy deposited, return
-    if (edep == 0.) 
-        return false;
+    // 1. Resolve Ancestry first to map intermediate neutral particles
+    if (fTrackHitIndexMap.find(trackID) != fTrackHitIndexMap.end()) {
+        hitIndex = fTrackHitIndexMap[trackID];
+    } else if (fTrackHitIndexMap.find(parentID) != fTrackHitIndexMap.end()) {
+        hitIndex = fTrackHitIndexMap[parentID];
+        fTrackHitIndexMap[trackID] = hitIndex; 
+    }
 
-    // time
-    G4double t = step->GetPreStepPoint()->GetGlobalTime();
+    G4double w = step->GetPreStepPoint()->GetWeight(); 
 
-    // if not triggered yet
-    if(!fTrig) {
+    // 2. Create the "Shower Container" immediately to establish the map
+    if (hitIndex == -1) {
         auto newHit = new PanelHit();
-        newHit->SetTrackID(step->GetTrack()->GetTrackID());
-        newHit->SetEdep(edep);
-        newHit->SetPos(step->GetPostStepPoint()->GetPosition());
-        newHit->SetTime(t);
-        newHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
-        fHitsCollection->insert(newHit);
-
-        //G4cout << "inserting new hit" << G4endl;
-    }
-    // if triggered, but this step has smaller timestamp than hit 
-    else if(fTrig && t < ((PanelHit*)fHitsCollection->GetHit(0))->GetTime()) {
-        auto oldHit = (PanelHit*)fHitsCollection->GetHit(0);
-        oldHit->SetTrackID(step->GetTrack()->GetTrackID());
-        oldHit->AddEdep(edep);
-        oldHit->SetPos(step->GetPostStepPoint()->GetPosition());
-        oldHit->SetTime(t);
-        oldHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
+        newHit->SetTrackID(trackID);
+        newHit->SetEdep(0.); // Initialise to zero
+        newHit->SetWeight(w);
         
-        //G4cout << "updating old hit with new time/pos" << G4endl;
-    }
-    else { // triggered and time greater, just add edep
-        auto oldHit = (PanelHit*)fHitsCollection->GetHit(0);
-        oldHit->AddEdep(edep);
-        
-        //G4cout << "updating old hit by just summing the edeps" << G4endl;
-    }
+        hitIndex = fHitsCollection->insert(newHit) - 1;
+        fTrackHitIndexMap[trackID] = hitIndex;
+    } 
 
-    // set triggered to true
-    fTrig = true;
+    G4double edep = step->GetTotalEnergyDeposit();
+
+    // 3. Record physical data ONLY when energy is deposited
+    if (edep > 0.) {
+        auto oldHit = (PanelHit*)fHitsCollection->GetHit(hitIndex);
+        G4double t = step->GetPreStepPoint()->GetGlobalTime();
+        
+        // If this is the very first energy deposition in this shower, 
+        // lock in the physical observables.
+        if (oldHit->GetEdep() == 0.) {
+            oldHit->SetTime(t);
+            oldHit->SetPos(step->GetPostStepPoint()->GetPosition());
+            oldHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
+        } 
+        // If the shower already deposited energy, update only if this step is earlier
+        else if (t < oldHit->GetTime()) {
+            oldHit->SetTime(t);
+            oldHit->SetPos(step->GetPostStepPoint()->GetPosition());
+            oldHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
+        }
+
+        oldHit->AddEdep(edep);
+    }
 
     return true;
 }
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+//G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
+//{
+//    G4double edep = step->GetTotalEnergyDeposit();
+//    if (edep == 0.) return false; // Skip steps that deposit no energy
+//
+//    G4double t = step->GetPreStepPoint()->GetGlobalTime();
+//    G4double w = step->GetPreStepPoint()->GetWeight(); 
+//    G4int trackID = step->GetTrack()->GetTrackID();
+//    G4int parentID = step->GetTrack()->GetParentID();
+//    G4int hitIndex = -1;
+//
+//    // --- AVOID ARTIFICIAL PILE-UP ---
+//    // 1. Check if this specific track already has a hit recorded.
+//    if (fTrackHitIndexMap.find(trackID) != fTrackHitIndexMap.end()) {
+//        hitIndex = fTrackHitIndexMap[trackID];
+//    } 
+//    // 2. Check if this is a secondary particle generated INSIDE the detector 
+//    // (e.g., a photoelectron). It belongs to the parent's energy shower, 
+//    // so we map it to the parent's existing hit.
+//    else if (fTrackHitIndexMap.find(parentID) != fTrackHitIndexMap.end()) {
+//        hitIndex = fTrackHitIndexMap[parentID];
+//        fTrackHitIndexMap[trackID] = hitIndex; 
+//    }
+//
+//    // 3. If no hit exists for this track branch, create a new one.
+//    if (hitIndex == -1) {
+//        auto newHit = new PanelHit();
+//        newHit->SetTrackID(trackID);
+//        newHit->SetEdep(edep); // Record pure physical energy
+//        newHit->SetPos(step->GetPostStepPoint()->GetPosition());
+//        newHit->SetTime(t);
+//        newHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
+//        newHit->SetWeight(w); // Assign the statistical weight to the hit
+//        
+//        // Insert into collection and save the index to the map
+//        hitIndex = fHitsCollection->insert(newHit) - 1;
+//        fTrackHitIndexMap[trackID] = hitIndex;
+//    } 
+//    // 4. If the hit exists, accumulate the energy of this step.
+//    else {
+//        auto oldHit = (PanelHit*)fHitsCollection->GetHit(hitIndex);
+//        oldHit->AddEdep(edep); // Pure physical energy accumulation
+//        
+//        // CRITICAL: Do NOT modify the hit's weight here. 
+//        // The weight represents the statistical probability of this entire shower 
+//        // occurring, which was established when the primary particle entered the volume.
+//        
+//        // Update timing/position if this step happened earlier
+//        if (t < oldHit->GetTime()) {
+//            oldHit->SetTime(t);
+//            oldHit->SetPos(step->GetPostStepPoint()->GetPosition());
+//            oldHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
+//        }
+//    }
+//    return true;
+//}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+//G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
+//{
+//    // energy deposit
+//    G4double edep = step->GetTotalEnergyDeposit();
+// 
+//    //G4cout << " ---> In PanelSD::ProcessHits() ... " << G4endl;
+//
+//    // if no energy deposited, return
+//    if (edep == 0.) 
+//        return false;
+//
+//    // time and weight
+//    G4double t = step->GetPreStepPoint()->GetGlobalTime();
+//    G4double w = step->GetPreStepPoint()->GetWeight();
+//
+//    // if not triggered yet
+//    if(!fTrig) {
+//        auto newHit = new PanelHit();
+//        newHit->SetTrackID(step->GetTrack()->GetTrackID());
+//        newHit->SetEdep(edep);
+//        newHit->SetPos(step->GetPostStepPoint()->GetPosition());
+//        newHit->SetTime(t);
+//        newHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
+//        newHit->SetWeight(w);
+//        fHitsCollection->insert(newHit);
+//
+//        //G4cout << "inserting new hit" << G4endl;
+//    }
+//    // if triggered, but this step has smaller timestamp than hit 
+//    else if(fTrig && t < ((PanelHit*)fHitsCollection->GetHit(0))->GetTime()) {
+//        auto oldHit = (PanelHit*)fHitsCollection->GetHit(0);
+//        oldHit->SetTrackID(step->GetTrack()->GetTrackID());
+//        oldHit->AddEdep(edep);
+//        oldHit->SetPos(step->GetPostStepPoint()->GetPosition());
+//        oldHit->SetTime(t);
+//        oldHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
+//        oldHit->SetWeight(w);
+//
+//        //G4cout << "updating old hit with new time/pos" << G4endl;
+//    }
+//    else { // triggered and time greater, just add edep
+//        auto oldHit = (PanelHit*)fHitsCollection->GetHit(0);
+//        oldHit->AddEdep(edep);
+//        
+//        //G4cout << "updating old hit by just summing the edeps" << G4endl;
+//    }
+//
+//    // set triggered to true
+//    fTrig = true;
+//
+//    return true;
+//}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -127,10 +245,14 @@ void PanelSD::EndOfEvent(G4HCofThisEvent*)
 
     G4AnalysisManager* analysis = G4AnalysisManager::Instance();
     for (std::size_t i = 0; i < nofHits; i++) {
-        G4double pid        = (*fHitsCollection)[i]->GetPID();
         G4double edep       = (*fHitsCollection)[i]->GetEdep();
+        if(edep == 0.) continue; // skip hits which exist only due to the shower tracker,
+                                 // which will generate a hit even for edep=0
+        G4double pid        = (*fHitsCollection)[i]->GetPID();
         G4double t          = (*fHitsCollection)[i]->GetTime();
         G4ThreeVector pos   = (*fHitsCollection)[i]->GetPos();
+        G4int det           = (*fHitsCollection)[i]->GetDetNum();
+        G4double weight     = (*fHitsCollection)[i]->GetWeight();
         
         // 2nd ntuple is for panel hits
         G4int idx = 1;
@@ -140,6 +262,8 @@ void PanelSD::EndOfEvent(G4HCofThisEvent*)
         analysis->FillNtupleDColumn(idx, 3, pos.x());
         analysis->FillNtupleDColumn(idx, 4, pos.y());
         analysis->FillNtupleDColumn(idx, 5, pos.z());
+        analysis->FillNtupleIColumn(idx, 6, det);
+        analysis->FillNtupleDColumn(idx, 7, weight);
         analysis->AddNtupleRow(idx);
     }
 

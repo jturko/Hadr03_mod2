@@ -67,7 +67,8 @@ void PanelHit::Print()
 {
     G4cout << "  trackID: " << fTrackID << ", Edep: " << std::setw(7)
         << G4BestUnit(fEdep, "Energy") << ", Position: " << std::setw(7)
-        << G4BestUnit(fPos, "Length") << G4endl;
+        << G4BestUnit(fPos, "Length") << ", DetNum: " << fDetNum << ", weight: "
+        << std::setw(7) << fWeight << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

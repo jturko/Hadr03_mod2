@@ -59,6 +59,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         void ConstructSDandField() override;
 
     public:
+        void SetUseBiasing(G4bool val) { fUseBiasing = val; }
+        G4bool GetUseBiasing() const { return fUseBiasing; }
+
         const G4VPhysicalVolume* GetWorld()     { return fPWorld; };
         const G4VPhysicalVolume* GetCatcher()   { return fPCatcher; };
         const G4VPhysicalVolume* GetShieldingTracker()   { return fPShieldingTracker; };
@@ -130,6 +133,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     private:
         DetectorMessenger* fDetectorMessenger = nullptr;
+
+        // for biasing
+        G4bool fUseBiasing = false;
 
         // for next placed volume
         G4ThreeVector       fPosition;

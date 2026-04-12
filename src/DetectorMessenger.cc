@@ -39,6 +39,7 @@
 #include "G4UIcmdWith3VectorAndUnit.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithoutParameter.hh"
+#include "G4UIcmdWithABool.hh"
 #include "G4UIcommand.hh"
 #include "G4UIdirectory.hh"
 #include "G4UIparameter.hh"
@@ -54,7 +55,14 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     // directory
     fDir = new G4UIdirectory("/LDRS/det/");
     fDir->SetGuidance("detector construction commands");
-    
+ 
+    // biasing
+    fUseBiasingCmd = new G4UIcmdWithABool("/LDRS/det/useBiasing", this);
+    fUseBiasingCmd->SetGuidance("Toggle Geometry Importance Biasing (Weight Windows) on/off.");
+    fUseBiasingCmd->SetParameterName("useBiasing", true);
+    fUseBiasingCmd->SetDefaultValue(true);
+    fUseBiasingCmd->AvailableForStates(G4State_PreInit);
+
     // placement 
     fSetPositionCmd = new G4UIcmdWith3VectorAndUnit("/LDRS/det/setPosition",this);
     fSetPositionCmd->SetGuidance("set the position of the next volume");
@@ -205,6 +213,8 @@ DetectorMessenger::~DetectorMessenger()
 {
     delete fDir;
     
+    delete fUseBiasingCmd;
+
     delete fSetPositionCmd;
     delete fSetRotationCmd;
     
@@ -262,6 +272,11 @@ DetectorMessenger::~DetectorMessenger()
 
 void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String value)
 {
+    // biasing
+    if (command == fUseBiasingCmd) {
+        fDetector->SetUseBiasing(fUseBiasingCmd->GetNewBoolValue(value));
+    }
+
     // placement
     if(command == fSetPositionCmd) {
         fDetector->SetPosition(fSetPositionCmd->GetNew3VectorValue(value));

@@ -64,6 +64,27 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
     G4int trackID = aStep->GetTrack()->GetTrackID();
     G4int stepNb = aStep->GetTrack()->GetCurrentStepNumber();
 
+
+
+    // --- TEMPORARY DEBUG: WATCH THE WEIGHT WINDOWS ---
+    const G4VProcess* process = aStep->GetPostStepPoint()->GetProcessDefinedStep();
+    G4String procName = process ? process->GetProcessName() : "None";
+
+    if (procName == "ImportanceProcess") {
+        G4double weight = aStep->GetTrack()->GetWeight();
+        G4String volName = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName();
+        
+        G4cout << " [Biasing Triggered] " 
+               << " Track: " << trackID 
+               << " | Boundary: " << volName 
+               << " | New Weight: " << weight 
+               << G4endl;
+    }
+    // -------------------------------------------------
+
+
+
+
     // check if world -> catcher
     if (aStep->GetPreStepPoint()->GetPhysicalVolume()  == fDetector->GetCatcher() && 
         aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld()) 

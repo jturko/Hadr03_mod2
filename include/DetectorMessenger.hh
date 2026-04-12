@@ -44,6 +44,7 @@ class G4UIcmdWithADoubleAndUnit;
 class G4UIcmdWithoutParameter;
 class G4UIcmdWith3Vector;
 class G4UIcmdWith3VectorAndUnit;
+class G4UIcmdWithABool;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -60,6 +61,8 @@ class DetectorMessenger : public G4UImessenger
 
     // directory
     G4UIdirectory* fDir = nullptr;
+    // biasing
+    G4UIcmdWithABool* fUseBiasingCmd = nullptr;
     // placement
     G4UIcmdWith3VectorAndUnit*  fSetPositionCmd = nullptr;
     G4UIcmdWith3Vector*         fSetRotationCmd = nullptr;
