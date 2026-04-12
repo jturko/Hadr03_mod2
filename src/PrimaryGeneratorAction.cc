@@ -305,14 +305,15 @@ void PrimaryGeneratorAction::GenerateCASTOR440FuelFlux()
         return;
     }
 
-    // 1. Configure the Isotope to decay at rest
-    G4ParticleDefinition* ion = G4IonTable::GetIonTable()->GetIon(fIsotopeZ, fIsotopeA, 0);
-    if (!ion) {
-        G4Exception("PrimaryGeneratorAction", "InvalidIon", JustWarning, "Could not find requested ion Z/A.");
-        return;
-    }
-    fParticleGun->SetParticleDefinition(ion);
-    fParticleGun->SetParticleEnergy(0.*eV); // Decay at rest
+    //// 1. Configure the Isotope to decay at rest
+    //G4ParticleDefinition* ion = G4IonTable::GetIonTable()->GetIon(fIsotopeZ, fIsotopeA, 0);
+    //if (!ion) {
+    //    G4Exception("PrimaryGeneratorAction", "InvalidIon", JustWarning, "Could not find requested ion Z/A.");
+    //    return;
+    //}
+    //fParticleGun->SetParticleDefinition(ion);
+    //fParticleGun->SetParticleEnergy(0.*eV); // Decay at rest
+    // Instead, we will use whatever particle gun parameters have been set
 
     // 2. Uniform Hexagon Sampling (via Triangular Decomposition)
     G4double R = 70.0 * mm; // Circumscribed radius of the hexagonal G4Polyhedra
