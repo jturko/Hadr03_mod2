@@ -39,7 +39,7 @@ GeometryCLYC::GeometryCLYC() :
     fCLYCCrystalLength = 25. * mm;
     fAlumCasingThickness = 0.5 * mm;
     
-    fPbCollimatorInnerRadius = 29./2. * mm;
+    fPbCollimatorInnerRadius = 29.4/2. * mm;
     fPbCollimatorOuterRadius = 40./2. * mm;
     fPbCollimatorLength = 50. * mm;
     
