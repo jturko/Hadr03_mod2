@@ -33,10 +33,14 @@ GeometryCASTOR440::GeometryCASTOR440() :
     fCavityHeight    = 3500. * mm;
     fLidThickness    = 290. * mm;
 
+    //fCastIronMatName = "G4_AIR";
     fCastIronMatName = "CastIron";
+    
     fHeliumMatName   = "G4_He";
     fPEMatName       = "G4_POLYETHYLENE";
     fFuelMatName     = "UO2";
+
+    //fSteelMatName    = "G4_AIR";
     fSteelMatName    = "G4_STAINLESS-STEEL";
 }
 
@@ -86,12 +90,12 @@ G4int GeometryCASTOR440::Build()
     // 1. Cask Body (Main Mother Volume)
     G4Tubs* body_solid = new G4Tubs("CastorBody", 0.*mm, fCaskOuterRadius, fCaskHeight/2.0, 0.*deg, 360.*deg);
     fCASTORBodyLog = new G4LogicalVolume(body_solid, mat_CastIron, "CastorBodyLog");
-    fCASTORBodyLog->SetVisAttributes(new G4VisAttributes(true, G4Colour(0.3, 0.3, 0.3, alpha)));
+    fCASTORBodyLog->SetVisAttributes(new G4VisAttributes(true, G4Colour(0.3, 0.3, 0.3, 0.8)));
 
     // 2. Cavity (Filled with Helium)
     G4Tubs* cavity_solid = new G4Tubs("Cavity", 0.*mm, fCaskInnerRadius, fCavityHeight/2.0, 0.*deg, 360.*deg);
     fCavityLog = new G4LogicalVolume(cavity_solid, mat_He, "CavityLog");
-    fCavityLog->SetVisAttributes(new G4VisAttributes(true, G4Colour(0.9, 0.9, 0.9, alpha)));
+    fCavityLog->SetVisAttributes(new G4VisAttributes(true, G4Colour(0.9, 0.9, 0.9, 0.8)));
     
     // Shifted downwards to leave space for the massive steel lid at the top
     G4double cavityZ = -150. * mm;

@@ -121,6 +121,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         GenerateCASTOR440FuelFlux_GeometricCLYCbias(anEvent);
     }
     else {
+        //G4cout << " -> Generating GPS vertex..." << G4endl;
         fGPS->GeneratePrimaryVertex(anEvent);
     }
 

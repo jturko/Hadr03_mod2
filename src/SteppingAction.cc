@@ -64,87 +64,120 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
     G4int trackID = aStep->GetTrack()->GetTrackID();
     G4int stepNb = aStep->GetTrack()->GetCurrentStepNumber();
 
+    //// --- TEMPORARY DEBUG: WATCH THE WEIGHT WINDOWS ---
+    //const G4VProcess* process = aStep->GetPostStepPoint()->GetProcessDefinedStep();
+    //G4String procName = process ? process->GetProcessName() : "None";
+    //if (procName == "ImportanceProcess") {
+    //    G4double weight = aStep->GetTrack()->GetWeight();
+    //    G4String volName = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName();
+    //    
+    //    G4cout << " [Biasing Triggered] " 
+    //           << " Track: " << trackID 
+    //           << " | Boundary: " << volName 
+    //           << " | New Weight: " << weight 
+    //           << G4endl;
+    //}
+    //// -------------------------------------------------
 
+    //// Kill electrons and positrons immediately to save CPU
+    //G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
+    //if (particle == G4Electron::Electron() || particle == G4Positron::Positron()) {
+    //    // Only kill them if they are in the shielding/cask, not the detector
+    //    G4String volName = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName();
+    //    //if (volName.find("CastorBody") != G4String::npos || volName.find("Cavity") != G4String::npos) {
+    //    if (volName.find("CastorBody") != G4String::npos || volName.find("Cavity") != G4String::npos || volName.find("FuelPhys") != G4String::npos ) {
+    //        aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+    //        //G4cout << " --> Killing an electron!" << G4endl;
+    //        return;
+    //    }
+    //}
 
-    // --- TEMPORARY DEBUG: WATCH THE WEIGHT WINDOWS ---
-    const G4VProcess* process = aStep->GetPostStepPoint()->GetProcessDefinedStep();
-    G4String procName = process ? process->GetProcessName() : "None";
-
-    if (procName == "ImportanceProcess") {
-        G4double weight = aStep->GetTrack()->GetWeight();
-        G4String volName = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName();
-        
-        G4cout << " [Biasing Triggered] " 
-               << " Track: " << trackID 
-               << " | Boundary: " << volName 
-               << " | New Weight: " << weight 
-               << G4endl;
-    }
-    // -------------------------------------------------
-
-
-
-
-    // check if world -> catcher
-    if (aStep->GetPreStepPoint()->GetPhysicalVolume()  == fDetector->GetCatcher() && 
-        aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld()) 
-    {
-        G4double particleID     = aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
-        G4double ekin           = aStep->GetPostStepPoint()->GetKineticEnergy();
-        G4double t              = aStep->GetPostStepPoint()->GetGlobalTime();
-        G4ThreeVector position  = aStep->GetPostStepPoint()->GetPosition();
-        G4ThreeVector momentum  = aStep->GetPostStepPoint()->GetMomentum();
-
-        G4int idx = 0;
-        //if(momentum.z() > 0) {
-        if(1) {
-            //G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
-            //G4String partName = particle->GetParticleName();
-
-            // 0-index ntuple is for generating neutron phase space
-            analysis->FillNtupleDColumn(idx, 0, particleID);
-            analysis->FillNtupleDColumn(idx, 1, ekin / MeV);
-            analysis->FillNtupleDColumn(idx, 2, t / ns);
-            analysis->FillNtupleDColumn(idx, 3, position.x() / mm);
-            analysis->FillNtupleDColumn(idx, 4, position.y() / mm);
-            analysis->FillNtupleDColumn(idx, 5, position.z() / mm);
-            analysis->FillNtupleDColumn(idx, 6, momentum.x());
-            analysis->FillNtupleDColumn(idx, 7, momentum.y());
-            analysis->FillNtupleDColumn(idx, 8, momentum.z());
-            analysis->AddNtupleRow(idx);
+    G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
+    G4String volName = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetName();
+    
+    G4bool inShielding = (volName.find("CastorBody") != G4String::npos || 
+                          volName.find("Cavity") != G4String::npos || 
+                          volName.find("FuelPhys") != G4String::npos);
+    if (inShielding) {
+        // 1. Kill ALL Electrons and Positrons immediately (Perfectly fair to do)
+        if (particle == G4Electron::Electron() || particle == G4Positron::Positron()) {
+            aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+            return;
+        }
+        // 2. Kill "Junk" Gammas that have scattered too much to be useful
+        // (e.g., anything below 500 keV). Adjust this threshold depending on 
+        // how much of the Compton continuum you actually want to see in the CLYC.
+        if (particle == G4Gamma::Gamma() && aStep->GetTrack()->GetKineticEnergy() < 200.0 * keV) {
+            aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+            return;
         }
     }
+
+
+
+
+
+
+    //// check if world -> catcher
+    //if (aStep->GetPreStepPoint()->GetPhysicalVolume()  == fDetector->GetCatcher() && 
+    //    aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld()) 
+    //{
+    //    G4double particleID     = aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
+    //    G4double ekin           = aStep->GetPostStepPoint()->GetKineticEnergy();
+    //    G4double t              = aStep->GetPostStepPoint()->GetGlobalTime();
+    //    G4ThreeVector position  = aStep->GetPostStepPoint()->GetPosition();
+    //    G4ThreeVector momentum  = aStep->GetPostStepPoint()->GetMomentum();
+
+    //    G4int idx = 0;
+    //    //if(momentum.z() > 0) {
+    //    if(1) {
+    //        //G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
+    //        //G4String partName = particle->GetParticleName();
+
+    //        // 0-index ntuple is for generating neutron phase space
+    //        analysis->FillNtupleDColumn(idx, 0, particleID);
+    //        analysis->FillNtupleDColumn(idx, 1, ekin / MeV);
+    //        analysis->FillNtupleDColumn(idx, 2, t / ns);
+    //        analysis->FillNtupleDColumn(idx, 3, position.x() / mm);
+    //        analysis->FillNtupleDColumn(idx, 4, position.y() / mm);
+    //        analysis->FillNtupleDColumn(idx, 5, position.z() / mm);
+    //        analysis->FillNtupleDColumn(idx, 6, momentum.x());
+    //        analysis->FillNtupleDColumn(idx, 7, momentum.y());
+    //        analysis->FillNtupleDColumn(idx, 8, momentum.z());
+    //        analysis->AddNtupleRow(idx);
+    //    }
+    //}
     
     
-    // check if shielding tracker -> world
-    if (aStep->GetPreStepPoint()->GetPhysicalVolume()  == fDetector->GetShieldingTracker() && 
-        aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld()) 
-    {
-        G4double particleID     = aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
-        G4double ekin           = aStep->GetPostStepPoint()->GetKineticEnergy();
-        G4double t              = aStep->GetPostStepPoint()->GetGlobalTime();
-        G4ThreeVector position  = aStep->GetPostStepPoint()->GetPosition();
-        G4ThreeVector momentum  = aStep->GetPostStepPoint()->GetMomentum();
+    //// check if shielding tracker -> world
+    //if (aStep->GetPreStepPoint()->GetPhysicalVolume()  == fDetector->GetShieldingTracker() && 
+    //    aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld()) 
+    //{
+    //    G4double particleID     = aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
+    //    G4double ekin           = aStep->GetPostStepPoint()->GetKineticEnergy();
+    //    G4double t              = aStep->GetPostStepPoint()->GetGlobalTime();
+    //    G4ThreeVector position  = aStep->GetPostStepPoint()->GetPosition();
+    //    G4ThreeVector momentum  = aStep->GetPostStepPoint()->GetMomentum();
 
-        G4int idx = 2;
-        //if(momentum.z() > 0) {
-        if(1) {
-            //G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
-            //G4String partName = particle->GetParticleName();
+    //    G4int idx = 2;
+    //    //if(momentum.z() > 0) {
+    //    if(1) {
+    //        //G4ParticleDefinition* particle = aStep->GetTrack()->GetDefinition();
+    //        //G4String partName = particle->GetParticleName();
 
-            // 0-index ntuple is for generating neutron phase space
-            analysis->FillNtupleDColumn(idx, 0, particleID);
-            analysis->FillNtupleDColumn(idx, 1, ekin / MeV);
-            analysis->FillNtupleDColumn(idx, 2, t / ns);
-            analysis->FillNtupleDColumn(idx, 3, position.x() / mm);
-            analysis->FillNtupleDColumn(idx, 4, position.y() / mm);
-            analysis->FillNtupleDColumn(idx, 5, position.z() / mm);
-            analysis->FillNtupleDColumn(idx, 6, momentum.x());
-            analysis->FillNtupleDColumn(idx, 7, momentum.y());
-            analysis->FillNtupleDColumn(idx, 8, momentum.z());
-            analysis->AddNtupleRow(idx);
-        }
-    }
+    //        // 0-index ntuple is for generating neutron phase space
+    //        analysis->FillNtupleDColumn(idx, 0, particleID);
+    //        analysis->FillNtupleDColumn(idx, 1, ekin / MeV);
+    //        analysis->FillNtupleDColumn(idx, 2, t / ns);
+    //        analysis->FillNtupleDColumn(idx, 3, position.x() / mm);
+    //        analysis->FillNtupleDColumn(idx, 4, position.y() / mm);
+    //        analysis->FillNtupleDColumn(idx, 5, position.z() / mm);
+    //        analysis->FillNtupleDColumn(idx, 6, momentum.x());
+    //        analysis->FillNtupleDColumn(idx, 7, momentum.y());
+    //        analysis->FillNtupleDColumn(idx, 8, momentum.z());
+    //        analysis->AddNtupleRow(idx);
+    //    }
+    //}
 
 
     // // 

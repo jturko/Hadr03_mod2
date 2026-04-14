@@ -58,6 +58,8 @@ void PanelSD::Initialize(G4HCofThisEvent* hce)
     // Add this collection in hce
     G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
     hce->AddHitsCollection(hcID, fHitsCollection);
+
+    fTrackHitIndexMap.clear();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -68,17 +70,22 @@ G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
     G4int parentID = step->GetTrack()->GetParentID();
     G4int hitIndex = -1;
 
-    // 1. Resolve Ancestry first to map intermediate neutral particles
+    // Detect if this track is crossing into the detector from the outside
+    G4bool isEntering = (step->GetPreStepPoint()->GetStepStatus() == fGeomBoundary);
+
+    // 1. Resolve Ancestry
     if (fTrackHitIndexMap.find(trackID) != fTrackHitIndexMap.end()) {
+        // Track is already registered
         hitIndex = fTrackHitIndexMap[trackID];
-    } else if (fTrackHitIndexMap.find(parentID) != fTrackHitIndexMap.end()) {
+    } else if (!isEntering && fTrackHitIndexMap.find(parentID) != fTrackHitIndexMap.end()) {
+        // Track was created INSIDE the detector (physical secondary). Map to parent's hit.
         hitIndex = fTrackHitIndexMap[parentID];
-        fTrackHitIndexMap[trackID] = hitIndex; 
+        fTrackHitIndexMap[trackID] = hitIndex;
     }
 
     G4double w = step->GetPreStepPoint()->GetWeight(); 
 
-    // 2. Create the "Shower Container" immediately to establish the map
+    // 2. Create the "Shower Container" if no valid hit index exists
     if (hitIndex == -1) {
         auto newHit = new PanelHit();
         newHit->SetTrackID(trackID);
@@ -96,14 +103,11 @@ G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
         auto oldHit = (PanelHit*)fHitsCollection->GetHit(hitIndex);
         G4double t = step->GetPreStepPoint()->GetGlobalTime();
         
-        // If this is the very first energy deposition in this shower, 
-        // lock in the physical observables.
         if (oldHit->GetEdep() == 0.) {
             oldHit->SetTime(t);
             oldHit->SetPos(step->GetPostStepPoint()->GetPosition());
             oldHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
         } 
-        // If the shower already deposited energy, update only if this step is earlier
         else if (t < oldHit->GetTime()) {
             oldHit->SetTime(t);
             oldHit->SetPos(step->GetPostStepPoint()->GetPosition());
@@ -115,6 +119,63 @@ G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
 
     return true;
 }
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+//// This implementation yields artificial pile-up, due to inheritance via parent of splitted tracks
+//G4bool PanelSD::ProcessHits(G4Step* step, G4TouchableHistory*)
+//{
+//    G4int trackID = step->GetTrack()->GetTrackID();
+//    G4int parentID = step->GetTrack()->GetParentID();
+//    G4int hitIndex = -1;
+//
+//    // 1. Resolve Ancestry first to map intermediate neutral particles
+//    if (fTrackHitIndexMap.find(trackID) != fTrackHitIndexMap.end()) {
+//        hitIndex = fTrackHitIndexMap[trackID];
+//    } else if (fTrackHitIndexMap.find(parentID) != fTrackHitIndexMap.end()) {
+//        hitIndex = fTrackHitIndexMap[parentID];
+//        fTrackHitIndexMap[trackID] = hitIndex; 
+//    }
+//
+//    G4double w = step->GetPreStepPoint()->GetWeight(); 
+//
+//    // 2. Create the "Shower Container" immediately to establish the map
+//    if (hitIndex == -1) {
+//        auto newHit = new PanelHit();
+//        newHit->SetTrackID(trackID);
+//        newHit->SetEdep(0.); // Initialise to zero
+//        newHit->SetWeight(w);
+//        
+//        hitIndex = fHitsCollection->insert(newHit) - 1;
+//        fTrackHitIndexMap[trackID] = hitIndex;
+//    } 
+//
+//    G4double edep = step->GetTotalEnergyDeposit();
+//
+//    // 3. Record physical data ONLY when energy is deposited
+//    if (edep > 0.) {
+//        auto oldHit = (PanelHit*)fHitsCollection->GetHit(hitIndex);
+//        G4double t = step->GetPreStepPoint()->GetGlobalTime();
+//        
+//        // If this is the very first energy deposition in this shower, 
+//        // lock in the physical observables.
+//        if (oldHit->GetEdep() == 0.) {
+//            oldHit->SetTime(t);
+//            oldHit->SetPos(step->GetPostStepPoint()->GetPosition());
+//            oldHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
+//        } 
+//        // If the shower already deposited energy, update only if this step is earlier
+//        else if (t < oldHit->GetTime()) {
+//            oldHit->SetTime(t);
+//            oldHit->SetPos(step->GetPostStepPoint()->GetPosition());
+//            oldHit->SetPID(step->GetTrack()->GetParticleDefinition()->GetPDGEncoding());
+//        }
+//
+//        oldHit->AddEdep(edep);
+//    }
+//
+//    return true;
+//}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

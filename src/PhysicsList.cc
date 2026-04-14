@@ -61,8 +61,7 @@
 #include "G4MesonConstructor.hh"
 #include "G4ShortLivedConstructor.hh"
 
-
-
+#include "G4EmStandardPhysics.hh"
 #include "G4EmStandardPhysics_option4.hh"
 #include "G4HadronElasticPhysicsHP.hh"
 #include "G4HadronPhysicsQGSP_BIC_HP.hh"
@@ -73,6 +72,10 @@
 
 #include "G4RadioactiveDecayPhysics.hh"
 
+// importance biasing
+#include "G4ParallelWorldPhysics.hh"
+#include "G4ImportanceBiasing.hh"
+#include "G4GeometrySampler.hh"
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -125,15 +128,40 @@ PhysicsList::PhysicsList()
     //   ////RegisterPhysics( new GammaNuclearPhysicsLEND("gamma"));
     
     
-    RegisterPhysics(new G4EmStandardPhysics_option4());
+
+
+    RegisterPhysics(new G4EmStandardPhysics());
+    //RegisterPhysics(new G4EmStandardPhysics_option4());
+    
     RegisterPhysics(new G4HadronElasticPhysicsXS(verb));
-        RegisterPhysics(new G4HadronPhysicsQGSP_BIC_HP(verb));
-        //RegisterPhysics(new G4HadronPhysicsQGSP_BIC_AllHP(verb));
+    
+    RegisterPhysics(new G4HadronPhysicsQGSP_BIC_HP(verb));
+    //RegisterPhysics(new G4HadronPhysicsQGSP_BIC_AllHP(verb));
+    
     RegisterPhysics(new G4IonElasticPhysics(verb));
+    
     RegisterPhysics(new G4IonPhysicsXS(verb));
+    
     RegisterPhysics(new GammaNuclearPhysics("gamma"));
 
     RegisterPhysics(new G4RadioactiveDecayPhysics());
+
+
+
+
+    // for importance biasing
+    // 1. Enable navigation in the parallel world
+    RegisterPhysics(new G4ParallelWorldPhysics("ParallelBiasingWorld"));
+    // Gamma biasing
+    G4GeometrySampler* gammaSampler = new G4GeometrySampler("ParallelBiasingWorld", "gamma");
+    gammaSampler->SetParallel(true);
+    RegisterPhysics(new G4ImportanceBiasing(gammaSampler, "ParallelBiasingWorld"));
+    // Neutron biasing
+    G4GeometrySampler* neutronSampler = new G4GeometrySampler("ParallelBiasingWorld", "neutron");
+    neutronSampler->SetParallel(true);
+    RegisterPhysics(new G4ImportanceBiasing(neutronSampler, "ParallelBiasingWorld"));
+
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -164,7 +192,13 @@ void PhysicsList::ConstructParticle()
 void PhysicsList::SetCuts()
 {
     //SetCutValue(0. * mm, "proton");
+    //SetCutValue(1. * um, "proton");
+    
+    SetCutValue(1.0 * mm, "gamma");
+    SetCutValue(10.0 * mm, "e-");   
+    SetCutValue(10.0 * mm, "e+");   
     SetCutValue(1. * um, "proton");
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
