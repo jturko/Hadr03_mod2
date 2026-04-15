@@ -48,10 +48,23 @@
 #include "TH1.h"
 #include "RootManager.hh"
 
+#include <csignal>
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+// for ctrl-c quitting, properly closing the ROOT file
+volatile std::sig_atomic_t g_sigint_received = 0;
+
+void sigint_handler(int signal) {
+    g_sigint_received = signal;
+}
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 int main(int argc, char** argv)
 {
+    std::signal(SIGINT, sigint_handler);
+
     // ROOT memory management
     gROOT->SetBatch(kTRUE);
     TH1::AddDirectory(kFALSE);

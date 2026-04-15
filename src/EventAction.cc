@@ -22,6 +22,10 @@
 #include "ProgressBar.hh"
 #include "G4Threading.hh"
 
+//
+#include <csignal>
+extern volatile std::sig_atomic_t g_sigint_received;
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 EventAction::EventAction(RunAction* runAct)
@@ -52,6 +56,15 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
 
 void EventAction::EndOfEventAction(const G4Event *)
 {
+    if (g_sigint_received != 0 && G4Threading::G4GetThreadId() == 0) {
+        G4cout << "\n>>> Ctrl-C detected. Soft-aborting run after current event..." << G4endl;
+        
+        // true = soft abort. Allows the current event to finish and triggers EndOfRunAction 
+        G4RunManager::GetRunManager()->AbortRun(true); 
+        
+        // Reset the flag to avoid repeated console prints across threads
+        g_sigint_received = 0; 
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
