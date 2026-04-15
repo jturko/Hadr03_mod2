@@ -98,6 +98,9 @@ class DetectorMessenger : public G4UImessenger
     G4UIcmdWithADoubleAndUnit* fSetCLYCCrystalRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCCrystalLengthCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCAlumThicknessCmd = nullptr;
+    G4UIcmdWithADoubleAndUnit* fSetCLYCLiFColInnerRadiusCmd = nullptr;
+    G4UIcmdWithADoubleAndUnit* fSetCLYCLiFColOuterRadiusCmd = nullptr;
+    G4UIcmdWithADoubleAndUnit* fSetCLYCLiFColLengthCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPbColInnerRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPbColOuterRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPbColLengthCmd = nullptr;
@@ -110,6 +113,7 @@ class DetectorMessenger : public G4UImessenger
 
     G4UIcmdWithAString* fSetCLYCCrystalMaterialNameCmd = nullptr;
     G4UIcmdWithAString* fSetCLYCAlumMaterialNameCmd = nullptr;
+    G4UIcmdWithAString* fSetCLYCLiFMaterialNameCmd = nullptr;
     G4UIcmdWithAString* fSetCLYCPbMaterialNameCmd = nullptr;
     G4UIcmdWithAString* fSetCLYCPEHDMaterialNameCmd = nullptr;
 

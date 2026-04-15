@@ -25,6 +25,10 @@ class GeometryCLYC
     void SetCrystalLength(G4double length) { fCLYCCrystalLength = length; }
     void SetAlumCasingThickness(G4double thickness) { fAlumCasingThickness = thickness; }
     
+    void SetLiFCollimatorInnerRadius(G4double r) { fLiFCollimatorInnerRadius = r; }
+    void SetLiFCollimatorOuterRadius(G4double r) { fLiFCollimatorOuterRadius = r; }
+    void SetLiFCollimatorLength(G4double l) { fLiFCollimatorLength = l; }
+    
     void SetPbCollimatorInnerRadius(G4double r) { fPbCollimatorInnerRadius = r; }
     void SetPbCollimatorOuterRadius(G4double r) { fPbCollimatorOuterRadius = r; }
     void SetPbCollimatorLength(G4double l) { fPbCollimatorLength = l; }
@@ -40,6 +44,7 @@ class GeometryCLYC
     // Material Setters
     void SetCrystalMaterialName(G4String name) { fCLYCCrystalMatName = name; }
     void SetAlumMaterialName(G4String name) { fAlumMatName = name; }
+    void SetLiFMaterialName(G4String name) { fLiFMatName = name; }
     void SetPbMaterialName(G4String name) { fPbMatName = name; }
     void SetPEHDMaterialName(G4String name) { fPEHDMatName = name; }
 
@@ -50,6 +55,7 @@ class GeometryCLYC
 
     G4LogicalVolume* fCLYCCrystalLog;
     G4LogicalVolume* fAlumCasingLog;
+    G4LogicalVolume* fLiFCollimatorLog;
     G4LogicalVolume* fPbCollimatorLog;
     G4LogicalVolume* fPEHDCollimatorLog;
     G4LogicalVolume* fPEPlugLog;
@@ -57,6 +63,10 @@ class GeometryCLYC
     G4double fCLYCCrystalRadius;
     G4double fCLYCCrystalLength;
     G4double fAlumCasingThickness;
+    
+    G4double fLiFCollimatorInnerRadius;
+    G4double fLiFCollimatorOuterRadius;
+    G4double fLiFCollimatorLength;
 
     G4double fPbCollimatorInnerRadius;
     G4double fPbCollimatorOuterRadius;
@@ -73,11 +83,13 @@ class GeometryCLYC
 
     G4String fCLYCCrystalMatName;
     G4String fAlumMatName;
+    G4String fLiFMatName;
     G4String fPbMatName;
     G4String fPEHDMatName;
 
     G4Colour fCLYCCrystalColour;
     G4Colour fAlumColour;
+    G4Colour fLiFColour;
     G4Colour fPbColour;
     G4Colour fPEHDColour;
     G4Colour fPEPlugColour;

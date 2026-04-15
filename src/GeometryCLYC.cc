@@ -31,6 +31,7 @@ GeometryCLYC::GeometryCLYC() :
     fCLYCAssembly(NULL),
     fCLYCCrystalLog(NULL),
     fAlumCasingLog(NULL),
+    fLiFCollimatorLog(NULL),
     fPbCollimatorLog(NULL),
     fPEHDCollimatorLog(NULL),
     fPEPlugLog(NULL)
@@ -38,6 +39,10 @@ GeometryCLYC::GeometryCLYC() :
     fCLYCCrystalRadius = 25./2 * mm;
     fCLYCCrystalLength = 25. * mm;
     fAlumCasingThickness = 0.5 * mm;
+    
+    fLiFCollimatorInnerRadius = -1. * mm;
+    fLiFCollimatorOuterRadius = -1. * mm;
+    fLiFCollimatorLength = -1. * mm;
     
     fPbCollimatorInnerRadius = 29.4/2. * mm;
     fPbCollimatorOuterRadius = 40./2. * mm;
@@ -55,11 +60,13 @@ GeometryCLYC::GeometryCLYC() :
     fCLYCCrystalMatName = "CLYC";
     fAlumMatName = "G4_Al";
     fPbMatName = "G4_Pb";
+    fPbMatName = "G4_Pb";
     fPEHDMatName = "G4_POLYETHYLENE";
 
     G4double alpha = 1.0; 
     fCLYCCrystalColour = G4Colour(0.0, 1.0, 0.0, alpha); // Green
     fAlumColour        = G4Colour(0.5, 0.5, 0.5, alpha); // Grey
+    fLiFColour         = G4Colour(0.5, 1.0, 0.0, alpha); // Green-yellow-ish
     fPbColour          = G4Colour(0.6, 0.4, 0.2, alpha); // Brown
     fPEHDColour        = G4Colour(0.0, 1.0, 1.0, alpha); // Cyan
     fPEPlugColour      = G4Colour(1.0, 1.0, 0.0, alpha); // Yellow
@@ -89,6 +96,7 @@ G4int GeometryCLYC::Build()
     G4NistManager* manager = G4NistManager::Instance();
     G4Material* CLYC_material = manager->FindOrBuildMaterial(fCLYCCrystalMatName);
     G4Material* Alum_material = manager->FindOrBuildMaterial(fAlumMatName);
+    G4Material* LiF_material = manager->FindOrBuildMaterial(fLiFMatName);
     G4Material* Pb_material = manager->FindOrBuildMaterial(fPbMatName);
     G4Material* PEHD_material = manager->FindOrBuildMaterial(fPEHDMatName);
 
@@ -125,6 +133,17 @@ G4int GeometryCLYC::Build()
     move = G4ThreeVector(0., 0., pbCenterZ);
     if(!onlyBuildCLYC)
         fCLYCAssembly->AddPlacedVolume(fPbCollimatorLog, move, rotate);
+    
+    if(fLiFCollimatorOuterRadius>0.) {
+        G4double lifCenterZ = -fPEPlugFaceThickness - (fLiFCollimatorLength / 2.0);
+        G4Tubs* LiF_collimator_solid = new G4Tubs("LiF_collimator_solid", fLiFCollimatorInnerRadius, fLiFCollimatorOuterRadius, fLiFCollimatorLength/2., startPhi, endPhi);
+        fLiFCollimatorLog = new G4LogicalVolume(LiF_collimator_solid, LiF_material, "LiFCollimatorLog", 0, 0, 0);
+        fLiFCollimatorLog->SetVisAttributes(new G4VisAttributes(true, fLiFColour));
+
+        move = G4ThreeVector(0., 0., lifCenterZ);
+        if(!onlyBuildCLYC)
+            fCLYCAssembly->AddPlacedVolume(fLiFCollimatorLog, move, rotate);
+    }
 
     // 3. CLYC Crystal and Aluminum Casing
     // Front face of the Aluminum Casing is flush with the rear face of the entire plug.
@@ -270,4 +289,9 @@ void GeometryCLYC::BuildMaterials()
     mat_CLYC->AddElement(el_Li_enr, 1);
     mat_CLYC->AddElement(el_Y,      1);
     mat_CLYC->AddElement(el_Cl,     6);   
+
+    G4Material* LiF = new G4Material("LiF", 2.635*g/cm3, 2);
+    //LiF->AddElement(nist->FindOrBuildElement("Li"), 1);
+    LiF->AddElement(el_Li_enr, 1);
+    LiF->AddElement(nist->FindOrBuildElement("F"), 1);
 }
