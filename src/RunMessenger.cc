@@ -41,7 +41,7 @@
 
 RunMessenger::RunMessenger(RunAction* run) : fRun(run)
 {
-    fWritePrimaryCmd = new G4UIcmdWithABool("/LDRS/run/writePrimary", this);
+    fWritePrimaryCmd = new G4UIcmdWithABool("/dcs-monitor/run/writePrimary", this);
     fWritePrimaryCmd->SetGuidance("Toggle filling of the primary ntuple");
     fWritePrimaryCmd->SetParameterName("write", true);
     fWritePrimaryCmd->SetDefaultValue(true);

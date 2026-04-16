@@ -66,45 +66,24 @@ class DetectorMessenger : public G4UImessenger
     // placement
     G4UIcmdWith3VectorAndUnit*  fSetPositionCmd = nullptr;
     G4UIcmdWith3Vector*         fSetRotationCmd = nullptr;
-    // catcher
-    G4UIcmdWithADoubleAndUnit*  fSetCatcherRadiusCmd        = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetCatcherZCmd             = nullptr;
-    G4UIcmdWithAString*         fSetCatcherMaterialNameCmd  = nullptr;
-    G4UIcmdWithoutParameter*    fPlaceCatcherCmd            = nullptr;
-    // collimator
-    G4UIcmdWithADoubleAndUnit*  fSetSampleRadiusCmd         = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetSampleZCmd              = nullptr;
-    G4UIcmdWithAString*         fSetSampleMaterialNameCmd   = nullptr;
-    G4UIcmdWithoutParameter*    fPlaceSampleCmd             = nullptr;
-    // collimator
-    G4UIcmdWithADoubleAndUnit*  fSetCollimatorXYCmd         = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetCollimatorInnerXYCmd    = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetCollimatorZCmd          = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetCollimatorPbZCmd        = nullptr;
-    G4UIcmdWithoutParameter*    fPlaceCollimatorCmd         = nullptr;
-    // detector panel
-    G4UIcmdWithADoubleAndUnit*  fSetDetectorPanelXYCmd         = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetDetectorPanelZCmd          = nullptr;
-    G4UIcmdWithoutParameter*    fPlaceDetectorPanelCmd         = nullptr;
-    // shielding
-    G4UIcmdWithADoubleAndUnit*  fSetShieldingInnerXYCmd             = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetShieldingInnerZCmd              = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetShieldingBoratedPEThicknessCmd  = nullptr;
-    G4UIcmdWithADoubleAndUnit*  fSetShieldingPbThicknessCmd         = nullptr;
-    G4UIcmdWithoutParameter*    fPlaceShieldingCmd                  = nullptr;
 
     // DCS monitor
     G4UIcmdWithoutParameter* fAddCLYCCmd = nullptr;
     G4UIcmdWithoutParameter* fAddCLYCByCrystalCenterCmd = nullptr;
+
     G4UIcmdWithADoubleAndUnit* fSetCLYCCrystalRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCCrystalLengthCmd = nullptr;
+
     G4UIcmdWithADoubleAndUnit* fSetCLYCAlumThicknessCmd = nullptr;
+
     G4UIcmdWithADoubleAndUnit* fSetCLYCLiFColInnerRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCLiFColOuterRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCLiFColLengthCmd = nullptr;
+
     G4UIcmdWithADoubleAndUnit* fSetCLYCPbColInnerRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPbColOuterRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPbColLengthCmd = nullptr;
+
     G4UIcmdWithADoubleAndUnit* fSetCLYCPEHDColInnerRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPEHDColOuterRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPEHDColLengthCmd = nullptr;
@@ -120,6 +99,7 @@ class DetectorMessenger : public G4UImessenger
     G4UIcmdWithAString* fSetCLYCPbMaterialNameCmd = nullptr;
     G4UIcmdWithAString* fSetCLYCPEHDMaterialNameCmd = nullptr;
 
+    // castor 440
     G4UIcmdWithoutParameter* fAddCASTOR440Cmd = nullptr;
 
 };

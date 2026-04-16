@@ -63,43 +63,14 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         G4bool GetUseBiasing() const { return fUseBiasing; }
 
         const G4VPhysicalVolume* GetWorld()     { return fPWorld; };
-        const G4VPhysicalVolume* GetCatcher()   { return fPCatcher; };
-        const G4VPhysicalVolume* GetShieldingTracker()   { return fPShieldingTracker; };
 
         // for messenger
-        //
+        
         // placement
         void SetPosition(G4ThreeVector pos)     { fPosition = pos; };
         void SetRotation(G4ThreeVector rot)     { fRotation = rot; };
-        // catcher
-        void SetCatcherRadius(G4double val)         { fCatcherRadius = val; };
-        void SetCatcherZ(G4double val)              { fCatcherZ = val; };
-        void SetCatcherMaterialName(G4String val)   { fCatcherMaterialName = val; };
-        void PlaceCatcher();
-        G4double GetCatcherZ()                      { return fCatcherZ; };
-        G4double GetCatcherRadius()                 { return fCatcherRadius; };
-        // collimator
-        void SetCollimatorXY(G4double val)          { fCollimatorXY = val; };
-        void SetCollimatorZ(G4double val)           { fCollimatorZ = val; };
-        void SetCollimatorInnerXY(G4double val)     { fCollimatorInnerXY = val; };
-        void SetCollimatorPbZ(G4double val)         { fCollimatorPbZ = val; };
-        void PlaceCollimator();
-        // sample (cylinder)
-        void SetSampleRadius(G4double val)         { fSampleRadius = val; };
-        void SetSampleZ(G4double val)              { fSampleZ = val; };
-        void SetSampleMaterialName(G4String val)   { fSampleMaterialName = val; };
-        void PlaceSample();
-        // detector
-        void SetDetectorPanelXY(G4double val)          { fDetectorPanelXY = val; };
-        void SetDetectorPanelZ(G4double val)           { fDetectorPanelZ = val; };
-        // shielding
-        void SetShieldingInnerXY(G4double val)              { fShieldingInnerXY = val; };
-        void SetShieldingInnerZ(G4double val)               { fShieldingInnerZ = val; };
-        void SetShieldingBoratedPEThickness(G4double val)   { fShieldingBoratedPEThickness = val; };
-        void SetShieldingPbThickness(G4double val)          { fShieldingPbThickness = val; };
-        void PlaceShielding();
-
-        // FOR DCS MONITOR PROJECT
+        
+        // CLYC
         void AddCLYC();
         void AddCLYCByCrystalCenter();
         G4int GetNumCLYC() const { return fCLYCDetectors.size(); }
@@ -135,11 +106,11 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     
         // CASTOR 440
         void AddCASTOR440();
-        // 
+        
         G4int GetNumCASTOR440s() const { return fCASTOR440Detectors.size(); }
         G4ThreeVector GetCASTOR440Position(G4int index) const { return fCASTOR440Positions[index]; }
         G4RotationMatrix* GetCASTOR440Rotation(G4int index) const { return fCASTOR440Rotations[index]; }
-        //
+        
         G4ThreeVector GetCASTOR440FuelGlobalPosition(G4int caskIndex, G4int fuelIndex, G4ThreeVector pointInFuel) const;
 
     private:
@@ -157,47 +128,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         G4LogicalVolume*    fLWorld = nullptr;
         G4double            fWorldXYZ;
 
-        // catcher
-        G4VPhysicalVolume*  fPCatcher = nullptr;
-        G4LogicalVolume*    fLCatcher = nullptr;
-        G4double            fCatcherRadius;
-        G4double            fCatcherZ;
-        G4String            fCatcherMaterialName;
-        G4Material*         fCatcherMaterial = nullptr;
-
-        // collimator
-        G4double            fCollimatorXY;
-        G4double            fCollimatorZ;
-        G4double            fCollimatorInnerXY;
-        G4double            fCollimatorPbZ;
-        G4Material*         fCollimatorMaterial = nullptr;
-        
-        // sample
-        G4double            fSampleRadius;
-        G4double            fSampleZ;
-        G4String            fSampleMaterialName;
-        G4Material*         fSampleMaterial = nullptr;
-
-        // detector
-        G4VPhysicalVolume*  fPDetectorPanel = nullptr;
-        G4LogicalVolume*    fLDetectorPanel = nullptr;
-        G4double            fDetectorPanelXY;
-        G4double            fDetectorPanelZ;
-        G4Material*         fDetectorPanelMaterial = nullptr;
-
-        // shielding
-        G4VPhysicalVolume*  fPShieldingTracker = nullptr;
-        G4double fShieldingInnerXY;
-        G4double fShieldingInnerZ;
-        G4double fShieldingBoratedPEThickness;
-        G4double fShieldingPbThickness;
-
-        // FOR DCS MONITOR PROJECT
+        // CLYC
         std::vector<GeometryCLYC*> fCLYCDetectors;
         std::vector<G4ThreeVector> fCLYCPositions;
         std::vector<G4RotationMatrix*> fCLYCRotations;
         std::vector<G4bool> fCLYCPlaceByCrystalCenter;
 
+        // castor 440
         std::vector<GeometryCASTOR440*> fCASTOR440Detectors;
         std::vector<G4ThreeVector> fCASTOR440Positions;
         std::vector<G4RotationMatrix*> fCASTOR440Rotations;

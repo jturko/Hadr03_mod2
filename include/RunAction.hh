@@ -70,8 +70,6 @@ class RunAction : public G4UserRunAction
     
     static G4bool WritePrimaryTree;
 
-    //std::shared_ptr<THnSparseD> GetNeutronPhaseSpace() { return fhNeutronPhaseSpace; }
-
   private:
     DetectorConstruction* fDetector = nullptr;
     PrimaryGeneratorAction* fPrimary = nullptr;
@@ -82,7 +80,6 @@ class RunAction : public G4UserRunAction
     G4bool fPrint = true;  // optional printing
     ProgressBar* fProgBar; 
     
-    //std::shared_ptr<THnSparseD> fhNeutronPhaseSpace;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

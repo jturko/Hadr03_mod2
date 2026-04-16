@@ -62,37 +62,6 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDet
     // source mode
     fSourceMode = kGPS;
     
-
-    // use phase space?
-    //fUseNeutronPhaseSpace = true;
-
-    // configured for neutrons generated from phase space file
-    //G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("neutron");
-    //fParticleGun->SetParticleDefinition(particle);
-    //fNeutronMass = particle->GetPDGMass();
-
-    // configured for protons incident on the catcher
-    //// set particle
-    //particle = G4ParticleTable::GetParticleTable()->FindParticle("proton");
-    //fGPS->SetParticleDefinition(particle);
-    //// set energy dist.
-    //fGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Lin");
-    //fGPS->GetCurrentSource()->GetEneDist()->SetEmin(1.*MeV);
-    //fGPS->GetCurrentSource()->GetEneDist()->SetEmax(10.*MeV);
-    //fGPS->GetCurrentSource()->GetEneDist()->SetInterCept(1);
-    //fGPS->GetCurrentSource()->GetEneDist()->SetGradient(0);
-    //// set angular dist.
-    //fGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("cos");
-    //fGPS->GetCurrentSource()->GetAngDist()->SetMinTheta(0.*deg);
-    //fGPS->GetCurrentSource()->GetAngDist()->SetMaxTheta(20.*deg);
-    //fGPS->GetCurrentSource()->GetAngDist()->SetMinPhi(0.*deg);
-    //fGPS->GetCurrentSource()->GetAngDist()->SetMaxPhi(360.*deg);
-    ////fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(0.,1.,0.));
-    //fGPS->GetCurrentSource()->GetAngDist()->DefineAngRefAxes("angref1", G4ThreeVector(-1, 0, 0));
-    //fGPS->GetCurrentSource()->GetAngDist()->DefineAngRefAxes("angref2", G4ThreeVector(0, 1, 0));
-    //// set pos dist.
-    //fGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Point");
-    //fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0.,0.,0.));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -128,7 +97,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
             fParticleGun->GeneratePrimaryVertex(anEvent);
         }
         else if(fSourceMode == kCASTOR440_fuel_biased) {
-            GenerateCASTOR440FuelFlux_GeometricCLYCbias(anEvent);
+            GenerateCASTOR440FuelFlux_GeometricCLYCbias(anEvent); // vertex created inside
         }
         else {
             G4Exception("PrimaryGeneratorAction::GeneratePrimaries()",
@@ -160,122 +129,6 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         analysis->AddNtupleRow(idx);
     }
 
-
-
-    //// using neutron file phase space
-    //if(fUseNeutronPhaseSpace) {
-    //    // 7-d
-    //    //double val[7]; // time, x, y, z, px, py, pz
-    //    // 3-d
-    //    double val[3]; // t, Ekin, theta
-
-    //                   // get the ROOT manager
-    //    RootManager& rootManager = RootManager::GetInstance();
-    //    if (!rootManager.IsInitialized()) {
-    //        G4ExceptionDescription desc;
-    //        desc << "RootManager not initialized!";
-    //        G4Exception("YourPrimaryGeneratorAction::GeneratePrimaries", 
-    //                "RootNotInitialized", FatalException, desc);
-    //        return;
-    //    }
-    //    rootManager.SampleEvent(val);
-
-    //    //G4cout << " ---> sampled " << val[0] << ", " << val[1] << ", " << val[2] << G4endl;
-
-    //    // first implementation:
-    //    // 7-d phase space (t, x, y, z, px, py, pz)
-    //    //   // set time
-    //    //   G4double time = val[0];
-    //    //   fParticleGun->SetParticleTime(time);
-    //    //   //fGPS->SetParticleTime(time);
-
-    //    //   // set position
-    //    //   G4ThreeVector pos(val[1], val[2], val[3]);
-    //    //   fParticleGun->SetParticlePosition(pos);
-    //    //   //fGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Point");
-    //    //   //fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(pos);
-
-    //    //   // set momentum
-    //    //   G4ThreeVector mom(val[4], val[5], val[6]);
-    //    //   fParticleGun->SetParticleMomentumDirection(mom.unit());
-    //    //   //fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(mom.unit());
-
-    //    //   // set kinetic energy
-    //    //   G4double ekin = sqrt(mom.mag()*mom.mag() + fNeutronMass*fNeutronMass) - fNeutronMass; // kinetic energy (MeV)
-    //    //   fParticleGun->SetParticleEnergy(ekin);
-    //    //   //G4double m_n = particle->GetPDGMass();
-    //    //   //G4double ekin = sqrt(mom.mag()*mom.mag() + m_n*m_n) - m_n; // kinetic energy (MeV)
-    //    //   //fGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(ekin);
-
-    //    //   // print values
-    //    //   //G4cout << G4endl<< G4endl<< G4endl<< G4endl<< G4endl<< G4endl;
-    //    //   //G4cout  << "gonna generate a neutron at t = " << val[0] << " ns at (" 
-    //    //   //        << val[1] << ", " << val[2] << ", " << val[3] << ") mm with p = ("
-    //    //   //        << val[4] << ", " << val[5] << ", " << val[6] << ") MeV/c, "
-    //    //   //        << "Ekin = " << ekin << " MeV" << G4endl;
-
-    //    // second implementation:
-    //    // 3-d phase space (t, Ekin, theta)
-    //    //
-    //    // set time
-    //    fParticleGun->SetParticleTime(val[0]);
-    //    // set energy
-    //    fParticleGun->SetParticleEnergy(val[1]);
-    //    // set position
-    //    G4double phi = G4UniformRand() * 2. * M_PI;
-    //    G4double rad = fDetector->GetCatcherRadius() * sqrt(G4UniformRand());
-    //    //G4double zz = 5.*cm + 2.*mm * G4UniformRand();
-    //    G4double zz = 5.*cm + fDetector->GetCatcherZ() + 1*um;
-    //    G4ThreeVector pos(cos(phi)*rad, sin(phi)*rad, zz);
-    //    fParticleGun->SetParticlePosition(pos);
-    //        // set position
-    //        //G4PhysicalVolumeStore* PVStore = G4PhysicalVolumeStore::GetInstance();
-    //        //for (auto it = PVStore->begin(); it != PVStore->end(); ++it) {
-    //        //    G4VPhysicalVolume* currentVolume = *it;
-    //        //    G4String volumeName = currentVolume->GetName();
-    //        //    if (volumeName.find("Catcher") != G4String::npos) {
-    //        //        auto posDist = fGPS->GetCurrentSource()->GetPosDist();
-    //        //        posDist->SetCentreCoords(G4ThreeVector(0.,0.,0.));
-    //        //        posDist->SetPosDisType("Volume");
-    //        //        posDist->SetPosDisShape("Para");
-    //        //        posDist->SetParAlpha(0.*deg);
-    //        //        posDist->SetParTheta(0.*deg);
-    //        //        posDist->SetHalfX(0.25*m);
-    //        //        posDist->SetHalfY(0.25*m);
-    //        //        posDist->SetHalfZ(0.25*m);
-    //        //        posDist->ConfineSourceToVolume(volumeName);
-    //        //        break;
-    //        //    }
-    //        //}
-    //    // set direction
-    //    phi = G4UniformRand() * 2. * M_PI;
-    //    G4ThreeVector mom;
-    //    mom.setRThetaPhi(1., val[2], phi);
-    //    fParticleGun->SetParticleMomentumDirection(mom.unit());
-    //    
-
-    //    // generate the vertex
-    //    fParticleGun->GeneratePrimaryVertex(anEvent); // for first implementation
-    //    //fGPS->GeneratePrimaryVertex(anEvent);
-    //}
-    //// protons incident on catcher
-    //else {
-    //    fGPS->GeneratePrimaryVertex(anEvent);
-    //    G4double Ep = fGPS->GetParticleEnergy();
-
-    //    G4PrimaryVertex* vertex = anEvent->GetPrimaryVertex();
-    //    if (vertex && vertex->GetNumberOfParticle() > 0) {
-    //        G4PrimaryParticle* primary = vertex->GetPrimary(0);
-    //        G4ThreeVector momentumDir = primary->GetMomentumDirection();
-    //        G4double theta = momentumDir.theta();
-    //        if(momentumDir.x() < 0) theta*= -1;
-    //        G4double energy = primary->GetKineticEnergy();
-    //        //G4cout << "Direction: " << momentumDir << " Energy: " << energy/MeV << " MeV" << G4endl;
-    //        analysis->FillH2(0, 180./M_PI*theta, energy, abs(1./sin(theta)));
-    //        analysis->FillH2(1, cos(theta), energy);
-    //    }
-    //    analysis->FillH1(0, Ep);
-    //}
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -354,16 +207,6 @@ void PrimaryGeneratorAction::GenerateCASTOR440FuelFlux()
         G4Exception("PrimaryGeneratorAction", "InvalidSelection", FatalException, "Invalid cask or fuel element index.");
         return;
     }
-
-    //// 1. Configure the Isotope to decay at rest
-    //G4ParticleDefinition* ion = G4IonTable::GetIonTable()->GetIon(fIsotopeZ, fIsotopeA, 0);
-    //if (!ion) {
-    //    G4Exception("PrimaryGeneratorAction", "InvalidIon", JustWarning, "Could not find requested ion Z/A.");
-    //    return;
-    //}
-    //fParticleGun->SetParticleDefinition(ion);
-    //fParticleGun->SetParticleEnergy(0.*eV); // Decay at rest
-    // Instead, we will use whatever particle gun parameters have been set
 
     // 2. Uniform Hexagon Sampling (via Triangular Decomposition)
     G4double R = 70.0 * mm; // Circumscribed radius of the hexagonal G4Polyhedra
@@ -491,29 +334,4 @@ void PrimaryGeneratorAction::GenerateCASTOR440FuelFlux_GeometricCLYCbias(G4Event
     }
 }
 
-
-////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//
-//void PrimaryGeneratorAction::SetProtons() {
-//    fUseNeutronPhaseSpace = false;
-//    G4cout << " ---> Setting incident proton beam" << G4endl;
-//}
-//
-////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//
-//void PrimaryGeneratorAction::SetNeutrons() {
-//    fUseNeutronPhaseSpace = true;
-//    G4cout << " ---> Setting neutrons from catcher" << G4endl;
-//}
-//
-////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//
-//void PrimaryGeneratorAction::SetNeutronPhaseSpace(std::shared_ptr<THnSparseD> hist) 
-//{
-//    if(hist) {
-//        fhNeutronPhaseSpace = std::shared_ptr<THnSparseD>((THnSparseD*)hist->Clone());
-//        gROOT->GetListOfCleanups()->Remove(fhNeutronPhaseSpace.get());
-//    }
-//}
-//
 ////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

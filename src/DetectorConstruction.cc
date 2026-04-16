@@ -72,33 +72,7 @@ DetectorConstruction::DetectorConstruction()
     fPosition = G4ThreeVector(0., 0., 0.);
     fRotation = G4ThreeVector(0., 0., 0.);
 
-    fWorldXYZ = 25 * m;
-
-    // default catcher params
-    fCatcherRadius = 2.5 * cm;
-    fCatcherZ = 2 * mm;
-    fCatcherMaterialName = "G4_Be";
-
-    // default collimator params
-    fCollimatorXY = 20 * cm;
-    fCollimatorZ = 20 * cm;
-    fCollimatorInnerXY = 5 * cm;
-    fCollimatorPbZ = 2 * cm;
-
-    // default sample params
-    fSampleRadius = 5. * mm; 
-    fSampleZ = 5. * cm;
-    fSampleMaterialName = "G4_Pb";
-
-    // default detector params
-    fDetectorPanelXY = 5.*cm;
-    fDetectorPanelZ = 1.*cm;
-
-    // default shielding params
-    fShieldingInnerXY = 2.*m;
-    fShieldingInnerZ = 4.*m;
-    fShieldingBoratedPEThickness = 10.*cm;
-    fShieldingPbThickness = 2.*cm;
+    fWorldXYZ = 10 * m;
 
     DefineMaterials();
     fDetectorMessenger = new DetectorMessenger(this);
@@ -172,18 +146,6 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             0);                     // copy number
 
 
-    //// detector panel
-    //GeometryDetectorPanel* panel = new GeometryDetectorPanel();
-    //panel->SetXY(fDetectorPanelXY);
-    //panel->SetZ(fDetectorPanelZ);
-    //panel->Build();
-    //G4RotationMatrix* rotate = new G4RotationMatrix();
-    //rotate->rotateX(fRotation.x()*M_PI/180.);
-    //rotate->rotateY(fRotation.y()*M_PI/180.);
-    //rotate->rotateZ(fRotation.z()*M_PI/180.);    
-    //panel->PlaceDetector(fLWorld, fPosition, rotate);
-    //fLDetectorPanel = panel->GetScintiLog();
-
     for (size_t i = 0; i < fCLYCDetectors.size(); ++i) {
         fCLYCDetectors[i]->Build();
 
@@ -212,11 +174,6 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 void DetectorConstruction::ConstructSDandField()
 {
     // Sensitive detectors
-    //G4String panelSDname = "PanelSD";
-    //auto panelSD = new PanelSD(panelSDname, "PanelHitsCollection");
-    //G4SDManager::GetSDMpointer()->AddNewDetector(panelSD);
-    //SetSensitiveDetector(fLDetectorPanel, panelSD);
-
     if (!fCLYCDetectors.empty()) {
         G4String clycSDname = "ClycSD";
         auto clycSD = new PanelSD(clycSDname, "ClycHitsCollection"); 
@@ -230,96 +187,6 @@ void DetectorConstruction::ConstructSDandField()
         }
     }
 
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void DetectorConstruction::PlaceCatcher() 
-{
-    G4cout << " ---> Placing a catcher... " << G4endl;
-    
-    GeometryCatcher* catcher = new GeometryCatcher();
-    catcher->SetRadius      (fCatcherRadius);    
-    catcher->SetZ           (fCatcherZ);    
-    catcher->SetMaterialName(fCatcherMaterialName);    
-    catcher->Build();
-
-    G4RotationMatrix* rotate = new G4RotationMatrix();
-    rotate->rotateX(fRotation.x()*M_PI/180.);
-    rotate->rotateY(fRotation.y()*M_PI/180.);
-    rotate->rotateZ(fRotation.z()*M_PI/180.);    
-    
-    catcher->PlaceDetector(fLWorld, fPosition, rotate);
-
-    // after catcher placed, we can set the PV
-    G4cout << " ---> Trying to assign catcher physical volume: " << catcher->GetCatcherPhys() << G4endl;
-    fPCatcher = catcher->GetCatcherPhys();
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//
-void DetectorConstruction::PlaceCollimator() 
-{
-    G4cout << " ---> Placing a collimator... " << G4endl;
-    
-    GeometryCollimator* col = new GeometryCollimator();
-    col->SetXY      (fCollimatorXY);    
-    col->SetZ       (fCollimatorZ);    
-    col->SetInnerXY (fCollimatorInnerXY);
-    col->SetPbZ     (fCollimatorPbZ);
-    col->Build();
-
-    G4RotationMatrix* rotate = new G4RotationMatrix();
-    rotate->rotateX(fRotation.x()*M_PI/180.);
-    rotate->rotateY(fRotation.y()*M_PI/180.);
-    rotate->rotateZ(fRotation.z()*M_PI/180.);    
-    
-    col->PlaceDetector(fLWorld, fPosition, rotate);
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void DetectorConstruction::PlaceSample() 
-{
-    G4cout << " ---> Placing a sample... " << G4endl;
-    
-    GeometrySample* sample = new GeometrySample();
-    sample->SetRadius      (fSampleRadius);    
-    sample->SetZ           (fSampleZ);    
-    sample->SetMaterialName(fSampleMaterialName);    
-    sample->Build();
-
-    G4RotationMatrix* rotate = new G4RotationMatrix();
-    rotate->rotateX(fRotation.x()*M_PI/180.);
-    rotate->rotateY(fRotation.y()*M_PI/180.);
-    rotate->rotateZ(fRotation.z()*M_PI/180.);    
-    
-    sample->PlaceDetector(fLWorld, fPosition, rotate);
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void DetectorConstruction::PlaceShielding() 
-{
-    G4cout << " ---> Placing shielding ... " << G4endl;
-    
-    GeometryShielding* shield = new GeometryShielding();
-    shield->SetInnerXY              (fShieldingInnerXY);    
-    shield->SetInnerZ               (fShieldingInnerZ);    
-    shield->SetBoratedPEThickness   (fShieldingBoratedPEThickness);    
-    shield->SetPbThickness          (fShieldingPbThickness);    
-    shield->Build();
-
-    G4RotationMatrix* rotate = new G4RotationMatrix();
-    rotate->rotateX(fRotation.x()*M_PI/180.);
-    rotate->rotateY(fRotation.y()*M_PI/180.);
-    rotate->rotateZ(fRotation.z()*M_PI/180.);    
-    
-    shield->PlaceDetector(fLWorld, fPosition, rotate);
-    
-    // after shielding is placed, we can set the PV
-    G4cout << " ---> Trying to assign shielding tracker physical volume: " << shield->GetTrackerPhys() << G4endl;
-    fPShieldingTracker = shield->GetTrackerPhys();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -397,7 +264,6 @@ void DetectorConstruction::AddCASTOR440()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-// Add at the bottom of the file:
 G4ThreeVector DetectorConstruction::GetCASTOR440FuelGlobalPosition(G4int caskIndex, G4int fuelIndex, G4ThreeVector pointInFuel) const {
     if (caskIndex < 0 || caskIndex >= fCASTOR440Detectors.size()) return G4ThreeVector();
 
@@ -413,3 +279,5 @@ G4ThreeVector DetectorConstruction::GetCASTOR440FuelGlobalPosition(G4int caskInd
     globalPos += fCASTOR440Positions[caskIndex];
     return globalPos;
 }
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
