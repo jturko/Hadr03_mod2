@@ -27,8 +27,8 @@
 /// \file B2/B2a/include/TrackerHit.hh
 /// \brief Definition of the B2::TrackerHit class
 
-#ifndef PanelHit_h
-#define PanelHit_h 1
+#ifndef DCSMonitorHit_h
+#define DCSMonitorHit_h 1
 
 #include "G4Allocator.hh"
 #include "G4THitsCollection.hh"
@@ -42,16 +42,16 @@
 /// and position of charged particles in a selected volume:
 /// - fTrackID, fChamberNB, fEdep, fPos
 
-class PanelHit : public G4VHit
+class DCSMonitorHit : public G4VHit
 {
     public:
-        PanelHit() = default;
-        PanelHit(const PanelHit&) = default;
-        ~PanelHit() override = default;
+        DCSMonitorHit() = default;
+        DCSMonitorHit(const DCSMonitorHit&) = default;
+        ~DCSMonitorHit() override = default;
 
         // operators
-        PanelHit& operator=(const PanelHit&) = default;
-        G4bool operator==(const PanelHit&) const;
+        DCSMonitorHit& operator=(const DCSMonitorHit&) = default;
+        G4bool operator==(const DCSMonitorHit&) const;
 
         inline void* operator new(size_t);
         inline void operator delete(void*);
@@ -92,23 +92,23 @@ class PanelHit : public G4VHit
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-using PanelHitsCollection = G4THitsCollection<PanelHit>;
+using DCSMonitorHitsCollection = G4THitsCollection<DCSMonitorHit>;
 
-extern G4ThreadLocal G4Allocator<PanelHit>* PanelHitAllocator;
+extern G4ThreadLocal G4Allocator<DCSMonitorHit>* DCSMonitorHitAllocator;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-inline void* PanelHit::operator new(size_t)
+inline void* DCSMonitorHit::operator new(size_t)
 {
-    if (!PanelHitAllocator) PanelHitAllocator = new G4Allocator<PanelHit>;
-    return (void*)PanelHitAllocator->MallocSingle();
+    if (!DCSMonitorHitAllocator) DCSMonitorHitAllocator = new G4Allocator<DCSMonitorHit>;
+    return (void*)DCSMonitorHitAllocator->MallocSingle();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-inline void PanelHit::operator delete(void* hit)
+inline void DCSMonitorHit::operator delete(void* hit)
 {
-    PanelHitAllocator->FreeSingle((PanelHit*)hit);
+    DCSMonitorHitAllocator->FreeSingle((DCSMonitorHit*)hit);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

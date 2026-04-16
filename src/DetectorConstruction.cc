@@ -32,15 +32,10 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "DetectorConstruction.hh"
-
 #include "DetectorMessenger.hh"
-#include "PanelSD.hh"
 
-#include "GeometryCollimator.hh"   
-#include "GeometryCatcher.hh"   
-#include "GeometrySample.hh"   
-#include "GeometryDetectorPanel.hh"   
-#include "GeometryShielding.hh"   
+#include "DCSMonitorSD.hh"
+
 #include "GeometryCLYC.hh"
 #include "GeometryCASTOR440.hh"
 
@@ -176,7 +171,7 @@ void DetectorConstruction::ConstructSDandField()
     // Sensitive detectors
     if (!fCLYCDetectors.empty()) {
         G4String clycSDname = "ClycSD";
-        auto clycSD = new PanelSD(clycSDname, "ClycHitsCollection"); 
+        auto clycSD = new DCSMonitorSD(clycSDname, "ClycHitsCollection"); 
         G4SDManager::GetSDMpointer()->AddNewDetector(clycSD);
         
         for (auto clyc : fCLYCDetectors) {

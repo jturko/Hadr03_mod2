@@ -11,66 +11,67 @@
 
 # importance biasing 
 # ------------------------------------------
-/LDRS/det/useBiasing true
+/dcs-monitor/det/useBiasing true
 
 # CLYC detector
 # ------------------------------------------
-/LDRS/det/setPosition 0 0 -1400 mm
-#/LDRS/det/setPosition 0 0 0 mm
-/LDRS/det/setRotation 0 0 0
-/LDRS/det/clyc/add
+/dcs-monitor/det/setPosition 0 0 -1400 mm
+#/dcs-monitor/det/setPosition 0 0 0 mm
+/dcs-monitor/det/setRotation 0 0 0
+/dcs-monitor/det/clyc/add
+#/dcs-monitor/det/clyc/addByCrystalCenter
 # geom parameters
 # CLYC scintillator
-/LDRS/det/clyc/setCrystalMaterial CLYC
-/LDRS/det/clyc/setCrystalRadius 12.5 mm
-/LDRS/det/clyc/setCrystalLength 25.0 mm
+/dcs-monitor/det/clyc/setCrystalMaterial CLYC
+/dcs-monitor/det/clyc/setCrystalRadius 12.5 mm
+/dcs-monitor/det/clyc/setCrystalLength 25.0 mm
 # aluminum casing
-/LDRS/det/clyc/setAlumMaterial G4_Al
-/LDRS/det/clyc/setAlumThickness 0.5 mm
-#/LDRS/det/clyc/setAlumThickness 0.0 mm
+/dcs-monitor/det/clyc/setAlumMaterial G4_Al
+/dcs-monitor/det/clyc/setAlumThickness 0.5 mm
+#/dcs-monitor/det/clyc/setAlumThickness 0.0 mm
 # LiF collimator
-/LDRS/det/clyc/setLiFMaterial LiF
-#/LDRS/det/clyc/setLiFColInnerRadius 15.0 mm
-#/LDRS/det/clyc/setLiFColOuterRadius 17.5 mm
-#/LDRS/det/clyc/setLiFColLength 50.0 mm
-/LDRS/det/clyc/setLiFColLength 0.0 mm
+/dcs-monitor/det/clyc/setLiFMaterial LiF
+#/dcs-monitor/det/clyc/setLiFColInnerRadius 15.0 mm
+#/dcs-monitor/det/clyc/setLiFColOuterRadius 17.5 mm
+#/dcs-monitor/det/clyc/setLiFColLength 50.0 mm
+/dcs-monitor/det/clyc/setLiFColLength 0.0 mm
 # Pb collimator
-/LDRS/det/clyc/setPbMaterial G4_Pb
-#/LDRS/det/clyc/setPbColInnerRadius 17.5 mm
-#/LDRS/det/clyc/setPbColOuterRadius 22.5 mm
-/LDRS/det/clyc/setPbColLength 50.0 mm
-#/LDRS/det/clyc/setPbColLength 0.0 mm
+/dcs-monitor/det/clyc/setPbMaterial G4_Pb
+#/dcs-monitor/det/clyc/setPbColInnerRadius 17.5 mm
+#/dcs-monitor/det/clyc/setPbColOuterRadius 22.5 mm
+/dcs-monitor/det/clyc/setPbColLength 50.0 mm
+#/dcs-monitor/det/clyc/setPbColLength 0.0 mm
 # PEHD collimator
-/LDRS/det/clyc/setPEHDMaterial G4_POLYETHYLENE
-#/LDRS/det/clyc/setPEHDColInnerRadius 22.5 mm
-#/LDRS/det/clyc/setPEHDColOuterRadius 27.5 mm
-/LDRS/det/clyc/setPEHDColLength 50.0 mm
-#/LDRS/det/clyc/setPEHDColLength 0.0 mm
+/dcs-monitor/det/clyc/setPEHDMaterial G4_POLYETHYLENE
+#/dcs-monitor/det/clyc/setPEHDColInnerRadius 22.5 mm
+#/dcs-monitor/det/clyc/setPEHDColOuterRadius 27.5 mm
+/dcs-monitor/det/clyc/setPEHDColLength 50.0 mm
+#/dcs-monitor/det/clyc/setPEHDColLength 0.0 mm
 # PE plug
-#/LDRS/det/clyc/setPEPlugLipRadius 27.5 mm
-#/LDRS/det/clyc/setPEPlugInnerRadius 14.5 mm
-/LDRS/det/clyc/setPEPlugLipLength 10.0 mm
-/LDRS/det/clyc/setPEPlugInnerLength 35.0 mm
-#/LDRS/det/clyc/setPEPlugLipLength 0.0 mm
-#/LDRS/det/clyc/setPEPlugInnerLength 0.0 mm
+#/dcs-monitor/det/clyc/setPEPlugLipRadius 27.5 mm
+#/dcs-monitor/det/clyc/setPEPlugInnerRadius 14.5 mm
+/dcs-monitor/det/clyc/setPEPlugLipLength 10.0 mm
+/dcs-monitor/det/clyc/setPEPlugInnerLength 35.0 mm
+#/dcs-monitor/det/clyc/setPEPlugLipLength 0.0 mm
+#/dcs-monitor/det/clyc/setPEPlugInnerLength 0.0 mm
 
 # CASTOR 440/84 pos 1
 # ------------------------------------------
-/LDRS/det/setPosition 0 0 0 m
-/LDRS/det/setRotation -90 0 0
-/LDRS/det/castor440/add
+/dcs-monitor/det/setPosition 0 0 0 m
+/dcs-monitor/det/setRotation -90 0 0
+/dcs-monitor/det/castor440/add
 
 # CASTOR 440/84 pos 2
 # ------------------------------------------
-#/LDRS/det/setPosition 2.00 0 -3.46 m
-#/LDRS/det/setRotation -90 0 0
-#/LDRS/det/castor440/add
+#/dcs-monitor/det/setPosition 2.00 0 -3.46 m
+#/dcs-monitor/det/setRotation -90 0 0
+#/dcs-monitor/det/castor440/add
 
 # CASTOR 440/84 pos 3
 # ------------------------------------------
-#/LDRS/det/setPosition -2.00 0 -3.46 m
-#/LDRS/det/setRotation -90 0 0
-#/LDRS/det/castor440/add
+#/dcs-monitor/det/setPosition -2.00 0 -3.46 m
+#/dcs-monitor/det/setRotation -90 0 0
+#/dcs-monitor/det/castor440/add
 
 # initialize the run
 # ------------------------------------------
@@ -84,7 +85,7 @@
 
 # planar source (GPS)
 # ------------------------------------------
-#/LDRS/gun/sourceMode GPS
+#/dcs-monitor/gun/sourceMode GPS
 #/gps/particle neutron
 #/gps/ene/mono 1.0 MeV
 #/gps/particle gamma
@@ -100,7 +101,7 @@
 
 # point/conic source (GPS)
 # ------------------------------------------
-#/LDRS/gun/sourceMode GPS
+#/dcs-monitor/gun/sourceMode GPS
 # radioactive ion
 #/gps/particle ion
 #/gps/ion 98 252 0 0 # Cf252
@@ -122,7 +123,7 @@
 
 # castor source
 # ------------------------------------------
-#/LDRS/gun/sourceMode CASTOR440_surface
+#/dcs-monitor/gun/sourceMode CASTOR440_surface
 ## radioactive ion
 #/gun/particle ion
 ##/gun/ion 98 252 0 0 # Cf252
@@ -135,22 +136,18 @@
 
 # castor fuel source
 # ------------------------------------------
-#/LDRS/gun/sourceMode CASTOR440_fuel
-#/LDRS/gun/caskNum 0
-#/LDRS/gun/fuelNum 20
-#    #/LDRS/gun/isotopeZ 1  # now we use whatever has been set for the particle gun
-#    #/LDRS/gun/isotopeA 1 
-#    #/LDRS/gun/isotopeZ 27 
-#    #/LDRS/gun/isotopeA 60 
+#/dcs-monitor/gun/sourceMode CASTOR440_fuel
+#/dcs-monitor/gun/caskNum 0
+#/dcs-monitor/gun/fuelNum 20
 #/gun/particle gamma
 #/gun/energy 1.332 MeV
 
 # castor fuel source, geometry bias for CLYC
 # ------------------------------------------
-/LDRS/gun/sourceMode CASTOR440_fuel_biased
-/LDRS/gun/caskNum 0
-/LDRS/gun/fuelNum 20
-/gun/particle geantino
+/dcs-monitor/gun/sourceMode CASTOR440_fuel_biased
+/dcs-monitor/gun/caskNum 0
+/dcs-monitor/gun/fuelNum 20
+/gun/particle gamma
 /gun/energy 1.332 MeV
 
 # root output
@@ -161,7 +158,7 @@
 # select visualization
 # ------------------------------------------
 #/control/execute vis_vrml.mac
-#/control/execute vis_ogl.mac
+/control/execute vis_ogl.mac
 #/control/execute vis.mac
 
 # add vis filtering

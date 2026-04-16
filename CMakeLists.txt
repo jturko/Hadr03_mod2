@@ -86,8 +86,7 @@ target_link_libraries(G4DCSmonitor ${Geant4_LIBRARIES} )
 # relies on these scripts being in the current working directory.
 #
 set(G4DCSmonitor_SCRIPTS
-    vis.mac vis_ogl.mac vis_vrml.mac LDRS.mac
-    #debug.mac envHadronic.csh envHadronic.sh elastic.mac gamma.mac hadr03.in inelastic.mac ion.mac nCapture.mac neutron.mac nFission.mac fusion.mac vis.mac
+    vis.mac vis_ogl.mac vis_vrml.mac run.mac
   )
 
 foreach(_script ${G4DCSmonitor_SCRIPTS})

@@ -27,7 +27,7 @@
 /// \file B2/B2a/src/TrackerHit.cc
 /// \brief Implementation of the B2::TrackerHit class
 
-#include "PanelHit.hh"
+#include "DCSMonitorHit.hh"
 
 #include "G4Circle.hh"
 #include "G4Colour.hh"
@@ -37,18 +37,18 @@
 
 #include <iomanip>
 
-G4ThreadLocal G4Allocator<PanelHit>* PanelHitAllocator = nullptr;
+G4ThreadLocal G4Allocator<DCSMonitorHit>* DCSMonitorHitAllocator = nullptr;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4bool PanelHit::operator==(const PanelHit& right) const
+G4bool DCSMonitorHit::operator==(const DCSMonitorHit& right) const
 {
     return (this == &right) ? true : false;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PanelHit::Draw()
+void DCSMonitorHit::Draw()
 {
     G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
     if (pVVisManager) {
@@ -63,7 +63,7 @@ void PanelHit::Draw()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PanelHit::Print()
+void DCSMonitorHit::Print()
 {
     G4cout << "  trackID: " << fTrackID << ", Edep: " << std::setw(7)
         << G4BestUnit(fEdep, "Energy") << ", Position: " << std::setw(7)

@@ -27,10 +27,10 @@
 /// \file B2/B2a/include/TrackerSD.hh
 /// \brief Definition of the B2::TrackerSD class
 
-#ifndef PanelSD_h
-#define PanelSD_h 1
+#ifndef DCSMonitorSD_h
+#define DCSMonitorSD_h 1
 
-#include "PanelHit.hh"
+#include "DCSMonitorHit.hh"
 
 #include "G4VSensitiveDetector.hh"
 
@@ -46,11 +46,11 @@ class G4HCofThisEvent;
 /// by Geant4 kernel at each step. A hit is created with each step with non zero
 /// energy deposit.
 
-class PanelSD : public G4VSensitiveDetector
+class DCSMonitorSD : public G4VSensitiveDetector
 {
   public:
-    PanelSD(const G4String& name, const G4String& hitsCollectionName);
-    ~PanelSD() override = default;
+    DCSMonitorSD(const G4String& name, const G4String& hitsCollectionName);
+    ~DCSMonitorSD() override = default;
 
     // methods from base class
     void Initialize(G4HCofThisEvent* hitCollection) override;
@@ -58,7 +58,7 @@ class PanelSD : public G4VSensitiveDetector
     void EndOfEvent(G4HCofThisEvent* hitCollection) override;
 
   private:
-    PanelHitsCollection* fHitsCollection = nullptr;
+    DCSMonitorHitsCollection* fHitsCollection = nullptr;
     G4bool fTrig = false;
 
     std::map<G4int, G4int> fTrackHitIndexMap;
