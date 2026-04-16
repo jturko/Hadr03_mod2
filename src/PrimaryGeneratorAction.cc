@@ -45,6 +45,7 @@
 #include "Randomize.hh"
 
 #include "G4PhysicalVolumeStore.hh"
+#include "RunAction.hh"
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -108,22 +109,58 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
     G4AnalysisManager* analysis = G4AnalysisManager::Instance();
 
-    if(fSourceMode == kCASTOR440_surface) {
-        GenerateCASTOR440Flux();
-        fParticleGun->GeneratePrimaryVertex(anEvent); 
-    }
-    else if(fSourceMode == kCASTOR440_fuel) { 
-        GenerateCASTOR440FuelFlux();
-        fParticleGun->GeneratePrimaryVertex(anEvent);
-    }
-    else if(fSourceMode == kCASTOR440_fuel_biased) {
-        // Generates the kinematics and applies the weight directly to the event
-        GenerateCASTOR440FuelFlux_GeometricCLYCbias(anEvent);
-    }
-    else {
-        //G4cout << " -> Generating GPS vertex..." << G4endl;
+    // variables to save primary info
+    G4double ekin, time;
+    G4ThreeVector pos, mom;
+    G4int particle;
+
+    
+    if(fSourceMode == kGPS) { // GPS-based
         fGPS->GeneratePrimaryVertex(anEvent);
+    } 
+    else { // particle gun-based
+        if(fSourceMode == kCASTOR440_surface) {
+            GenerateCASTOR440Flux();
+            fParticleGun->GeneratePrimaryVertex(anEvent); 
+        }
+        else if(fSourceMode == kCASTOR440_fuel) { 
+            GenerateCASTOR440FuelFlux();
+            fParticleGun->GeneratePrimaryVertex(anEvent);
+        }
+        else if(fSourceMode == kCASTOR440_fuel_biased) {
+            GenerateCASTOR440FuelFlux_GeometricCLYCbias(anEvent);
+        }
+        else {
+            G4Exception("PrimaryGeneratorAction::GeneratePrimaries()",
+                        "UnknownSourceMode",
+                        FatalException,
+                        Form("The source mode '%s' is unknown", fSourceMode));
+        }
+
+        ekin =  fParticleGun->GetParticleEnergy();
+        time =  fParticleGun->GetParticleTime();
+        pos =   fParticleGun->GetParticlePosition();
+        mom =   fParticleGun->GetParticleMomentumDirection();
+        particle = fParticleGun->GetParticleDefinition()->GetPDGEncoding();
     }
+
+    // save particle info to tree
+    // [0]: 1st ntuple is for primaries
+    if(RunAction::WritePrimaryTree) {
+        G4int idx = 0;
+        analysis->FillNtupleDColumn(idx, 0, particle);
+        analysis->FillNtupleDColumn(idx, 1, ekin);
+        analysis->FillNtupleDColumn(idx, 2, time);
+        analysis->FillNtupleDColumn(idx, 3, pos.x());
+        analysis->FillNtupleDColumn(idx, 4, pos.y());
+        analysis->FillNtupleDColumn(idx, 5, pos.z());
+        analysis->FillNtupleDColumn(idx, 6, mom.x());
+        analysis->FillNtupleDColumn(idx, 7, mom.y());
+        analysis->FillNtupleDColumn(idx, 8, mom.z());
+        analysis->AddNtupleRow(idx);
+    }
+
+
 
     //// using neutron file phase space
     //if(fUseNeutronPhaseSpace) {
@@ -253,7 +290,10 @@ void PrimaryGeneratorAction::SetSourceMode(SourceMode mode) {
 void PrimaryGeneratorAction::GenerateCASTOR440Flux()
 {
     G4int numCasks = fDetector->GetNumCASTOR440s();
-    if (numCasks == 0) return;
+    if (fCaskNum < 0 || fCaskNum >= numCasks || fFuelNum < 0 || fFuelNum >= 84) {
+        G4Exception("PrimaryGeneratorAction", "InvalidSelection", FatalException, "Invalid cask or fuel element index.");
+        return;
+    }
 
     G4int caskIndex = (G4int)(G4UniformRand() * numCasks);
     G4ThreeVector caskPos = fDetector->GetCASTOR440Position(caskIndex);
@@ -311,7 +351,7 @@ void PrimaryGeneratorAction::GenerateCASTOR440FuelFlux()
 {
     G4int numCasks = fDetector->GetNumCASTOR440s();
     if (fCaskNum < 0 || fCaskNum >= numCasks || fFuelNum < 0 || fFuelNum >= 84) {
-        G4Exception("PrimaryGeneratorAction", "InvalidSelection", JustWarning, "Invalid cask or fuel element index.");
+        G4Exception("PrimaryGeneratorAction", "InvalidSelection", FatalException, "Invalid cask or fuel element index.");
         return;
     }
 
@@ -368,7 +408,7 @@ void PrimaryGeneratorAction::GenerateCASTOR440FuelFlux_GeometricCLYCbias(G4Event
 {
     G4int numCasks = fDetector->GetNumCASTOR440s();
     if (fCaskNum < 0 || fCaskNum >= numCasks || fFuelNum < 0 || fFuelNum >= 84) {
-        G4Exception("PrimaryGeneratorAction", "InvalidSelection", JustWarning, "Invalid cask or fuel element index.");
+        G4Exception("PrimaryGeneratorAction", "InvalidSelection", FatalException, "Invalid cask or fuel element index.");
         return;
     }
 

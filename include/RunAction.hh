@@ -67,6 +67,8 @@ class RunAction : public G4UserRunAction
 
     void SetPrintFlag(G4bool);
     ProgressBar * GetProgBar() { return fProgBar; }
+    
+    static G4bool WritePrimaryTree;
 
     //std::shared_ptr<THnSparseD> GetNeutronPhaseSpace() { return fhNeutronPhaseSpace; }
 

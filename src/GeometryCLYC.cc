@@ -53,9 +53,9 @@ GeometryCLYC::GeometryCLYC() :
     fPEHDCollimatorLength = 50. * mm;
 
     fPEPlugInnerRadius = 29./2. * mm;
-    fPEPlugOuterRadius = 50./2. * mm;
-    fPEPlugLength = 45. * mm;
-    fPEPlugFaceThickness = 10. * mm; 
+    fPEPlugLipRadius = 50./2. * mm;
+    fPEPlugInnerLength = 35. * mm;
+    fPEPlugLipLength = 10. * mm; 
 
     fCLYCCrystalMatName = "CLYC";
     fAlumMatName = "G4_Al";
@@ -64,23 +64,23 @@ GeometryCLYC::GeometryCLYC() :
     fPEHDMatName = "G4_POLYETHYLENE";
 
     G4double alpha = 1.0; 
-    fCLYCCrystalColour = G4Colour(0.0, 1.0, 0.0, alpha); // Green
-    fAlumColour        = G4Colour(0.5, 0.5, 0.5, alpha); // Grey
-    fLiFColour         = G4Colour(0.5, 1.0, 0.0, alpha); // Green-yellow-ish
-    fPbColour          = G4Colour(0.6, 0.4, 0.2, alpha); // Brown
-    fPEHDColour        = G4Colour(0.0, 1.0, 1.0, alpha); // Cyan
-    fPEPlugColour      = G4Colour(1.0, 1.0, 0.0, alpha); // Yellow
+    //fCLYCCrystalColour = G4Colour(0.0, 1.0, 0.0, alpha); // Green
+    //fAlumColour        = G4Colour(0.5, 0.5, 0.5, alpha); // Grey
+    //fLiFColour         = G4Colour(0.5, 1.0, 0.0, alpha); // Green-yellow-ish
+    //fPbColour          = G4Colour(0.6, 0.4, 0.2, alpha); // Brown
+    //fPEHDColour        = G4Colour(0.0, 1.0, 1.0, alpha); // Cyan
+    //fPEPlugColour      = G4Colour(1.0, 1.0, 0.0, alpha); // Yellow
 
-    //fCLYCCrystalColour = G4Colour::Green();
-    //fAlumColour = G4Colour::Grey();
-    //fPbColour = G4Colour::Brown();
-    //fPEHDColour = G4Colour::Cyan();
-    //fPEPlugColour = G4Colour::Yellow();
+    fCLYCCrystalColour = G4Colour(0.45, 0.65, 0.85, 0.5); // Icy translucent blue
+    fAlumColour        = G4Colour(0.75, 0.77, 0.80, alpha); // Brushed silver/metallic grey
+    fLiFColour         = G4Colour(0.95, 0.90, 0.70, alpha); // Pale ivory/sand
+    fPbColour          = G4Colour(0.35, 0.35, 0.40, alpha); // Dark heavy gunmetal/slate
+    fPEHDColour        = G4Colour(0.92, 0.92, 0.92, alpha); // Milky opaque white
+    fPEPlugColour      = G4Colour(0.15, 0.15, 0.15, alpha); // Dark charcoal/black plastic
+
 }
 
 GeometryCLYC::~GeometryCLYC() {}
-
-
 
 // CLYC crystal centered with HDPE collimator rear face
 G4int GeometryCLYC::Build()
@@ -102,40 +102,43 @@ G4int GeometryCLYC::Build()
 
     // 1. PE Plug
     // Front face sits exactly at Z=0, projecting backwards.
-    std::vector<G4double> rPlug = { 0.*mm, fPEPlugOuterRadius, fPEPlugOuterRadius, fPEPlugInnerRadius, fPEPlugInnerRadius, 0.*mm };
-    std::vector<G4double> zPlug = { 0.*mm, 0.*mm, -fPEPlugFaceThickness, -fPEPlugFaceThickness, -fPEPlugLength, -fPEPlugLength };
-
-    G4GenericPolycone* PE_plug_solid = new G4GenericPolycone("PE_plug_solid", startPhi, endPhi, rPlug.size(), rPlug.data(), zPlug.data());
-    fPEPlugLog = new G4LogicalVolume(PE_plug_solid, PEHD_material, "PEPlugLog", 0, 0, 0);
-    fPEPlugLog->SetVisAttributes(new G4VisAttributes(true, fPEPlugColour));
-
-    move = G4ThreeVector(0., 0., 0.);
-    if(!onlyBuildCLYC)
-        fCLYCAssembly->AddPlacedVolume(fPEPlugLog, move, rotate);
+    if(fPEPlugLipLength>0. || fPEPlugInnerLength>0.) {
+        std::vector<G4double> rPlug = { 0.*mm, fPEPlugLipRadius,  fPEPlugLipRadius,  fPEPlugInnerRadius,  fPEPlugInnerRadius,                   0.*mm };
+        std::vector<G4double> zPlug = { 0.*mm, 0.*mm,            -fPEPlugLipLength, -fPEPlugLipLength,   -fPEPlugLipLength-fPEPlugInnerLength, -fPEPlugLipLength-fPEPlugInnerLength };
+        G4GenericPolycone* PE_plug_solid = new G4GenericPolycone("PE_plug_solid", startPhi, endPhi, rPlug.size(), rPlug.data(), zPlug.data());
+        fPEPlugLog = new G4LogicalVolume(PE_plug_solid, PEHD_material, "PEPlugLog", 0, 0, 0);
+        fPEPlugLog->SetVisAttributes(new G4VisAttributes(true, fPEPlugColour));
+        move = G4ThreeVector(0., 0., 0.);
+        if(!onlyBuildCLYC)
+            fCLYCAssembly->AddPlacedVolume(fPEPlugLog, move, rotate);
+    }
 
     // 2. Collimators (PEHD and Pb)
-    // Front faces aligned with the back of the plug lip (Z = -fPEPlugFaceThickness).
+    // Front faces aligned with the back of the plug lip (Z = -fPEPlugLipLength).
     // Tubs are defined from their center, so we shift by half their length.
-    G4double pehdCenterZ = -fPEPlugFaceThickness - (fPEHDCollimatorLength / 2.0);
-    G4Tubs* PEHD_collimator_solid = new G4Tubs("PEHD_collimator_solid", fPEHDCollimatorInnerRadius, fPEHDCollimatorOuterRadius, fPEHDCollimatorLength/2., startPhi, endPhi);
-    fPEHDCollimatorLog = new G4LogicalVolume(PEHD_collimator_solid, PEHD_material, "PEHDCollimatorLog", 0, 0, 0);
-    fPEHDCollimatorLog->SetVisAttributes(new G4VisAttributes(true, fPEHDColour));
-
-    move = G4ThreeVector(0., 0., pehdCenterZ);
-    if(!onlyBuildCLYC)
-        fCLYCAssembly->AddPlacedVolume(fPEHDCollimatorLog, move, rotate);
-
-    G4double pbCenterZ = -fPEPlugFaceThickness - (fPbCollimatorLength / 2.0);
-    G4Tubs* Pb_collimator_solid = new G4Tubs("Pb_collimator_solid", fPbCollimatorInnerRadius, fPbCollimatorOuterRadius, fPbCollimatorLength/2., startPhi, endPhi);
-    fPbCollimatorLog = new G4LogicalVolume(Pb_collimator_solid, Pb_material, "PbCollimatorLog", 0, 0, 0);
-    fPbCollimatorLog->SetVisAttributes(new G4VisAttributes(true, fPbColour));
-
-    move = G4ThreeVector(0., 0., pbCenterZ);
-    if(!onlyBuildCLYC)
-        fCLYCAssembly->AddPlacedVolume(fPbCollimatorLog, move, rotate);
-    
-    if(fLiFCollimatorOuterRadius>0.) {
-        G4double lifCenterZ = -fPEPlugFaceThickness - (fLiFCollimatorLength / 2.0);
+    // PE-HD collimator
+    if(fPEHDCollimatorLength>0.) {
+        G4double pehdCenterZ = -fPEPlugLipLength - (fPEHDCollimatorLength / 2.0);
+        G4Tubs* PEHD_collimator_solid = new G4Tubs("PEHD_collimator_solid", fPEHDCollimatorInnerRadius, fPEHDCollimatorOuterRadius, fPEHDCollimatorLength/2., startPhi, endPhi);
+        fPEHDCollimatorLog = new G4LogicalVolume(PEHD_collimator_solid, PEHD_material, "PEHDCollimatorLog", 0, 0, 0);
+        fPEHDCollimatorLog->SetVisAttributes(new G4VisAttributes(true, fPEHDColour));
+        move = G4ThreeVector(0., 0., pehdCenterZ);
+        if(!onlyBuildCLYC)
+            fCLYCAssembly->AddPlacedVolume(fPEHDCollimatorLog, move, rotate);
+    }
+    // Pb collimator
+    if(fPbCollimatorLength>0.) {
+        G4double pbCenterZ = -fPEPlugLipLength - (fPbCollimatorLength / 2.0);
+        G4Tubs* Pb_collimator_solid = new G4Tubs("Pb_collimator_solid", fPbCollimatorInnerRadius, fPbCollimatorOuterRadius, fPbCollimatorLength/2., startPhi, endPhi);
+        fPbCollimatorLog = new G4LogicalVolume(Pb_collimator_solid, Pb_material, "PbCollimatorLog", 0, 0, 0);
+        fPbCollimatorLog->SetVisAttributes(new G4VisAttributes(true, fPbColour));
+        move = G4ThreeVector(0., 0., pbCenterZ);
+        if(!onlyBuildCLYC)
+            fCLYCAssembly->AddPlacedVolume(fPbCollimatorLog, move, rotate);
+    }
+    // LiF collimator
+    if(fLiFCollimatorLength>0.) {
+        G4double lifCenterZ = -fPEPlugLipLength - (fLiFCollimatorLength / 2.0);
         G4Tubs* LiF_collimator_solid = new G4Tubs("LiF_collimator_solid", fLiFCollimatorInnerRadius, fLiFCollimatorOuterRadius, fLiFCollimatorLength/2., startPhi, endPhi);
         fLiFCollimatorLog = new G4LogicalVolume(LiF_collimator_solid, LiF_material, "LiFCollimatorLog", 0, 0, 0);
         fLiFCollimatorLog->SetVisAttributes(new G4VisAttributes(true, fLiFColour));
@@ -150,109 +153,30 @@ G4int GeometryCLYC::Build()
     G4double L = fCLYCCrystalLength;
     G4double R = fCLYCCrystalRadius;
     G4double t = fAlumCasingThickness;
-
-    // The plug ends at -fPEPlugLength. We place the front of the casing exactly there.
-    G4double crystalCenterZ = -fPEPlugLength - t - (L / 2.0);
-
+    // The plug ends at -fPEPlugLength (-fPEPlugLipLength - fPEPlugInnerLength). We place the front of the casing exactly there.
+    G4double crystalCenterZ = -fPEPlugLipLength - fPEPlugInnerLength - t - (L / 2.0);
     G4Tubs* CLYC_solid = new G4Tubs("CLYC_solid", 0.*mm, R, L/2.0, startPhi, endPhi);
     fCLYCCrystalLog = new G4LogicalVolume(CLYC_solid, CLYC_material, "CLYCCrystalLog", 0, 0, 0);
     fCLYCCrystalLog->SetVisAttributes(new G4VisAttributes(true, fCLYCCrystalColour));
-
     move = G4ThreeVector(0., 0., crystalCenterZ);
     fCLYCAssembly->AddPlacedVolume(fCLYCCrystalLog, move, rotate);
 
     // Aluminum casing overlaps the sides and FRONT face (+Z) of the crystal
-    std::vector<G4double> rCasing = { 0.*mm, R + t, R + t, R, R, 0.*mm };
-    std::vector<G4double> zCasing = { +(L/2. + t), +(L/2. + t), -L/2., -L/2., +L/2., +L/2. };
+    if(t>0.) {
+        std::vector<G4double> rCasing = { 0.*mm, R + t, R + t, R, R, 0.*mm };
+        std::vector<G4double> zCasing = { +(L/2. + t), +(L/2. + t), -L/2., -L/2., +L/2., +L/2. };
 
-    G4GenericPolycone* Alum_solid = new G4GenericPolycone("Alum_solid", startPhi, endPhi, rCasing.size(), rCasing.data(), zCasing.data());
-    fAlumCasingLog = new G4LogicalVolume(Alum_solid, Alum_material, "AlumCasingLog", 0, 0, 0);
-    fAlumCasingLog->SetVisAttributes(new G4VisAttributes(true, fAlumColour));
+        G4GenericPolycone* Alum_solid = new G4GenericPolycone("Alum_solid", startPhi, endPhi, rCasing.size(), rCasing.data(), zCasing.data());
+        fAlumCasingLog = new G4LogicalVolume(Alum_solid, Alum_material, "AlumCasingLog", 0, 0, 0);
+        fAlumCasingLog->SetVisAttributes(new G4VisAttributes(true, fAlumColour));
 
-    move = G4ThreeVector(0., 0., crystalCenterZ);
-    if(!onlyBuildCLYC)
-        fCLYCAssembly->AddPlacedVolume(fAlumCasingLog, move, rotate);
+        move = G4ThreeVector(0., 0., crystalCenterZ);
+        if(!onlyBuildCLYC)
+            fCLYCAssembly->AddPlacedVolume(fAlumCasingLog, move, rotate);
+    }
 
     return 1;
 }
-
-//G4int GeometryCLYC::Build()
-//{
-//    BuildMaterials();
-//    fCLYCAssembly = new G4AssemblyVolume();
-//    
-//    G4double startPhi = 0.0*deg, endPhi = 360.0/2.*deg;
-//    G4ThreeVector move;
-//    G4RotationMatrix* rotate = NULL;
-//
-//    G4NistManager* manager = G4NistManager::Instance();
-//    G4Material* CLYC_material = manager->FindOrBuildMaterial(fCLYCCrystalMatName);
-//    G4Material* Alum_material = manager->FindOrBuildMaterial(fAlumMatName);
-//    G4Material* Pb_material = manager->FindOrBuildMaterial(fPbMatName);
-//    G4Material* PEHD_material = manager->FindOrBuildMaterial(fPEHDMatName);
-//
-//    // Assembly Alignment Logic:
-//    // Crystal native center is 0. Collimators are mounted at +Length/2 relative to crystal.
-//    // PE Plug originally mounted forward of the crystal. We want the flat face of the PE Plug 
-//    // to sit precisely at Z=0 in the final assembly frame.
-//    // Original Z position of plug face relative to crystal center: fPEPlugFaceThickness - fCLYCCrystalLength/2.0 + fPEHDCollimatorLength.
-//    // Shift vector applied to crystal and collimators to pull them backwards behind Z=0.
-//    G4double zShift = -(fPEPlugFaceThickness - fCLYCCrystalLength/2.0 + fPEHDCollimatorLength);
-//    G4ThreeVector zShiftVec(0., 0., zShift);
-//
-//    // 1. CLYC Crystal
-//    G4Tubs* CLYC_solid = new G4Tubs("CLYC_solid", 0.*mm, fCLYCCrystalRadius, fCLYCCrystalLength/2.0, startPhi, endPhi);
-//    fCLYCCrystalLog = new G4LogicalVolume(CLYC_solid, CLYC_material, "CLYCCrystalLog", 0, 0, 0);
-//    fCLYCCrystalLog->SetVisAttributes(new G4VisAttributes(true, fCLYCCrystalColour));
-//    
-//    move = G4ThreeVector(0., 0., -fCLYCCrystalLength/2.0) + zShiftVec;
-//    fCLYCAssembly->AddPlacedVolume(fCLYCCrystalLog, move, rotate);
-//
-//    // 2. Aluminum Casing (Polycone wraps back and sides of crystal)
-//    G4double L = fCLYCCrystalLength;
-//    G4double R = fCLYCCrystalRadius;
-//    G4double t = fAlumCasingThickness;
-//    std::vector<G4double> rCasing = { 0.*mm, R + t, R + t, R, R, 0.*mm };
-//    std::vector<G4double> zCasing = { +(L/2. + t), +(L/2. + t), -L/2., -L/2., +L/2., +L/2. };
-//    
-//    G4GenericPolycone* Alum_solid = new G4GenericPolycone("Alum_solid", startPhi, endPhi, rCasing.size(), rCasing.data(), zCasing.data());
-//    fAlumCasingLog = new G4LogicalVolume(Alum_solid, Alum_material, "AlumCasingLog", 0, 0, 0);
-//    fAlumCasingLog->SetVisAttributes(new G4VisAttributes(true, fAlumColour));
-//
-//    move = G4ThreeVector(0., 0., -fCLYCCrystalLength/2.0) + zShiftVec;
-//    fCLYCAssembly->AddPlacedVolume(fAlumCasingLog, move, rotate);
-//
-//    // 3. Pb Collimator
-//    G4Tubs* Pb_collimator_solid = new G4Tubs("Pb_collimator_solid", fPbCollimatorInnerRadius, fPbCollimatorOuterRadius, fPbCollimatorLength/2., startPhi, endPhi);
-//    fPbCollimatorLog = new G4LogicalVolume(Pb_collimator_solid, Pb_material, "PbCollimatorLog", 0, 0, 0);
-//    fPbCollimatorLog->SetVisAttributes(new G4VisAttributes(true, fPbColour));
-//    
-//    move = G4ThreeVector(0., 0., +fCLYCCrystalLength/2.) + zShiftVec;
-//    fCLYCAssembly->AddPlacedVolume(fPbCollimatorLog, move, rotate);
-//
-//    // 4. PEHD Collimator
-//    G4Tubs* PEHD_collimator_solid = new G4Tubs("PEHD_collimator_solid", fPEHDCollimatorInnerRadius, fPEHDCollimatorOuterRadius, fPEHDCollimatorLength/2., startPhi, endPhi);
-//    fPEHDCollimatorLog = new G4LogicalVolume(PEHD_collimator_solid, PEHD_material, "PEHDCollimatorLog", 0, 0, 0);
-//    fPEHDCollimatorLog->SetVisAttributes(new G4VisAttributes(true, fPEHDColour));
-//    
-//    move = G4ThreeVector(0., 0., +fCLYCCrystalLength/2.) + zShiftVec;
-//    fCLYCAssembly->AddPlacedVolume(fPEHDCollimatorLog, move, rotate);
-//
-//    // 5. PE Plug
-//    // Profile is constructed starting exactly at Z=0 and projecting into the -Z direction
-//    std::vector<G4double> rPlug = { 0.*mm, fPEPlugOuterRadius, fPEPlugOuterRadius, fPEPlugInnerRadius, fPEPlugInnerRadius, 0.*mm };
-//    std::vector<G4double> zPlug = { 0.*mm, 0.*mm, -fPEPlugFaceThickness, -fPEPlugFaceThickness, -fPEPlugLength, -fPEPlugLength };
-//    
-//    G4GenericPolycone* PE_plug_solid = new G4GenericPolycone("PE_plug_solid", startPhi, endPhi, rPlug.size(), rPlug.data(), zPlug.data());
-//    fPEPlugLog = new G4LogicalVolume(PE_plug_solid, PEHD_material, "PEPlugLog", 0, 0, 0);
-//    fPEPlugLog->SetVisAttributes(new G4VisAttributes(true, fPEPlugColour));
-//    
-//    // No translation needed; it sits exactly at assembly origin
-//    move = G4ThreeVector(0., 0., 0.);
-//    fCLYCAssembly->AddPlacedVolume(fPEPlugLog, move, rotate);
-//
-//    return 1;
-//}
 
 void GeometryCLYC::PlaceDetector(G4LogicalVolume* logic_world, G4ThreeVector move, G4RotationMatrix* rotate, G4int copyNo) 
 {

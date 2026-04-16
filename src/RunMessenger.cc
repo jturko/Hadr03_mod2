@@ -41,30 +41,43 @@
 
 RunMessenger::RunMessenger(RunAction* run) : fRun(run)
 {
-  fRunDir = new G4UIdirectory("/testhadr/run/");
-  fRunDir->SetGuidance("run commands");
+    fWritePrimaryCmd = new G4UIcmdWithABool("/LDRS/run/writePrimary", this);
+    fWritePrimaryCmd->SetGuidance("Toggle filling of the primary ntuple");
+    fWritePrimaryCmd->SetParameterName("write", true);
+    fWritePrimaryCmd->SetDefaultValue(true);
+    fWritePrimaryCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
-  fPrintCmd = new G4UIcmdWithABool("/testhadr/run/printStat", this);
-  fPrintCmd->SetGuidance("print list of nuclear reactions");
-  fPrintCmd->SetParameterName("print", false);
-  fPrintCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+    fRunDir = new G4UIdirectory("/testhadr/run/");
+    fRunDir->SetGuidance("run commands");
+
+    fPrintCmd = new G4UIcmdWithABool("/testhadr/run/printStat", this);
+    fPrintCmd->SetGuidance("print list of nuclear reactions");
+    fPrintCmd->SetParameterName("print", false);
+    fPrintCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 RunMessenger::~RunMessenger()
 {
-  delete fPrintCmd;
-  delete fRunDir;
+    delete fWritePrimaryCmd;
+
+    delete fPrintCmd;
+    delete fRunDir;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void RunMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
-  if (command == fPrintCmd) {
-    fRun->SetPrintFlag(fPrintCmd->GetNewBoolValue(newValue));
-  }
+    if (command == fWritePrimaryCmd) {
+        RunAction::WritePrimaryTree = fWritePrimaryCmd->GetNewBoolValue(newValue);
+    }
+    
+    if (command == fPrintCmd) {
+        fRun->SetPrintFlag(fPrintCmd->GetNewBoolValue(newValue));
+    }
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

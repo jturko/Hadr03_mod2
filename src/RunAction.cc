@@ -54,6 +54,10 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+G4bool RunAction::WritePrimaryTree = false;
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 RunAction::RunAction(DetectorConstruction* det, PrimaryGeneratorAction* prim)
     : fDetector(det), fPrimary(prim), fProgBar(NULL)
 {
@@ -117,9 +121,9 @@ void RunAction::BeginOfRunAction(const G4Run* run)
     // histograms
     //
     G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-    if (analysisManager->IsActive()) {
+    //if (analysisManager->IsActive()) {
         analysisManager->OpenFile();
-    }
+    //}
 
     ProgressBar::gEvtNb.store(0, std::memory_order_relaxed);
     if(fProgBar)
@@ -156,10 +160,10 @@ void RunAction::EndOfRunAction(const G4Run* run)
 
     // save histograms
     G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-    if (analysisManager->IsActive()) {
+    //if (analysisManager->IsActive()) {
         analysisManager->Write();
         analysisManager->CloseFile();
-    }
+    //}
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

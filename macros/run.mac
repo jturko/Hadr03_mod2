@@ -13,44 +13,46 @@
 # ------------------------------------------
 /LDRS/det/useBiasing true
 
-# CLYC detector 1
+# CLYC detector
 # ------------------------------------------
-# position/rotation
 /LDRS/det/setPosition 0 0 -1400 mm
+#/LDRS/det/setPosition 0 0 0 mm
 /LDRS/det/setRotation 0 0 0
-# instantiate the CLYC detector
 /LDRS/det/clyc/add
-
-## CLYC detector 2
-# ------------------------------------------
-## position/rotation
-#/LDRS/det/setPosition 10 0 0 cm
-#/LDRS/det/setRotation 0 0 0
-## CLYC scintillator
-#/LDRS/det/clyc/setCrystalMaterial CLYC
-#/LDRS/det/clyc/setCrystalRadius 12.5 mm
-#/LDRS/det/clyc/setCrystalLength 25.0 mm
-#/LDRS/det/clyc/setCrystalLength 2.0 mm
-## aluminum casing
-#/LDRS/det/clyc/setAlumMaterial G4_Al
-#/LDRS/det/clyc/setAlumThickness 0.5 mm
-#/LDRS/det/clyc/setAlumThickness 2.5 mm
-## Pb collimator
-#/LDRS/det/clyc/setPbMaterial G4_Pb
-#/LDRS/det/clyc/setPbColInnerRadius 14.5 mm
-#/LDRS/det/clyc/setPbColOuterRadius 20.0 mm
-#/LDRS/det/clyc/setPbColLength 50.0 mm
-## PEHD collimator
-#/LDRS/det/clyc/setPEHDMaterial G4_POLYETHYLENE
-#/LDRS/det/clyc/setPEHDColInnerRadius 20.0 mm
-#/LDRS/det/clyc/setPEHDColOuterRadius 25.0 mm
-#/LDRS/det/clyc/setPEHDColLength 50.0 mm
-## PE plug
+# geom parameters
+# CLYC scintillator
+/LDRS/det/clyc/setCrystalMaterial CLYC
+/LDRS/det/clyc/setCrystalRadius 12.5 mm
+/LDRS/det/clyc/setCrystalLength 25.0 mm
+# aluminum casing
+/LDRS/det/clyc/setAlumMaterial G4_Al
+/LDRS/det/clyc/setAlumThickness 0.5 mm
+#/LDRS/det/clyc/setAlumThickness 0.0 mm
+# LiF collimator
+/LDRS/det/clyc/setLiFMaterial LiF
+#/LDRS/det/clyc/setLiFColInnerRadius 15.0 mm
+#/LDRS/det/clyc/setLiFColOuterRadius 17.5 mm
+#/LDRS/det/clyc/setLiFColLength 50.0 mm
+/LDRS/det/clyc/setLiFColLength 0.0 mm
+# Pb collimator
+/LDRS/det/clyc/setPbMaterial G4_Pb
+#/LDRS/det/clyc/setPbColInnerRadius 17.5 mm
+#/LDRS/det/clyc/setPbColOuterRadius 22.5 mm
+/LDRS/det/clyc/setPbColLength 50.0 mm
+#/LDRS/det/clyc/setPbColLength 0.0 mm
+# PEHD collimator
+/LDRS/det/clyc/setPEHDMaterial G4_POLYETHYLENE
+#/LDRS/det/clyc/setPEHDColInnerRadius 22.5 mm
+#/LDRS/det/clyc/setPEHDColOuterRadius 27.5 mm
+/LDRS/det/clyc/setPEHDColLength 50.0 mm
+#/LDRS/det/clyc/setPEHDColLength 0.0 mm
+# PE plug
+#/LDRS/det/clyc/setPEPlugLipRadius 27.5 mm
 #/LDRS/det/clyc/setPEPlugInnerRadius 14.5 mm
-#/LDRS/det/clyc/setPEPlugOuterRadius 25.0 mm
-#/LDRS/det/clyc/setPEPlugLength 45.0 mm
-## instantiate the CLYC detector
-#/LDRS/det/clyc/add
+/LDRS/det/clyc/setPEPlugLipLength 10.0 mm
+/LDRS/det/clyc/setPEPlugInnerLength 35.0 mm
+#/LDRS/det/clyc/setPEPlugLipLength 0.0 mm
+#/LDRS/det/clyc/setPEPlugInnerLength 0.0 mm
 
 # CASTOR 440/84 pos 1
 # ------------------------------------------

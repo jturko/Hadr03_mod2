@@ -54,7 +54,7 @@ void HistoManager::Book()
     analysisManager->SetDefaultFileType("root");
     analysisManager->SetFileName(fFileName);
     analysisManager->SetVerboseLevel(1);
-    analysisManager->SetActivation(true);  // enable inactivation of histograms
+    //analysisManager->SetActivation(true);  // enable inactivation of histograms
     analysisManager->SetNtupleMerging(true);
 
     // check if file number set
@@ -67,22 +67,11 @@ void HistoManager::Book()
 
     G4int idx;
 
-    // Ep
-    idx = analysisManager->CreateH1("hEp", "incident proton energy distrib.", 2000, 0, 20);
-    analysisManager->SetH1Activation(idx, true);
-    
-    // Ep vs theta
-    idx = analysisManager->CreateH2("hEpTheta", "incident proton energy vs theta distrib.", 180, -90, 90, 200, 0, 20);
-    analysisManager->SetH2Activation(idx, true);
-    
-    // Ep vs cos(theta)
-    idx = analysisManager->CreateH2("hEpCosTheta", "incident proton energy vs cos(theta) distrib.", 1800, -1, 1, 200, 0, 20);
-    analysisManager->SetH2Activation(idx, true);
-
-    // ntuple for generating phase space
-    idx = analysisManager->CreateNtuple("tree", "spectrum of outgoing particles");
-    analysisManager->CreateNtupleDColumn("particle");
-    analysisManager->CreateNtupleDColumn("Ekin");
+    // ntuple for primary particles
+    idx = analysisManager->CreateNtuple("primary", "tree of primary particles");
+    analysisManager->SetNtupleActivation(idx, true);
+    analysisManager->CreateNtupleDColumn("pid");
+    analysisManager->CreateNtupleDColumn("ekin");
     analysisManager->CreateNtupleDColumn("t");
     analysisManager->CreateNtupleDColumn("x");
     analysisManager->CreateNtupleDColumn("y");
@@ -91,12 +80,13 @@ void HistoManager::Book()
     analysisManager->CreateNtupleDColumn("py");
     analysisManager->CreateNtupleDColumn("pz");
     analysisManager->FinishNtuple();
-    G4cout << " Created ntuple \"tree\" (id " << idx << ") for neutron phase space" << G4endl;
+    G4cout << " Created ntuple \"primary\" (id " << idx << ")" << G4endl;
     
     // ntuple for detector hits
-    idx = analysisManager->CreateNtuple("hits", "detector hits");
-    analysisManager->CreateNtupleDColumn("particle");
-    analysisManager->CreateNtupleDColumn("Edep");
+    idx = analysisManager->CreateNtuple("hits", "tree of sensitive detector hits");
+    analysisManager->SetNtupleActivation(idx, true);
+    analysisManager->CreateNtupleDColumn("pid");
+    analysisManager->CreateNtupleDColumn("edep");
     analysisManager->CreateNtupleDColumn("t");
     analysisManager->CreateNtupleDColumn("x");
     analysisManager->CreateNtupleDColumn("y");
@@ -104,22 +94,8 @@ void HistoManager::Book()
     analysisManager->CreateNtupleIColumn("det");
     analysisManager->CreateNtupleDColumn("weight");
     analysisManager->FinishNtuple();
-    G4cout << " Created ntuple \"hits\" (id " << idx << ") for detector hits" << G4endl;
+    G4cout << " Created ntuple \"hits\" (id " << idx << ")" << G4endl;
     
-    // ntuple for generating phase space
-    idx = analysisManager->CreateNtuple("shield", "spectrum of outgoing particles of shielding");
-    analysisManager->CreateNtupleDColumn("particle");
-    analysisManager->CreateNtupleDColumn("Ekin");
-    analysisManager->CreateNtupleDColumn("t");
-    analysisManager->CreateNtupleDColumn("x");
-    analysisManager->CreateNtupleDColumn("y");
-    analysisManager->CreateNtupleDColumn("z");
-    analysisManager->CreateNtupleDColumn("px");
-    analysisManager->CreateNtupleDColumn("py");
-    analysisManager->CreateNtupleDColumn("pz");
-    analysisManager->FinishNtuple();
-    G4cout << " Created ntuple \"shield\" (id " << idx << ") for shielding tracker" << G4endl;
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

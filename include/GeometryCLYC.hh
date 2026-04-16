@@ -37,9 +37,10 @@ class GeometryCLYC
     void SetPEHDCollimatorOuterRadius(G4double r) { fPEHDCollimatorOuterRadius = r; }
     void SetPEHDCollimatorLength(G4double l) { fPEHDCollimatorLength = l; }
     
-    void SetPEPlugInnerRadius(G4double r) { fPEPlugInnerRadius = r; }
-    void SetPEPlugOuterRadius(G4double r) { fPEPlugOuterRadius = r; }
-    void SetPEPlugLength(G4double l) { fPEPlugLength = l; }
+    void SetPEPlugInnerRadius(G4double r)   { fPEPlugInnerRadius    = r; }
+    void SetPEPlugLipRadius(G4double r)     { fPEPlugLipRadius      = r; }
+    void SetPEPlugInnerLength(G4double l)   { fPEPlugInnerLength    = l; }
+    void SetPEPlugLipLength(G4double l)     { fPEPlugLipLength      = l; }
 
     // Material Setters
     void SetCrystalMaterialName(G4String name) { fCLYCCrystalMatName = name; }
@@ -77,9 +78,9 @@ class GeometryCLYC
     G4double fPEHDCollimatorLength;
 
     G4double fPEPlugInnerRadius;
-    G4double fPEPlugOuterRadius;
-    G4double fPEPlugLength;
-    G4double fPEPlugFaceThickness;
+    G4double fPEPlugLipRadius;
+    G4double fPEPlugInnerLength;
+    G4double fPEPlugLipLength;
 
     G4String fCLYCCrystalMatName;
     G4String fAlumMatName;

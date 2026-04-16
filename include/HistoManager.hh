@@ -46,7 +46,7 @@ class HistoManager
 
   private:
     void Book();
-    G4String fFileName = "hadr03";
+    G4String fFileName = "G4DCSmonitor";
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

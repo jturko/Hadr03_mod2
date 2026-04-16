@@ -52,6 +52,8 @@ class RunMessenger : public G4UImessenger
 
   private:
     RunAction* fRun = nullptr;
+    
+    G4UIcmdWithABool* fWritePrimaryCmd = nullptr;
 
     G4UIdirectory* fRunDir = nullptr;
     G4UIcmdWithABool* fPrintCmd = nullptr;

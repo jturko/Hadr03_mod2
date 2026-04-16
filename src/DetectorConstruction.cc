@@ -333,24 +333,29 @@ void DetectorConstruction::AddCLYC()
 void DetectorConstruction::SetCLYCCrystalRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetCrystalRadius(val); }
 void DetectorConstruction::SetCLYCCrystalLength(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetCrystalLength(val); }
 void DetectorConstruction::SetCLYCAlumThickness(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetAlumCasingThickness(val); }
-void DetectorConstruction::SetCLYCLiFCollimatorInnerRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetLiFCollimatorInnerRadius(val); }
-void DetectorConstruction::SetCLYCLiFCollimatorOuterRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetLiFCollimatorOuterRadius(val); }
-void DetectorConstruction::SetCLYCLiFCollimatorLength(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetLiFCollimatorLength(val); }
+
+void DetectorConstruction::SetCLYCLiFCollimatorInnerRadius(G4double val)    { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetLiFCollimatorInnerRadius(val); }
+void DetectorConstruction::SetCLYCLiFCollimatorOuterRadius(G4double val)    { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetLiFCollimatorOuterRadius(val); }
+void DetectorConstruction::SetCLYCLiFCollimatorLength(G4double val)         { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetLiFCollimatorLength(val); }
+
 void DetectorConstruction::SetCLYCPbCollimatorInnerRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbCollimatorInnerRadius(val); }
 void DetectorConstruction::SetCLYCPbCollimatorOuterRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbCollimatorOuterRadius(val); }
-void DetectorConstruction::SetCLYCPbCollimatorLength(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbCollimatorLength(val); }
-void DetectorConstruction::SetCLYCPEHDCollimatorInnerRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDCollimatorInnerRadius(val); }
-void DetectorConstruction::SetCLYCPEHDCollimatorOuterRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDCollimatorOuterRadius(val); }
-void DetectorConstruction::SetCLYCPEHDCollimatorLength(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDCollimatorLength(val); }
-void DetectorConstruction::SetCLYCPEPlugInnerRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEPlugInnerRadius(val); }
-void DetectorConstruction::SetCLYCPEPlugOuterRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEPlugOuterRadius(val); }
-void DetectorConstruction::SetCLYCPEPlugLength(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEPlugLength(val); }
+void DetectorConstruction::SetCLYCPbCollimatorLength(G4double val)      { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbCollimatorLength(val); }
+
+void DetectorConstruction::SetCLYCPEHDCollimatorInnerRadius(G4double val)   { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDCollimatorInnerRadius(val); }
+void DetectorConstruction::SetCLYCPEHDCollimatorOuterRadius(G4double val)   { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDCollimatorOuterRadius(val); }
+void DetectorConstruction::SetCLYCPEHDCollimatorLength(G4double val)        { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDCollimatorLength(val); }
+
+void DetectorConstruction::SetCLYCPEPlugLipRadius(G4double val)     { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEPlugLipRadius(val); }
+void DetectorConstruction::SetCLYCPEPlugInnerRadius(G4double val)   { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEPlugInnerRadius(val); }
+void DetectorConstruction::SetCLYCPEPlugLipLength(G4double val)     { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEPlugLipLength(val); }
+void DetectorConstruction::SetCLYCPEPlugInnerLength(G4double val)   { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEPlugInnerLength(val); }
 
 void DetectorConstruction::SetCLYCCrystalMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetCrystalMaterialName(val); }
-void DetectorConstruction::SetCLYCAlumMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetAlumMaterialName(val); }
-void DetectorConstruction::SetCLYCLiFMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetLiFMaterialName(val); }
-void DetectorConstruction::SetCLYCPbMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbMaterialName(val); }
-void DetectorConstruction::SetCLYCPEHDMaterialName(G4String val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDMaterialName(val); }
+void DetectorConstruction::SetCLYCAlumMaterialName(G4String val)    { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetAlumMaterialName(val); }
+void DetectorConstruction::SetCLYCLiFMaterialName(G4String val)     { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetLiFMaterialName(val); }
+void DetectorConstruction::SetCLYCPbMaterialName(G4String val)      { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPbMaterialName(val); }
+void DetectorConstruction::SetCLYCPEHDMaterialName(G4String val)    { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetPEHDMaterialName(val); }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
