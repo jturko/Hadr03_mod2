@@ -186,8 +186,14 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 
     for (size_t i = 0; i < fCLYCDetectors.size(); ++i) {
         fCLYCDetectors[i]->Build();
-        fCLYCDetectors[i]->PlaceDetector(fLWorld, fCLYCPositions[i], fCLYCRotations[i], i);
+
+        if (fCLYCPlaceByCrystalCenter[i]) {
+            fCLYCDetectors[i]->PlaceDetectorByCrystalCenter(fLWorld, fCLYCPositions[i], fCLYCRotations[i], i);
+        } else {
+            fCLYCDetectors[i]->PlaceDetector(fLWorld, fCLYCPositions[i], fCLYCRotations[i], i);
+        }
     }
+
     
     for (size_t i = 0; i < fCASTOR440Detectors.size(); ++i) {
         fCASTOR440Detectors[i]->Build();
@@ -328,6 +334,24 @@ void DetectorConstruction::AddCLYC()
     rot->rotateY(fRotation.y()*M_PI/180.);
     rot->rotateZ(fRotation.z()*M_PI/180.); 
     fCLYCRotations.push_back(rot);
+    
+    fCLYCPlaceByCrystalCenter.push_back(false); // Flag for default placement
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::AddCLYCByCrystalCenter() 
+{
+    fCLYCDetectors.push_back(new GeometryCLYC());
+    fCLYCPositions.push_back(fPosition);
+    
+    G4RotationMatrix* rot = new G4RotationMatrix();
+    rot->rotateX(fRotation.x()*M_PI/180.);
+    rot->rotateY(fRotation.y()*M_PI/180.);
+    rot->rotateZ(fRotation.z()*M_PI/180.); 
+    fCLYCRotations.push_back(rot);
+    
+    fCLYCPlaceByCrystalCenter.push_back(true); // Flag for COM placement
 }
 
 void DetectorConstruction::SetCLYCCrystalRadius(G4double val) { if (!fCLYCDetectors.empty()) fCLYCDetectors.back()->SetCrystalRadius(val); }

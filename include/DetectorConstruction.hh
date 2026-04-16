@@ -101,21 +101,27 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
         // FOR DCS MONITOR PROJECT
         void AddCLYC();
+        void AddCLYCByCrystalCenter();
         G4int GetNumCLYC() const { return fCLYCDetectors.size(); }
         G4ThreeVector GetCLYCPosition(G4int index) const { return fCLYCPositions[index]; }
 
         void SetCLYCCrystalRadius(G4double val);
         void SetCLYCCrystalLength(G4double val);
+
         void SetCLYCAlumThickness(G4double val);
+
         void SetCLYCLiFCollimatorInnerRadius(G4double val);
         void SetCLYCLiFCollimatorOuterRadius(G4double val);
         void SetCLYCLiFCollimatorLength(G4double val);
+
         void SetCLYCPbCollimatorInnerRadius(G4double val);
         void SetCLYCPbCollimatorOuterRadius(G4double val);
         void SetCLYCPbCollimatorLength(G4double val);
+
         void SetCLYCPEHDCollimatorInnerRadius(G4double val);
         void SetCLYCPEHDCollimatorOuterRadius(G4double val);
         void SetCLYCPEHDCollimatorLength(G4double val);
+
         void SetCLYCPEPlugLipRadius(G4double val);
         void SetCLYCPEPlugInnerRadius(G4double val);
         void SetCLYCPEPlugLipLength(G4double val);
@@ -190,6 +196,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         std::vector<GeometryCLYC*> fCLYCDetectors;
         std::vector<G4ThreeVector> fCLYCPositions;
         std::vector<G4RotationMatrix*> fCLYCRotations;
+        std::vector<G4bool> fCLYCPlaceByCrystalCenter;
 
         std::vector<GeometryCASTOR440*> fCASTOR440Detectors;
         std::vector<G4ThreeVector> fCASTOR440Positions;

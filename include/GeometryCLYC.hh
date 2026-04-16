@@ -17,6 +17,8 @@ class GeometryCLYC
 
     G4int Build();
     void PlaceDetector(G4LogicalVolume* expHallLog, G4ThreeVector move, G4RotationMatrix* rotate, G4int copyNo);
+    void PlaceDetectorByCrystalCenter(G4LogicalVolume* expHallLog, G4ThreeVector move, G4RotationMatrix* rotate, G4int copyNo);
+    G4ThreeVector GetCrystalCenterLocal() const;
 
     G4LogicalVolume* GetCLYCLog() { return fCLYCCrystalLog; }
     

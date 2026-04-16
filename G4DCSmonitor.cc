@@ -63,7 +63,7 @@ void sigint_handler(int signal) {
 
 int main(int argc, char** argv)
 {
-    std::signal(SIGINT, sigint_handler);
+    //std::signal(SIGINT, sigint_handler);
 
     // ROOT memory management
     gROOT->SetBatch(kTRUE);

@@ -95,6 +95,7 @@ class DetectorMessenger : public G4UImessenger
 
     // DCS monitor
     G4UIcmdWithoutParameter* fAddCLYCCmd = nullptr;
+    G4UIcmdWithoutParameter* fAddCLYCByCrystalCenterCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCCrystalRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCCrystalLengthCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCAlumThicknessCmd = nullptr;

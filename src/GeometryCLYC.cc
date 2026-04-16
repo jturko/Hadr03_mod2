@@ -219,3 +219,27 @@ void GeometryCLYC::BuildMaterials()
     LiF->AddElement(el_Li_enr, 1);
     LiF->AddElement(nist->FindOrBuildElement("F"), 1);
 }
+
+G4ThreeVector GeometryCLYC::GetCrystalCenterLocal() const
+{
+    // Replicate the offset calculation used in Build()
+    G4double crystalCenterZ = -fPEPlugLipLength - fPEPlugInnerLength - fAlumCasingThickness - (fCLYCCrystalLength / 2.0);
+    return G4ThreeVector(0., 0., crystalCenterZ);
+}
+
+void GeometryCLYC::PlaceDetectorByCrystalCenter(G4LogicalVolume* logic_world, G4ThreeVector move, G4RotationMatrix* rotate, G4int copyNo)
+{
+    G4ThreeVector localOffset = GetCrystalCenterLocal();
+    G4ThreeVector globalOffset = localOffset;
+
+    // Rotate the offset vector if a rotation matrix is provided
+    if (rotate) {
+        globalOffset.transform(*rotate);
+    }
+
+    // Shift the assembly origin so the crystal center aligns with the requested 'move' position
+    G4ThreeVector assemblyPos = move - globalOffset;
+
+    G4bool surfCheck = true;
+    fCLYCAssembly->MakeImprint(logic_world, assemblyPos, rotate, copyNo, surfCheck);
+}

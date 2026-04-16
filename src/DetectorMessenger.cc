@@ -44,10 +44,6 @@
 #include "G4UIdirectory.hh"
 #include "G4UIparameter.hh"
 
-
-
-
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
@@ -166,6 +162,8 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     // CLYC detector 
     fAddCLYCCmd = new G4UIcmdWithoutParameter("/LDRS/det/clyc/add", this);
     fAddCLYCCmd->AvailableForStates(G4State_PreInit);
+    fAddCLYCByCrystalCenterCmd = new G4UIcmdWithoutParameter("/LDRS/det/clyc/addByCrystalCenter", this);
+    fAddCLYCByCrystalCenterCmd->AvailableForStates(G4State_PreInit);
     // crystal
     fSetCLYCCrystalRadiusCmd = new G4UIcmdWithADoubleAndUnit("/LDRS/det/clyc/setCrystalRadius", this);
     fSetCLYCCrystalRadiusCmd->AvailableForStates(G4State_PreInit);
@@ -262,7 +260,8 @@ DetectorMessenger::~DetectorMessenger()
     
     // DCS monitor
     delete fAddCLYCCmd;
-    
+    delete fAddCLYCByCrystalCenterCmd;
+
     delete fSetCLYCCrystalRadiusCmd;
     delete fSetCLYCCrystalLengthCmd;
     
@@ -386,15 +385,21 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String value)
 
     // DCS monitor
     if(command == fAddCLYCCmd) fDetector->AddCLYC();
+    if(command == fAddCLYCByCrystalCenterCmd) fDetector->AddCLYCByCrystalCenter();
+
     if(command == fSetCLYCCrystalRadiusCmd) fDetector->SetCLYCCrystalRadius(fSetCLYCCrystalRadiusCmd->GetNewDoubleValue(value));
     if(command == fSetCLYCCrystalLengthCmd) fDetector->SetCLYCCrystalLength(fSetCLYCCrystalLengthCmd->GetNewDoubleValue(value));
+    
     if(command == fSetCLYCAlumThicknessCmd) fDetector->SetCLYCAlumThickness(fSetCLYCAlumThicknessCmd->GetNewDoubleValue(value));
+    
     if(command == fSetCLYCLiFColInnerRadiusCmd) fDetector->SetCLYCLiFCollimatorInnerRadius(fSetCLYCLiFColInnerRadiusCmd->GetNewDoubleValue(value));
     if(command == fSetCLYCLiFColOuterRadiusCmd) fDetector->SetCLYCLiFCollimatorOuterRadius(fSetCLYCLiFColOuterRadiusCmd->GetNewDoubleValue(value));
     if(command == fSetCLYCLiFColLengthCmd) fDetector->SetCLYCLiFCollimatorLength(fSetCLYCLiFColLengthCmd->GetNewDoubleValue(value));
+    
     if(command == fSetCLYCPbColInnerRadiusCmd) fDetector->SetCLYCPbCollimatorInnerRadius(fSetCLYCPbColInnerRadiusCmd->GetNewDoubleValue(value));
     if(command == fSetCLYCPbColOuterRadiusCmd) fDetector->SetCLYCPbCollimatorOuterRadius(fSetCLYCPbColOuterRadiusCmd->GetNewDoubleValue(value));
     if(command == fSetCLYCPbColLengthCmd) fDetector->SetCLYCPbCollimatorLength(fSetCLYCPbColLengthCmd->GetNewDoubleValue(value));
+    
     if(command == fSetCLYCPEHDColInnerRadiusCmd) fDetector->SetCLYCPEHDCollimatorInnerRadius(fSetCLYCPEHDColInnerRadiusCmd->GetNewDoubleValue(value));
     if(command == fSetCLYCPEHDColOuterRadiusCmd) fDetector->SetCLYCPEHDCollimatorOuterRadius(fSetCLYCPEHDColOuterRadiusCmd->GetNewDoubleValue(value));
     if(command == fSetCLYCPEHDColLengthCmd) fDetector->SetCLYCPEHDCollimatorLength(fSetCLYCPEHDColLengthCmd->GetNewDoubleValue(value));
