@@ -46,21 +46,24 @@ The particle source distribution mode is controlled via `/dcs-monitor/gun/source
 3.  **`CASTOR440_fuel`**: Generates a uniform volume flux from a specific fuel assembly inside a specific cask.
     * Requires: `/dcs-monitor/gun/caskNum [id]` and `/dcs-monitor/gun/fuelNum [id]` (0 to 83).
     * Particle type and energy are set using standard `/gun/` commands.
-4.  **`CASTOR440_fuel_biased`**: Identical spatial origin to `CASTOR440_fuel`, but the emission direction is strictly bounded to a cone intersecting the CLYC detector bounding sphere. Statistical weights are applied to the primary vertices to account for the biased solid angle.
+4.  **`CASTOR440_fuel_biased`**: Identical spatial origin to `CASTOR440_fuel`, but the emission direction is strictly bounded to a cone intersecting the CLYC detector bounding sphere. 
 
 ## Variance Reduction (Biasing)
-To acquire adequate statistics outside the heavy cask shielding, two variance reduction techniques are implemented.
+To achieve adequate statistical precision outside the thick cask shielding, three variance reduction techniques are implemented.
 
 1.  **Geometry Importance Biasing (Weight Windows)**
     * **Command**: `/dcs-monitor/det/useBiasing [true/false]` (Must be called before `/run/initialize`).
-    * **Mechanism**: A parallel world geometry overlays the mass geometry. An inner core covering the fuel region is assigned an importance of 1. Surrounding concentric cylindrical shells increase in importance by factors of 2 (up to 1024) toward the outer radius. This prevents deep-penetrating tracks from being terminated by Russian Roulette as they lose energy through the shielding.
-2.  **Stepping Action Termination**
-    * **Mechanism**: Hard-coded logic in `SteppingAction.cc`. If a particle is inside the cask shielding (`CastorBody`, `Cavity`, or `FuelPhys`), all electrons and positrons are immediately killed. Gammas with kinetic energy below 200 keV are also killed to suppress the computation of the low-energy Compton continuum.
+    * **Mechanism**: A parallel world geometry overlays the mass geometry. The inner core covering the fuel region is assigned a base importance of 1. Surrounding concentric cylindrical shells increase in importance outward, multiplying by factors of 2 for each shell (up to a maximum importance of 1024 at the outermost shell). As particle tracks propagate outwards through the cask shielding into regions of higher importance, they are systematically split. To conserve physical accuracy, the statistical weight of these split tracks is proportionally reduced. This artificially inflates the population of tracks reaching the outer shell and the detector, yielding viable counting statistics despite heavy attenuation.
+2.  **Primary Generator Directional Biasing**
+    * **Command**: `/dcs-monitor/gun/sourceMode CASTOR440_fuel_biased`
+    * **Mechanism**: This run mode applies geometric biasing at the source level. Primary particles originating in the fuel are preferentially emitted within a constrained solid angle (a cone directed specifically towards the CLYC detector). A fractional statistical weight is applied to the primary vertices to compensate for the artificially increased emission probability in the detector's direction.
+3.  **Kinematic Cutoffs (Stepping Action Termination)**
+    * **Mechanism**: Executed in `SteppingAction.cc`. If a particle is inside the cask shielding (`CastorBody`, `Cavity`, or `FuelPhys`), all electrons and positrons are immediately terminated. Gammas with kinetic energy below 200 keV are also terminated to suppress the computation of the low-energy Compton continuum and optimize overall computational efficiency.
 
 ## Output
 Data is output to a ROOT file specified by `/analysis/setFileName [name]`. The file contains two Ntuples:
 
-* **`primary`**: Logs the initial state of generated particles (`pid`, `ekin`, `t`, `x`, `y`, `z`, `px`, `py`, `pz`). Toggled via `/dcs-monitor/run/writePrimary [true/false]`.
+* **`primary`**: Logs the initial state of generated primary particles. This tree is toggled using the `/dcs-monitor/run/writePrimary [true/false]` command. When enabled, it records the particle ID (`pid`), kinetic energy (`ekin`), global time (`t`), origin coordinates (`x`, `y`, `z`), and the momentum direction vector (`px`, `py`, `pz`) for each generated primary.
 * **`hits`**: Logs sensitive detector interactions in the CLYC crystal. Tracks `pid`, `edep` (energy deposited), `t` (global time), `x`, `y`, `z`, `det` (detector copy number), and `weight` (statistical weight from biasing).
 
 ## Example Run Macro
