@@ -38,6 +38,7 @@
 #include "globals.hh"
 
 #include <map>
+#include <atomic>
 
 #include "THnSparse.h"
 
@@ -68,7 +69,8 @@ class RunAction : public G4UserRunAction
     void SetPrintFlag(G4bool);
     ProgressBar * GetProgBar() { return fProgBar; }
     
-    static G4bool WritePrimaryTree;
+    //static G4bool WritePrimaryTree;
+    static std::atomic<G4bool> WritePrimaryTree;
 
   private:
     DetectorConstruction* fDetector = nullptr;

@@ -31,6 +31,8 @@
 #ifndef PhysicsList_h
 #define PhysicsList_h 1
 
+class G4GeometrySampler;
+
 #include "G4VModularPhysicsList.hh"
 #include "globals.hh"
 
@@ -39,12 +41,17 @@
 class PhysicsList : public G4VModularPhysicsList
 {
   public:
-    PhysicsList();
-    ~PhysicsList() = default;
+    PhysicsList(G4bool useImportanceBiasing = false);
+    ~PhysicsList();// = default;
 
   public:
     void ConstructParticle() override;
     void SetCuts() override;
+
+  private:
+    G4GeometrySampler* fGammaSampler = nullptr;
+    G4GeometrySampler* fNeutronSampler = nullptr;
+    G4bool fUseImportanceBiasing;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

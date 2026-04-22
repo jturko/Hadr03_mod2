@@ -18,22 +18,25 @@ void GeometryParallelBiasing::Construct() {
 
     if (!fDetector->GetUseBiasing()) {
         G4cout << " [Biasing] Geometry Importance Biasing is OFF. Analog tracking only." << G4endl;
+        iStore->AddImportanceGeometryCell(1, *ghostWorld);
         return; 
     }
+    
+    // Define the total number of shells to be used in the imporance biasing
+    G4int nShells = 20; 
 
-    // 1. Set the background world importance to the MAXIMUM value (1024).
+    // 1. Set the background world importance to the MAXIMUM value (2^nShells).
     // This ensures tracks that escape the cask are not killed by Russian Roulette
     // in the air before they reach the detector.
-    iStore->AddImportanceGeometryCell(1024, *ghostWorld);
+    iStore->AddImportanceGeometryCell(pow(2,nShells), *ghostWorld);
 
     // 2. Elongate the shells to span the entire 25m world to prevent 
     // particles from escaping the top/bottom and bypassing the importance gradient.
     G4double rMin = 800.0 * mm;
     G4double rMax = 1330.0 * mm;
     G4double height = 24.0 * m; 
-    //G4int nShells = 10; 
-    G4int nShells = 35; 
     G4double shellThickness = (rMax - rMin) / nShells;
+    
 
     G4int numCasks = fDetector->GetNumCASTOR440s();
     for (G4int c = 0; c < numCasks; ++c) {
@@ -68,53 +71,3 @@ void GeometryParallelBiasing::Construct() {
         }
     }
 }
-
-
-//void GeometryParallelBiasing::Construct() {
-//    G4VPhysicalVolume* ghostWorld = GetWorld();
-//    G4LogicalVolume* ghostLogical = ghostWorld->GetLogicalVolume();
-//    G4IStore* iStore = G4IStore::GetInstance(GetName());
-//
-//    // FIX: Corrected the logic and updated the debug message
-//    if (!fDetector->GetUseBiasing()) {
-//        G4cout << " [Biasing] Geometry Importance Biasing is OFF. Analog tracking only." << G4endl;
-//        return; 
-//    }
-//
-//    G4cout << " [Biasing] Geometry Importance Biasing is ON. Constructing Parallel World: " << GetName() << G4endl;
-//    iStore->AddImportanceGeometryCell(1, *ghostWorld);
-//    G4cout << " [Biasing] Base ghost world importance set to 1." << G4endl;
-//
-//    G4double rMin = 800.0 * mm;
-//    G4double rMax = 1330.0 * mm;
-//    G4double height = 4080.0 * mm; 
-//    G4int nShells = 10; 
-//    G4double shellThickness = (rMax - rMin) / nShells;
-//
-//    G4int numCasks = fDetector->GetNumCASTOR440s();
-//    for (G4int c = 0; c < numCasks; ++c) {
-//        G4ThreeVector pos = fDetector->GetCASTOR440Position(c);
-//        G4RotationMatrix* rot = fDetector->GetCASTOR440Rotation(c);
-//        
-//        for (G4int i = 0; i < nShells; ++i) {
-//            G4double innerR = rMin + i * shellThickness;
-//            G4double outerR = innerR + shellThickness;
-//
-//            G4String solidName = "BiasingShellSolid_c" + std::to_string(c) + "_s" + std::to_string(i);
-//            G4Tubs* shellSolid = new G4Tubs(solidName, innerR, outerR, height/2.0, 0.*deg, 360.*deg);
-//            
-//            G4String logName = "BiasingShellLog_c" + std::to_string(c) + "_s" + std::to_string(i);
-//            G4LogicalVolume* shellLogical = new G4LogicalVolume(shellSolid, nullptr, logName);
-//            
-//            G4String physName = "BiasingShellPhys_c" + std::to_string(c) + "_s" + std::to_string(i);
-//            G4VPhysicalVolume* shellPhys = new G4PVPlacement(rot, pos, shellLogical, 
-//                                                             physName, ghostLogical, false, c * 100 + i);
-//            
-//            G4double importance = std::pow(2.0, i + 1); 
-//            iStore->AddImportanceGeometryCell(importance, *shellPhys, c * 100 + i);
-//            
-//            // VERIFICATION: Print out the successful mapping of each shell
-//            G4cout << " [Biasing] Placed " << physName << " with Importance: " << importance << G4endl;
-//        }
-//    }
-//}

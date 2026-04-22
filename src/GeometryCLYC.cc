@@ -23,9 +23,13 @@
 #include "G4Colour.hh"
 #include "G4SystemOfUnits.hh"
 
-// 2. Class Header after Geant4 Dependencies
 #include "GeometryCLYC.hh"
 #include <string>
+
+// for setting finer production cuts in CLYC
+#include "G4Region.hh"
+#include "G4RegionStore.hh"
+
 
 GeometryCLYC::GeometryCLYC() :
     fCLYCAssembly(NULL),
@@ -158,6 +162,13 @@ G4int GeometryCLYC::Build()
     G4Tubs* CLYC_solid = new G4Tubs("CLYC_solid", 0.*mm, R, L/2.0, startPhi, endPhi);
     fCLYCCrystalLog = new G4LogicalVolume(CLYC_solid, CLYC_material, "CLYCCrystalLog", 0, 0, 0);
     fCLYCCrystalLog->SetVisAttributes(new G4VisAttributes(true, fCLYCCrystalColour));
+    // --- set region in CLYC for finer physics list production cuts
+    G4Region* clycRegion = G4RegionStore::GetInstance()->GetRegion("CLYCRegion", false);
+    if (!clycRegion) {
+        clycRegion = new G4Region("CLYCRegion");
+    }
+    clycRegion->AddRootLogicalVolume(fCLYCCrystalLog);
+    // ---
     move = G4ThreeVector(0., 0., crystalCenterZ);
     fCLYCAssembly->AddPlacedVolume(fCLYCCrystalLog, move, rotate);
 

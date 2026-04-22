@@ -48,6 +48,7 @@
 #include "G4IonPhysicsPHP.hh"
 #include "G4IonPhysicsXS.hh"
 #include "G4IonQMDPhysics.hh"
+#include "G4ThermalNeutrons.hh"
 #include "G4NuclideTable.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
@@ -77,91 +78,63 @@
 #include "G4ImportanceBiasing.hh"
 #include "G4GeometrySampler.hh"
 
+// region-specific production cuts in CLYC
+#include "G4Region.hh"
+#include "G4RegionStore.hh"
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PhysicsList::PhysicsList()
+PhysicsList::PhysicsList(G4bool useImportanceBiasing) : fUseImportanceBiasing(useImportanceBiasing)
 {
     G4int verb = 1;
     SetVerboseLevel(verb);
 
-    //   // add new units for cross sections
-    //   //
-    //   new G4UnitDefinition("mm2/g", "mm2/g", "Surface/Mass", mm2 / g);
-    //   new G4UnitDefinition("um2/mg", "um2/mg", "Surface/Mass", um * um / mg);
-
-    //   // mandatory for G4NuclideTable
-    //   //
-    //   const G4double meanLife = 1 * nanosecond;
-    //   G4NuclideTable::GetInstance()->SetMeanLifeThreshold(meanLife);
-
-    //   // Hadron Elastic scattering
-    //   //
-    //    RegisterPhysics( new G4HadronElasticPhysicsHP(verb));
-    //   // RegisterPhysics(new G4HadronElasticPhysicsXS(verb));
-
-    //   // Hadron Inelastic physics
-    //   //
-    //   ////RegisterPhysics( new G4HadronPhysicsFTFP_BERT_HP(verb));
-    //   RegisterPhysics(new G4HadronPhysicsQGSP_BIC_HP(verb));
-    //   ////RegisterPhysics( new G4HadronPhysicsQGSP_BIC_AllHP(verb));
-    //   ////RegisterPhysics( new G4HadronPhysicsFTFP_BERT(verb));
-    //   ////RegisterPhysics( new G4HadronPhysicsQGSP_BIC(verb));
-    //   ////RegisterPhysics( new G4HadronInelasticQBBC(verb));
-    //   ////RegisterPhysics( new G4HadronPhysicsINCLXX(verb));
-    //   ////RegisterPhysics( new G4HadronPhysicsShielding(verb));
-
-    //   // Ion Elastic scattering
-    //   //
-    //   RegisterPhysics(new G4IonElasticPhysics(verb));
-
-    //   // Ion Inelastic physics
-    //   //
-    //   RegisterPhysics(new G4IonPhysicsXS(verb));
-    //   ////RegisterPhysics( new G4IonPhysicsPHP(verb));
-    //   ////RegisterPhysics( new G4IonQMDPhysics(verb));
-    //   ////RegisterPhysics( new G4IonINCLXXPhysics(verb));
-
-    //   // Gamma physics
-    //   //
-    //   RegisterPhysics(new GammaNuclearPhysics("gamma"));
-    //   ////RegisterPhysics( new GammaNuclearPhysicsLEND("gamma"));
+    // EM physics
+    //RegisterPhysics(new G4EmStandardPhysics());
+    RegisterPhysics(new G4EmStandardPhysics_option4());
     
+    // hadron elastic physics
+    //RegisterPhysics(new G4HadronElasticPhysicsXS(verb));
+    RegisterPhysics(new G4HadronElasticPhysicsHP(verb));
     
-
-
-    RegisterPhysics(new G4EmStandardPhysics());
-    //RegisterPhysics(new G4EmStandardPhysics_option4());
-    
-    RegisterPhysics(new G4HadronElasticPhysicsXS(verb));
-    
+    // hadron inelastic physics
     RegisterPhysics(new G4HadronPhysicsQGSP_BIC_HP(verb));
     //RegisterPhysics(new G4HadronPhysicsQGSP_BIC_AllHP(verb));
     
+    // thermal neutron scattering below 4 eV
+    RegisterPhysics(new G4ThermalNeutrons());
+
+    // elastic ion scattering
     RegisterPhysics(new G4IonElasticPhysics(verb));
     
+    // other stuff
     RegisterPhysics(new G4IonPhysicsXS(verb));
-    
     RegisterPhysics(new GammaNuclearPhysics("gamma"));
-
     RegisterPhysics(new G4RadioactiveDecayPhysics());
+    
+    // importance biasing
+    if(fUseImportanceBiasing) {
+        // Enable navigation in the parallel world
+        RegisterPhysics(new G4ParallelWorldPhysics("ParallelBiasingWorld"));
+        // Gamma biasing
+        fGammaSampler = new G4GeometrySampler("ParallelBiasingWorld", "gamma");
+        fGammaSampler->SetParallel(true);
+        RegisterPhysics(new G4ImportanceBiasing(fGammaSampler, "ParallelBiasingWorld"));
+        // Neutron biasing
+        fNeutronSampler = new G4GeometrySampler("ParallelBiasingWorld", "neutron");
+        fNeutronSampler->SetParallel(true);
+        RegisterPhysics(new G4ImportanceBiasing(fNeutronSampler, "ParallelBiasingWorld"));
+    }
 
+}
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-
-    // for importance biasing
-    // 1. Enable navigation in the parallel world
-    RegisterPhysics(new G4ParallelWorldPhysics("ParallelBiasingWorld"));
-    // Gamma biasing
-    G4GeometrySampler* gammaSampler = new G4GeometrySampler("ParallelBiasingWorld", "gamma");
-    gammaSampler->SetParallel(true);
-    RegisterPhysics(new G4ImportanceBiasing(gammaSampler, "ParallelBiasingWorld"));
-    // Neutron biasing
-    G4GeometrySampler* neutronSampler = new G4GeometrySampler("ParallelBiasingWorld", "neutron");
-    neutronSampler->SetParallel(true);
-    RegisterPhysics(new G4ImportanceBiasing(neutronSampler, "ParallelBiasingWorld"));
-
-
+PhysicsList::~PhysicsList()
+{
+    delete fGammaSampler;
+    delete fNeutronSampler;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -191,14 +164,35 @@ void PhysicsList::ConstructParticle()
 
 void PhysicsList::SetCuts()
 {
-    //SetCutValue(0. * mm, "proton");
-    //SetCutValue(1. * um, "proton");
-    
-    SetCutValue(1.0 * mm, "gamma");
-    SetCutValue(10.0 * mm, "e-");   
-    SetCutValue(10.0 * mm, "e+");   
-    SetCutValue(1. * um, "proton");
+    // Global cuts (coarse, appropriate for cask shielding)
+    SetCutValue( 1.0 * mm, "gamma"  );
+    SetCutValue(10.0 * mm, "e-"     );   
+    SetCutValue(10.0 * mm, "e+"     );   
+    SetCutValue( 1.0 * um, "proton" );
 
+    // FIX: Fine cuts for the CLYC detector region
+    G4Region* clycRegion = G4RegionStore::GetInstance()->GetRegion("CLYCRegion", false);
+    if (clycRegion) {
+        G4ProductionCuts* clycCuts = new G4ProductionCuts();
+        clycCuts->SetProductionCut(0.1 * mm, "gamma");
+        clycCuts->SetProductionCut(0.1 * mm, "e-");
+        clycCuts->SetProductionCut(0.1 * mm, "e+");
+        clycCuts->SetProductionCut(0.1 * mm, "proton");
+        clycRegion->SetProductionCuts(clycCuts);
+        G4cout << " [PhysicsList] Applied fine production cuts (0.1 mm) to CLYCRegion" << G4endl;
+    }
 }
+
+//void PhysicsList::SetCuts()
+//{
+//    //SetCutValue(0. * mm, "proton");
+//    //SetCutValue(1. * um, "proton");
+//    
+//    SetCutValue(1.0 * mm, "gamma");
+//    SetCutValue(1.0 * mm, "e-");   
+//    SetCutValue(1.0 * mm, "e+");   
+//    SetCutValue(1.0 * um, "proton");
+//
+//}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

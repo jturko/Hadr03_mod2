@@ -76,46 +76,51 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
-    G4AnalysisManager* analysis = G4AnalysisManager::Instance();
+    // generate the vertex
+    // TODO: move the call of GeneratePrimaryVertex explicitly into the member 'Generate*' functions
+    switch (fSourceMode) {
+        case kGPS:
+            fGPS->GeneratePrimaryVertex(anEvent);
+            break;
 
-    // variables to save primary info
-    G4double ekin, time;
-    G4ThreeVector pos, mom;
-    G4int particle;
-
-    
-    if(fSourceMode == kGPS) { // GPS-based
-        fGPS->GeneratePrimaryVertex(anEvent);
-    } 
-    else { // particle gun-based
-        if(fSourceMode == kCASTOR440_surface) {
+        case kCASTOR440_surface:
             GenerateCASTOR440Flux();
-            fParticleGun->GeneratePrimaryVertex(anEvent); 
-        }
-        else if(fSourceMode == kCASTOR440_fuel) { 
+            fParticleGun->GeneratePrimaryVertex(anEvent);
+            break;
+
+        case kCASTOR440_fuel:
             GenerateCASTOR440FuelFlux();
             fParticleGun->GeneratePrimaryVertex(anEvent);
-        }
-        else if(fSourceMode == kCASTOR440_fuel_biased) {
-            GenerateCASTOR440FuelFlux_GeometricCLYCbias(anEvent); // vertex created inside
-        }
-        else {
+            break;
+
+        case kCASTOR440_fuel_biased:
+            GenerateCASTOR440FuelFlux_GeometricCLYCbias(anEvent);
+            break;
+
+        default:
             G4Exception("PrimaryGeneratorAction::GeneratePrimaries()",
                         "UnknownSourceMode",
                         FatalException,
-                        Form("The source mode '%s' is unknown", fSourceMode));
-        }
-
-        ekin =  fParticleGun->GetParticleEnergy();
-        time =  fParticleGun->GetParticleTime();
-        pos =   fParticleGun->GetParticlePosition();
-        mom =   fParticleGun->GetParticleMomentumDirection();
-        particle = fParticleGun->GetParticleDefinition()->GetPDGEncoding();
+                        "Unknown source mode.");
+            return;
     }
 
-    // save particle info to tree
-    // [0]: 1st ntuple is for primaries
-    if(RunAction::WritePrimaryTree) {
+    // record primary particle info, if activated
+    if (RunAction::WritePrimaryTree) {
+        G4PrimaryVertex* vertex = 
+            anEvent->GetPrimaryVertex(anEvent->GetNumberOfPrimaryVertex() - 1);
+        if (!vertex) return;
+
+        G4PrimaryParticle* primary = vertex->GetPrimary(0);
+        if (!primary) return;
+
+        G4int         particle = primary->GetPDGcode();
+        G4double      ekin     = primary->GetKineticEnergy();
+        G4double      time     = vertex->GetT0();
+        G4ThreeVector pos      = vertex->GetPosition();
+        G4ThreeVector mom      = primary->GetMomentumDirection();
+
+        G4AnalysisManager* analysis = G4AnalysisManager::Instance();
         G4int idx = 0;
         analysis->FillNtupleDColumn(idx, 0, particle);
         analysis->FillNtupleDColumn(idx, 1, ekin);
@@ -128,7 +133,6 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         analysis->FillNtupleDColumn(idx, 8, mom.z());
         analysis->AddNtupleRow(idx);
     }
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -148,7 +152,8 @@ void PrimaryGeneratorAction::GenerateCASTOR440Flux()
         return;
     }
 
-    G4int caskIndex = (G4int)(G4UniformRand() * numCasks);
+    //G4int caskIndex = (G4int)(G4UniformRand() * numCasks);
+    G4int caskIndex = fCaskNum;
     G4ThreeVector caskPos = fDetector->GetCASTOR440Position(caskIndex);
     G4RotationMatrix* caskRot = fDetector->GetCASTOR440Rotation(caskIndex);
 

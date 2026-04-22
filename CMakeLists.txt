@@ -75,10 +75,9 @@ file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
 #----------------------------------------------------------------------------
-# Add the executable, and link it to the Geant4 libraries
+# Add the executable, 
 #
 add_executable(G4DCSmonitor G4DCSmonitor.cc ${sources} ${headers})
-target_link_libraries(G4DCSmonitor ${Geant4_LIBRARIES} )
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
@@ -97,7 +96,8 @@ foreach(_script ${G4DCSmonitor_SCRIPTS})
     )
 endforeach()
 
-target_link_libraries(G4DCSmonitor ${ROOT_LIBRARIES} Eve)
+# link the libraries (geant4, root, eve)
+target_link_libraries(G4DCSmonitor ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} Eve)
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX

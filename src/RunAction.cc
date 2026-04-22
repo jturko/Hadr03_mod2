@@ -54,7 +54,8 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4bool RunAction::WritePrimaryTree = false;
+//G4bool RunAction::WritePrimaryTree = false;
+std::atomic<G4bool> RunAction::WritePrimaryTree{false};
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
