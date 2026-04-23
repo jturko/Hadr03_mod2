@@ -64,23 +64,16 @@ GeometryCLYC::GeometryCLYC() :
     fCLYCCrystalMatName = "CLYC";
     fAlumMatName = "G4_Al";
     fPbMatName = "G4_Pb";
-    fPbMatName = "G4_Pb";
+    fLiFMatName = "LiF";
     fPEHDMatName = "G4_POLYETHYLENE";
 
     G4double alpha = 1.0; 
-    //fCLYCCrystalColour = G4Colour(0.0, 1.0, 0.0, alpha); // Green
-    //fAlumColour        = G4Colour(0.5, 0.5, 0.5, alpha); // Grey
-    //fLiFColour         = G4Colour(0.5, 1.0, 0.0, alpha); // Green-yellow-ish
-    //fPbColour          = G4Colour(0.6, 0.4, 0.2, alpha); // Brown
-    //fPEHDColour        = G4Colour(0.0, 1.0, 1.0, alpha); // Cyan
-    //fPEPlugColour      = G4Colour(1.0, 1.0, 0.0, alpha); // Yellow
-
-    fCLYCCrystalColour = G4Colour(0.45, 0.65, 0.85, 0.5); // Icy translucent blue
-    fAlumColour        = G4Colour(0.75, 0.77, 0.80, alpha); // Brushed silver/metallic grey
-    fLiFColour         = G4Colour(0.95, 0.90, 0.70, alpha); // Pale ivory/sand
-    fPbColour          = G4Colour(0.35, 0.35, 0.40, alpha); // Dark heavy gunmetal/slate
-    fPEHDColour        = G4Colour(0.92, 0.92, 0.92, alpha); // Milky opaque white
-    fPEPlugColour      = G4Colour(0.15, 0.15, 0.15, alpha); // Dark charcoal/black plastic
+    fCLYCCrystalColour = G4Colour(0.0, 1.0, 0.0, 0.5); // Green
+    fAlumColour        = G4Colour(0.5, 0.5, 0.5, alpha); // Grey
+    fLiFColour         = G4Colour(0.5, 1.0, 0.0, alpha); // Green-yellow-ish
+    fPbColour          = G4Colour(0.6, 0.4, 0.2, alpha); // Brown
+    fPEHDColour        = G4Colour(0.0, 1.0, 1.0, alpha); // Cyan
+    fPEPlugColour      = G4Colour(1.0, 1.0, 0.0, alpha); // Yellow
 
 }
 
@@ -199,36 +192,40 @@ void GeometryCLYC::BuildMaterials()
 {
     G4NistManager* nist = G4NistManager::Instance();
     
-    // Short-circuit if custom material already exists
+    // return early if custom materials already built
     if (nist->FindOrBuildMaterial("CLYC") != nullptr) {
         return;
     }
 
-    G4Material* mat_Pb = nist->FindOrBuildMaterial(fPbMatName);
-    G4Material* mat_PE_HD = nist->FindOrBuildMaterial(fPEHDMatName);
-    G4Material* mat_Al = nist->FindOrBuildMaterial(fAlumMatName);
-
+    // elements
+    // NIST 
+    G4Element* el_Cs = nist->FindOrBuildElement("Cs");
+    G4Element* el_Y  = nist->FindOrBuildElement("Y");
+    G4Element* el_Cl = nist->FindOrBuildElement("Cl");
+    G4Element* el_Li = nist->FindOrBuildElement("Li");
+    G4Element* el_F  = nist->FindOrBuildElement("F");
+    // enriched lithium
     G4Isotope* iso_Li6 = new G4Isotope("Li6", 3, 6, 6.015 * g/mole);
     G4Isotope* iso_Li7 = new G4Isotope("Li7", 3, 7, 7.016 * g/mole);
-
     G4Element* el_Li_enr = new G4Element("Enriched Lithium", "Li", 2);
     el_Li_enr->AddIsotope(iso_Li6, 95.0 * perCent);
     el_Li_enr->AddIsotope(iso_Li7, 5.0 * perCent);
 
-    G4Element* el_Cs = nist->FindOrBuildElement("Cs");
-    G4Element* el_Y  = nist->FindOrBuildElement("Y");
-    G4Element* el_Cl = nist->FindOrBuildElement("Cl");
-
+    // materials
+    // NIST 
+    G4Material* mat_Pb = nist->FindOrBuildMaterial(fPbMatName);
+    G4Material* mat_PE_HD = nist->FindOrBuildMaterial(fPEHDMatName);
+    G4Material* mat_Al = nist->FindOrBuildMaterial(fAlumMatName);
+    // CLYC
     G4Material* mat_CLYC = new G4Material("CLYC", 3.31 * g/cm3, 4);
     mat_CLYC->AddElement(el_Cs,     2);
     mat_CLYC->AddElement(el_Li_enr, 1);
     mat_CLYC->AddElement(el_Y,      1);
     mat_CLYC->AddElement(el_Cl,     6);   
-
+    // enriched LiF
     G4Material* LiF = new G4Material("LiF", 2.635*g/cm3, 2);
-    //LiF->AddElement(nist->FindOrBuildElement("Li"), 1);
     LiF->AddElement(el_Li_enr, 1);
-    LiF->AddElement(nist->FindOrBuildElement("F"), 1);
+    LiF->AddElement(el_F, 1);
 }
 
 G4ThreeVector GeometryCLYC::GetCrystalCenterLocal() const

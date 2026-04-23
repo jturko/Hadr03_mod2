@@ -53,7 +53,7 @@ To achieve adequate statistical precision outside the thick cask shielding, thre
 
 1.  **Geometry Importance Biasing (Weight Windows)**
     * **Command**: `/dcs-monitor/det/useBiasing [true/false]` (Must be called before `/run/initialize`).
-    * **Mechanism**: A parallel world geometry overlays the mass geometry. The inner core covering the fuel region is assigned a base importance of 1. Surrounding concentric cylindrical shells increase in importance outward, multiplying by factors of 2 for each shell (up to a maximum importance of 1024 at the outermost shell). As particle tracks propagate outwards through the cask shielding into regions of higher importance, they are systematically split. To conserve physical accuracy, the statistical weight of these split tracks is proportionally reduced. This artificially inflates the population of tracks reaching the outer shell and the detector, yielding viable counting statistics despite heavy attenuation.
+    * **Mechanism**: A parallel world geometry overlays the mass geometry. The inner core covering the fuel region is assigned a base importance of 1. Surrounding concentric cylindrical shells increase in importance outward, multiplying by factors of 2 for each shell. As particle tracks propagate outwards through the cask shielding into regions of higher importance, they are systematically split. To conserve physical accuracy, the statistical weight of these split tracks is proportionally reduced. This artificially inflates the population of tracks reaching the outer shell and the detector, yielding viable counting statistics despite heavy attenuation. 
 2.  **Primary Generator Directional Biasing**
     * **Command**: `/dcs-monitor/gun/sourceMode CASTOR440_fuel_biased`
     * **Mechanism**: This run mode applies geometric biasing at the source level. Primary particles originating in the fuel are preferentially emitted within a constrained solid angle (a cone directed specifically towards the CLYC detector). A fractional statistical weight is applied to the primary vertices to compensate for the artificially increased emission probability in the detector's direction.
@@ -65,6 +65,20 @@ Data is output to a ROOT file specified by `/analysis/setFileName [name]`. The f
 
 * **`primary`**: Logs the initial state of generated primary particles. This tree is toggled using the `/dcs-monitor/run/writePrimary [true/false]` command. When enabled, it records the particle ID (`pid`), kinetic energy (`ekin`), global time (`t`), origin coordinates (`x`, `y`, `z`), and the momentum direction vector (`px`, `py`, `pz`) for each generated primary.
 * **`hits`**: Logs sensitive detector interactions in the CLYC crystal. Tracks `pid`, `edep` (energy deposited), `t` (global time), `x`, `y`, `z`, `det` (detector copy number), and `weight` (statistical weight from biasing).
+
+## TODO
+### **Biasing**
+- [ ] Validate weights for geometric biasing
+- [ ] Validate weights for importance biasing (might require temporary modifications to CASTOR 440 materaials; iron/steel -> air)
+- [ ] Implement geometric biasing for any SourceMode
+- [ ] Implement messenger commands to set shell number/dimensions for gammas/neutrons
+### **Primary generators**
+- [ ] Implement $\cos^2\theta$ (intensity) emission distribution (isotropic) from CASTOR 440
+- [ ] Implement primary generator using phase-space input file
+### **Data output**
+- [ ] CASTOR 440 surface tracker (to create phase-space for flux leaving the cask)
+### **Misc**
+- [ ] Create example simulations directory / examples, for quick validation runs
 
 ## Example Run Macro
 ```macro

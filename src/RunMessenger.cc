@@ -41,29 +41,23 @@
 
 RunMessenger::RunMessenger(RunAction* run) : fRun(run)
 {
+    fRunDir = new G4UIdirectory("/dcs-monitor/run/");
+    fRunDir->SetGuidance("run commands for the DCS monitor simulation");
+    
     fWritePrimaryCmd = new G4UIcmdWithABool("/dcs-monitor/run/writePrimary", this);
-    fWritePrimaryCmd->SetGuidance("Toggle filling of the primary ntuple");
+    fWritePrimaryCmd->SetGuidance("Toggle filling of the primary vertex ntuple");
     fWritePrimaryCmd->SetParameterName("write", true);
     fWritePrimaryCmd->SetDefaultValue(true);
     fWritePrimaryCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
-    fRunDir = new G4UIdirectory("/testhadr/run/");
-    fRunDir->SetGuidance("run commands");
-
-    fPrintCmd = new G4UIcmdWithABool("/testhadr/run/printStat", this);
-    fPrintCmd->SetGuidance("print list of nuclear reactions");
-    fPrintCmd->SetParameterName("print", false);
-    fPrintCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 RunMessenger::~RunMessenger()
 {
-    delete fWritePrimaryCmd;
-
-    delete fPrintCmd;
     delete fRunDir;
+    delete fWritePrimaryCmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -73,11 +67,6 @@ void RunMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
     if (command == fWritePrimaryCmd) {
         RunAction::WritePrimaryTree = fWritePrimaryCmd->GetNewBoolValue(newValue);
     }
-    
-    if (command == fPrintCmd) {
-        fRun->SetPrintFlag(fPrintCmd->GetNewBoolValue(newValue));
-    }
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

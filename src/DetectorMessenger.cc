@@ -170,6 +170,7 @@ DetectorMessenger::~DetectorMessenger()
 
     delete fSetCLYCCrystalMaterialNameCmd;
     delete fSetCLYCAlumMaterialNameCmd;
+    delete fSetCLYCLiFMaterialNameCmd;
     delete fSetCLYCPbMaterialNameCmd;
     delete fSetCLYCPEHDMaterialNameCmd;
     
