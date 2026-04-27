@@ -1,41 +1,11 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-/// \file PrimaryGeneratorAction.hh
-/// \brief Definition of the PrimaryGeneratorAction class
-//
-//
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 #ifndef PrimaryGeneratorAction_h
 #define PrimaryGeneratorAction_h 1
 
 #include "G4ParticleGun.hh"
 #include "G4GeneralParticleSource.hh"
 #include "G4VUserPrimaryGeneratorAction.hh"
+#include "G4ThreeVector.hh"
+#include "G4SystemOfUnits.hh"
 #include "globals.hh"
 
 #include "THnSparse.h"
@@ -62,47 +32,56 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
   public:
     void GeneratePrimaries(G4Event*) override;
-    
-    // guns
-    G4ParticleGun* GetParticleGun() { return fParticleGun; };
-    G4GeneralParticleSource* GetGPS() { return fGPS; };
 
-    // set the source mode (see enum for types)
+    G4ParticleGun*           GetParticleGun() { return fParticleGun; }
+    G4GeneralParticleSource* GetGPS()         { return fGPS; }
+
     void SetSourceMode(SourceMode mode);
-    
-    // For uniform distrib. in a specific cask/fuelrod combo
-    void SetCaskNum(G4int val) { fCaskNum = val; }
-    void SetFuelNum(G4int val) { fFuelNum = val; }
+
+    void SetCaskNum (G4int val) { fCaskNum  = val; }
+    void SetFuelNum (G4int val) { fFuelNum  = val; }
     void SetIsotopeZ(G4int val) { fIsotopeZ = val; }
     void SetIsotopeA(G4int val) { fIsotopeA = val; }
 
-    //void SetProtons();
-    //void SetNeutrons();
-    //void SetNeutronPhaseSpace(std::shared_ptr<THnSparseD>);
+    // Bounding sphere radius around the CLYC assembly used by the directional
+    // bias. Exposed so it can be tied to GeometryCLYC dimensions later if you
+    // want a tighter cone.
+    void     SetCLYCBoundingRadius(G4double r) { fCLYCBoundingRadius = r; }
+    G4double GetCLYCBoundingRadius() const     { return fCLYCBoundingRadius; }
 
   private:
-    G4ParticleGun* fParticleGun = nullptr;
-    G4GeneralParticleSource* fGPS = nullptr;
-    DetectorConstruction* fDetector = nullptr;
+    G4ParticleGun*             fParticleGun = nullptr;
+    G4GeneralParticleSource*   fGPS         = nullptr;
+    DetectorConstruction*      fDetector    = nullptr;
     PrimaryGeneratorMessenger* fPrimaryGeneratorMessenger = nullptr;
 
     SourceMode fSourceMode;
-    
-    void GenerateCASTOR440Flux();
 
-    void GenerateCASTOR440FuelFlux();
-    G4int fCaskNum = 0;
-    G4int fFuelNum = 0;
-    G4int fIsotopeZ = 27; // Default Co-60
-    G4int fIsotopeA = 60;
+    // ----- Source mode implementations -----
+    void GenerateCASTOR440Flux();                                     // surface flux
+    void GenerateCASTOR440FuelFlux();                                 // unbiased fuel flux
+    void GenerateCASTOR440FuelFlux_GeometricCLYCbias(G4Event* event); // biased fuel flux
 
-    void GenerateCASTOR440FuelFlux_GeometricCLYCbias(G4Event* anEvent);
+    // ----- Shared primitives used by both biased and unbiased modes -----
+    // Returns a uniformly sampled global position inside (fCaskNum, fFuelNum).
+    // Throws via G4Exception if the configured indices are invalid.
+    G4ThreeVector GenerateFuelVertexPosition();
+    // Sets a globally isotropic momentum direction on fParticleGun.
+    void          SetIsotropicDirection();
+    // Sets a directional-bias momentum direction (cone subtending the CLYC
+    // bounding sphere) and returns the statistical weight to apply to the
+    // resulting primary vertex.
+    G4double      SetBiasedDirectionTowardsCLYC(const G4ThreeVector& vertexPos);
 
-    //G4double fNeutronMass;
-    //G4bool fUseNeutronPhaseSpace;
-    //std::shared_ptr<THnSparseD> fhNeutronPhaseSpace;
+    // Source / fuel selection
+    G4int    fCaskNum  = 0;
+    G4int    fFuelNum  = 0;
+    G4int    fIsotopeZ = 27; // default Co-60
+    G4int    fIsotopeA = 60;
+
+    // Default bounding sphere radius used by the geometric bias
+    G4double fCLYCBoundingRadius = 150.0 * CLHEP::mm;
 };
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 #endif
+

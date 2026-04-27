@@ -1,36 +1,3 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-/// \file DetectorConstruction.hh
-/// \brief Definition of the DetectorConstruction class
-//
-//
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 #ifndef DetectorConstruction_h
 #define DetectorConstruction_h 1
 
@@ -46,8 +13,6 @@ class DetectorMessenger;
 class GeometryCLYC;
 class GeometryCASTOR440;
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 class DetectorConstruction : public G4VUserDetectorConstruction
 {
     public:
@@ -60,35 +25,34 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     public:
 
-        const G4VPhysicalVolume* GetWorld()     { return fPWorld; };
+        const G4VPhysicalVolume* GetWorld() { return fPWorld; }
 
-        // for biasing
-        void SetUseBiasing(G4bool val) { fUseBiasing = val; }
-        G4bool GetUseBiasing() const { return fUseBiasing; }
-        
+        // Biasing
+        void  SetUseBiasing(G4bool val) { fUseBiasing = val; }
+        G4bool GetUseBiasing() const    { return fUseBiasing; }
+
         void     SetNShells(G4int n)               { fNShells = n; }
         G4int    GetNShells() const                { return fNShells; }
 
-        void     SetBiasingInnerRadius (G4double r) { fBiasRMin  = r; }
-        void     SetBiasingOuterRadius (G4double r) { fBiasRMax  = r; }
-        void     SetBiasingInnerHeight (G4double h) { fBiasHMin  = h; }
-        G4double GetBiasingInnerRadius () const     { return fBiasRMin; }
-        G4double GetBiasingOuterRadius () const     { return fBiasRMax; }
-        G4double GetBiasingInnerHeight () const     { return fBiasHMin; }
+        void     SetBiasingInnerRadius (G4double r){ fBiasRMin = r; }
+        void     SetBiasingOuterRadius (G4double r){ fBiasRMax = r; }
+        void     SetBiasingInnerHeight (G4double h){ fBiasHMin = h; }
+        G4double GetBiasingInnerRadius () const    { return fBiasRMin; }
+        G4double GetBiasingOuterRadius () const    { return fBiasRMax; }
+        G4double GetBiasingInnerHeight () const    { return fBiasHMin; }
 
-        // placement
-        void SetPosition(G4ThreeVector pos)     { fPosition = pos; };
-        void SetRotation(G4ThreeVector rot)     { fRotation = rot; };
-        
+        // Placement
+        void SetPosition(G4ThreeVector pos) { fPosition = pos; }
+        void SetRotation(G4ThreeVector rot) { fRotation = rot; }
+
         // CLYC
-        void AddCLYC();
-        void AddCLYCByCrystalCenter();
-        G4int GetNumCLYC() const { return fCLYCDetectors.size(); }
-        G4ThreeVector GetCLYCPosition(G4int index) const { return fCLYCPositions[index]; }
+        void  AddCLYC();
+        void  AddCLYCByCrystalCenter();
+        G4int GetNumCLYC() const                          { return fCLYCDetectors.size(); }
+        G4ThreeVector GetCLYCPosition(G4int index) const  { return fCLYCPositions[index]; }
 
         void SetCLYCCrystalRadius(G4double val);
         void SetCLYCCrystalLength(G4double val);
-
         void SetCLYCAlumThickness(G4double val);
 
         void SetCLYCLiFCollimatorInnerRadius(G4double val);
@@ -113,52 +77,67 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         void SetCLYCLiFMaterialName(G4String val);
         void SetCLYCPbMaterialName(G4String val);
         void SetCLYCPEHDMaterialName(G4String val);
-    
+
         // CASTOR 440
         void AddCASTOR440();
-        const std::vector<G4LogicalVolume*> GetLCASTOR440s() { return fLCASTOR440s; };
+        const std::vector<G4LogicalVolume*> GetLCASTOR440s() { return fLCASTOR440s; }
 
         G4int GetNumCASTOR440s() const { return fCASTOR440Detectors.size(); }
-        G4ThreeVector GetCASTOR440Position(G4int index) const { return fCASTOR440Positions[index]; }
+        G4ThreeVector     GetCASTOR440Position(G4int index) const { return fCASTOR440Positions[index]; }
         G4RotationMatrix* GetCASTOR440Rotation(G4int index) const { return fCASTOR440Rotations[index]; }
-        G4ThreeVector GetCASTOR440FuelGlobalPosition(G4int caskIndex, G4int fuelIndex, G4ThreeVector pointInFuel) const;
+
+        // Direct access to the underlying GeometryCASTOR440 instance (used by
+        // the primary generator to query parameters such as active fuel
+        // length, hex circumradius, fuel-assembly count, etc.).
+        GeometryCASTOR440* GetCASTOR440(G4int index) const {
+            if (index < 0 || index >= (G4int)fCASTOR440Detectors.size()) return nullptr;
+            return fCASTOR440Detectors[index];
+        }
+
+        //// Legacy helper (kept for back-compat). pointInFuel is interpreted as
+        //// a point in the fuel polyhedra local frame; the cavity Z offset is
+        //// taken from the cask geometry so it stays in sync.
+        //G4ThreeVector GetCASTOR440FuelGlobalPosition(G4int caskIndex,
+        //                                             G4int fuelIndex,
+        //                                             G4ThreeVector pointInFuel) const;
+
+        // Sample a uniformly distributed global position inside the requested
+        // fuel assembly of the requested cask. This is the single primitive
+        // that should be used by ALL primary generators that need a vertex
+        // inside a fuel assembly (biased and unbiased alike).
+        G4ThreeVector SampleUniformGlobalPositionInFuel(G4int caskIndex,
+                                                        G4int fuelIndex) const;
 
     private:
         DetectorMessenger* fDetectorMessenger = nullptr;
 
-        // for biasing
-        G4bool fUseBiasing = false;
-        G4int    fNShells  = 10;
-        G4double fBiasRMin = 800. * CLHEP::mm;
-        G4double fBiasRMax = 1330.* CLHEP::mm;
-        G4double fBiasHMin = 3500.* CLHEP::mm;   // covers cavity/fuel region
+        G4bool   fUseBiasing = false;
+        G4int    fNShells    = 10;
+        G4double fBiasRMin   =  900. * CLHEP::mm;
+        G4double fBiasRMax   = 1270. * CLHEP::mm;
+        G4double fBiasHMin   = 3500. * CLHEP::mm;
 
-        // for next placed volume
-        G4ThreeVector       fPosition;
-        G4ThreeVector       fRotation;
+        G4ThreeVector fPosition;
+        G4ThreeVector fRotation;
 
-        // world
-        G4VPhysicalVolume*  fPWorld = nullptr;
-        G4LogicalVolume*    fLWorld = nullptr;
-        G4double            fWorldXYZ;
+        G4VPhysicalVolume* fPWorld = nullptr;
+        G4LogicalVolume*   fLWorld = nullptr;
+        G4double           fWorldXYZ;
 
-        // CLYC
-        std::vector<GeometryCLYC*> fCLYCDetectors;
-        std::vector<G4ThreeVector> fCLYCPositions;
-        std::vector<G4RotationMatrix*> fCLYCRotations;
-        std::vector<G4bool> fCLYCPlaceByCrystalCenter;
+        std::vector<GeometryCLYC*>        fCLYCDetectors;
+        std::vector<G4ThreeVector>        fCLYCPositions;
+        std::vector<G4RotationMatrix*>    fCLYCRotations;
+        std::vector<G4bool>               fCLYCPlaceByCrystalCenter;
 
-        // castor 440
-        std::vector<GeometryCASTOR440*> fCASTOR440Detectors;
-        std::vector<G4ThreeVector> fCASTOR440Positions;
-        std::vector<G4RotationMatrix*> fCASTOR440Rotations;
-        std::vector<G4LogicalVolume*> fLCASTOR440s;
+        std::vector<GeometryCASTOR440*>   fCASTOR440Detectors;
+        std::vector<G4ThreeVector>        fCASTOR440Positions;
+        std::vector<G4RotationMatrix*>    fCASTOR440Rotations;
+        std::vector<G4LogicalVolume*>     fLCASTOR440s;
 
     private:
         void DefineMaterials();
         G4VPhysicalVolume* ConstructVolumes();
 };
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 #endif
+

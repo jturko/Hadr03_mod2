@@ -1,67 +1,30 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-/// \file PrimaryGeneratorAction.cc
-/// \brief Implementation of the PrimaryGeneratorAction class
-//
-//
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 #include "PrimaryGeneratorAction.hh"
 
 #include "DetectorConstruction.hh"
+#include "GeometryCASTOR440.hh"
 #include "HistoManager.hh"
 #include "RootManager.hh"
 #include "PrimaryGeneratorMessenger.hh"
+#include "RunAction.hh"
 
 #include "G4Event.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTable.hh"
-#include "G4IonTable.hh" 
+#include "G4IonTable.hh"
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
 
 #include "G4PhysicalVolumeStore.hh"
-#include "RunAction.hh"
-
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det) : fDetector(det)
+PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det)
+    : fDetector(det)
 {
-    // setup messenger
     fPrimaryGeneratorMessenger = new PrimaryGeneratorMessenger(this);
-
-    // guns
     fParticleGun = new G4ParticleGun(1);
-    fGPS = new G4GeneralParticleSource;
-
-    // source mode
-    fSourceMode = kGPS;
-    
+    fGPS         = new G4GeneralParticleSource;
+    fSourceMode  = kGPS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -70,14 +33,14 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 {
     delete fParticleGun;
     delete fGPS;
+    delete fPrimaryGeneratorMessenger;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
+void 
+PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
-    // generate the vertex
-    // TODO: move the call of GeneratePrimaryVertex explicitly into the member 'Generate*' functions
     switch (fSourceMode) {
         case kGPS:
             fGPS->GeneratePrimaryVertex(anEvent);
@@ -94,20 +57,20 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
             break;
 
         case kCASTOR440_fuel_biased:
+            // This mode generates the vertex itself (so it can stamp the weight).
             GenerateCASTOR440FuelFlux_GeometricCLYCbias(anEvent);
             break;
 
         default:
             G4Exception("PrimaryGeneratorAction::GeneratePrimaries()",
-                        "UnknownSourceMode",
-                        FatalException,
+                        "UnknownSourceMode", FatalException,
                         "Unknown source mode.");
             return;
     }
 
-    // record primary particle info, if activated
+    // Optional primary-vertex ntuple
     if (RunAction::WritePrimaryTree) {
-        G4PrimaryVertex* vertex = 
+        G4PrimaryVertex* vertex =
             anEvent->GetPrimaryVertex(anEvent->GetNumberOfPrimaryVertex() - 1);
         if (!vertex) return;
 
@@ -121,7 +84,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
         G4ThreeVector mom      = primary->GetMomentumDirection();
 
         G4AnalysisManager* analysis = G4AnalysisManager::Instance();
-        G4int idx = 0;
+        const G4int idx = 0;
         analysis->FillNtupleDColumn(idx, 0, particle);
         analysis->FillNtupleDColumn(idx, 1, ekin);
         analysis->FillNtupleDColumn(idx, 2, time);
@@ -137,206 +100,223 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PrimaryGeneratorAction::SetSourceMode(SourceMode mode) {
-    fSourceMode = mode; 
+void 
+PrimaryGeneratorAction::SetSourceMode(SourceMode mode)
+{
+    fSourceMode = mode;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// Surface flux from the cylindrical body of a CASTOR 440. Reads the cask
+// geometry directly so that any future change to fCaskHeight / fFinTipRadius
+// in GeometryCASTOR440 propagates here automatically.
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-// particle gun implementation
-void PrimaryGeneratorAction::GenerateCASTOR440Flux()
+void 
+PrimaryGeneratorAction::GenerateCASTOR440Flux()
 {
-    G4int numCasks = fDetector->GetNumCASTOR440s();
-    if (fCaskNum < 0 || fCaskNum >= numCasks || fFuelNum < 0 || fFuelNum >= 84) {
-        G4Exception("PrimaryGeneratorAction", "InvalidSelection", FatalException, "Invalid cask or fuel element index.");
+    const G4int numCasks = fDetector->GetNumCASTOR440s();
+    if (fCaskNum < 0 || fCaskNum >= numCasks) {
+        G4Exception("PrimaryGeneratorAction", "InvalidCaskIndex",
+                    FatalException, "Cask index out of range.");
         return;
     }
 
-    //G4int caskIndex = (G4int)(G4UniformRand() * numCasks);
-    G4int caskIndex = fCaskNum;
-    G4ThreeVector caskPos = fDetector->GetCASTOR440Position(caskIndex);
-    G4RotationMatrix* caskRot = fDetector->GetCASTOR440Rotation(caskIndex);
+    GeometryCASTOR440* cask    = fDetector->GetCASTOR440(fCaskNum);
+    G4ThreeVector      caskPos = fDetector->GetCASTOR440Position(fCaskNum);
+    G4RotationMatrix*  caskRot = fDetector->GetCASTOR440Rotation(fCaskNum);
 
-    G4double R = 1330.0 * mm;
-    G4double H = 4080.0 * mm;
-    G4double areaTop = M_PI * R * R;
-    G4double areaSide = 2.0 * M_PI * R * H;
-    G4double areaTotal = 2.0 * areaTop + areaSide;
+    const G4double R = cask->GetCaskOuterRadius();   // outer radial extent
+    const G4double H = cask->GetCaskHeight();
 
-    G4double randArea = G4UniformRand() * areaTotal;
-    G4ThreeVector localPos, localNormal;
+    const G4double areaTop   = M_PI * R * R;
+    const G4double areaSide  = 2.0 * M_PI * R * H;
+    const G4double areaTotal = 2.0 * areaTop + areaSide;
+
+    const G4double randArea = G4UniformRand() * areaTotal;
+    G4ThreeVector  localPos, localNormal;
 
     if (randArea < areaTop) {
-        G4double r = R * std::sqrt(G4UniformRand());
-        G4double phi = 2.0 * M_PI * G4UniformRand();
-        localPos = G4ThreeVector(r * std::cos(phi), r * std::sin(phi), H / 2.0);
-        localNormal = G4ThreeVector(0., 0., 1.);
+        const G4double r   = R * std::sqrt(G4UniformRand());
+        const G4double phi = 2.0 * M_PI * G4UniformRand();
+        localPos    = G4ThreeVector(r * std::cos(phi), r * std::sin(phi),  H/2.0);
+        localNormal = G4ThreeVector(0., 0.,  1.);
     } else if (randArea < 2.0 * areaTop) {
-        G4double r = R * std::sqrt(G4UniformRand());
-        G4double phi = 2.0 * M_PI * G4UniformRand();
-        localPos = G4ThreeVector(r * std::cos(phi), r * std::sin(phi), -H / 2.0);
+        const G4double r   = R * std::sqrt(G4UniformRand());
+        const G4double phi = 2.0 * M_PI * G4UniformRand();
+        localPos    = G4ThreeVector(r * std::cos(phi), r * std::sin(phi), -H/2.0);
         localNormal = G4ThreeVector(0., 0., -1.);
     } else {
-        G4double z = H * (G4UniformRand() - 0.5);
-        G4double phi = 2.0 * M_PI * G4UniformRand();
-        localPos = G4ThreeVector(R * std::cos(phi), R * std::sin(phi), z);
+        const G4double z   = H * (G4UniformRand() - 0.5);
+        const G4double phi = 2.0 * M_PI * G4UniformRand();
+        localPos    = G4ThreeVector(R * std::cos(phi), R * std::sin(phi), z);
         localNormal = G4ThreeVector(std::cos(phi), std::sin(phi), 0.);
     }
 
-    G4ThreeVector globalPos = localPos;
+    G4ThreeVector globalPos    = localPos;
     G4ThreeVector globalNormal = localNormal;
-
     if (caskRot) {
         globalPos.transform(*caskRot);
         globalNormal.transform(*caskRot);
     }
     globalPos += caskPos;
 
-    G4double cosTheta = G4UniformRand(); 
-    G4double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
-    G4double phiEmit = 2.0 * M_PI * G4UniformRand();
-
-    G4ThreeVector globalDir(sinTheta * std::cos(phiEmit), sinTheta * std::sin(phiEmit), cosTheta);
-    globalDir.rotateUz(globalNormal); 
+    // Cosine-weighted hemispherical emission about the outward surface normal.
+    const G4double cosTheta = G4UniformRand();
+    const G4double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
+    const G4double phiEmit  = 2.0 * M_PI * G4UniformRand();
+    G4ThreeVector  globalDir(sinTheta * std::cos(phiEmit),
+                             sinTheta * std::sin(phiEmit),
+                             cosTheta);
+    globalDir.rotateUz(globalNormal);
 
     fParticleGun->SetParticlePosition(globalPos);
     fParticleGun->SetParticleMomentumDirection(globalDir);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// Shared primitives
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PrimaryGeneratorAction::GenerateCASTOR440FuelFlux()
+G4ThreeVector 
+PrimaryGeneratorAction::GenerateFuelVertexPosition()
 {
-    G4int numCasks = fDetector->GetNumCASTOR440s();
-    if (fCaskNum < 0 || fCaskNum >= numCasks || fFuelNum < 0 || fFuelNum >= 84) {
-        G4Exception("PrimaryGeneratorAction", "InvalidSelection", FatalException, "Invalid cask or fuel element index.");
-        return;
+    // 1) Validate cask index
+    const G4int numCasks = fDetector->GetNumCASTOR440s();
+    if (fCaskNum < 0 || fCaskNum >= numCasks) {
+        G4Exception("PrimaryGeneratorAction::GenerateFuelVertexPosition",
+                    "InvalidCaskIndex", FatalException,
+                    "Configured cask index is out of range.");
+        return G4ThreeVector();
     }
 
-    // 2. Uniform Hexagon Sampling (via Triangular Decomposition)
-    G4double R = 70.0 * mm; // Circumscribed radius of the hexagonal G4Polyhedra
-    G4double r1 = G4UniformRand();
-    G4double r2 = G4UniformRand();
-    if (r1 + r2 > 1.0) {
-        r1 = 1.0 - r1;
-        r2 = 1.0 - r2;
+    // 2) Validate fuel index against actual count from the geometry
+    GeometryCASTOR440* cask = fDetector->GetCASTOR440(fCaskNum);
+    const G4int numFuel = cask ? cask->GetNumFuelAssemblies() : 0;
+    if (fFuelNum < 0 || fFuelNum >= numFuel) {
+        G4ExceptionDescription ed;
+        ed << "Fuel index " << fFuelNum
+           << " out of range [0, " << numFuel << ").";
+        G4Exception("PrimaryGeneratorAction::GenerateFuelVertexPosition",
+                    "InvalidFuelIndex", FatalException, ed);
+        return G4ThreeVector();
     }
 
-    // Sample within one foundational equilateral triangle
-    G4double x0 = R * r1 + (R / 2.0) * r2;
-    G4double y0 = (R * std::sqrt(3.0) / 2.0) * r2;
-
-    // Rotate into one of the 6 sectors uniformly
-    G4int sector = (G4int)(G4UniformRand() * 6);
-    G4double angle = sector * 60. * deg;
-    G4double localX = x0 * std::cos(angle) - y0 * std::sin(angle);
-    G4double localY = x0 * std::sin(angle) + y0 * std::cos(angle);
-
-    // 3. Uniform Z Sampling
-    G4double cavityHeight = 3500. * mm;
-    G4double fuelHeight = cavityHeight - 200. * mm; // Based on zPlanes in GeometryCASTOR440
-    G4double localZ = (G4UniformRand() - 0.5) * fuelHeight;
-
-    G4ThreeVector sampledLocalPos(localX, localY, localZ);
-
-    // 4. Transform to global and apply
-    G4ThreeVector globalPos = fDetector->GetCASTOR440FuelGlobalPosition(fCaskNum, fFuelNum, sampledLocalPos);
-    fParticleGun->SetParticlePosition(globalPos);
-
-    // Provide generic isotropic momentum direction (required by gun, but physics dictates decay isotropy)
-    G4double cosTheta = 2.0 * G4UniformRand() - 1.0;
-    G4double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
-    G4double phiEmit = 2.0 * M_PI * G4UniformRand();
-    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(sinTheta * std::cos(phiEmit), sinTheta * std::sin(phiEmit), cosTheta));
+    // 3) Delegate the actual sampling to the geometry (single source of truth)
+    return fDetector->SampleUniformGlobalPositionInFuel(fCaskNum, fFuelNum);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PrimaryGeneratorAction::GenerateCASTOR440FuelFlux_GeometricCLYCbias(G4Event* anEvent)
+void 
+PrimaryGeneratorAction::SetIsotropicDirection()
 {
-    G4int numCasks = fDetector->GetNumCASTOR440s();
-    if (fCaskNum < 0 || fCaskNum >= numCasks || fFuelNum < 0 || fFuelNum >= 84) {
-        G4Exception("PrimaryGeneratorAction", "InvalidSelection", FatalException, "Invalid cask or fuel element index.");
-        return;
-    }
-
-    // 1. Uniform Hexagon Sampling (via Triangular Decomposition)
-    G4double R = 70.0 * mm; 
-    G4double r1 = G4UniformRand();
-    G4double r2 = G4UniformRand();
-    if (r1 + r2 > 1.0) {
-        r1 = 1.0 - r1;
-        r2 = 1.0 - r2;
-    }
-
-    G4double x0 = R * r1 + (R / 2.0) * r2;
-    G4double y0 = (R * std::sqrt(3.0) / 2.0) * r2;
-
-    G4int sector = (G4int)(G4UniformRand() * 6);
-    G4double angle = sector * 60. * deg;
-    G4double localX = x0 * std::cos(angle) - y0 * std::sin(angle);
-    G4double localY = x0 * std::sin(angle) + y0 * std::cos(angle);
-
-    // 2. Uniform Z Sampling
-    G4double cavityHeight = 3500. * mm;
-    G4double fuelHeight = cavityHeight - 200. * mm; 
-    G4double localZ = (G4UniformRand() - 0.5) * fuelHeight;
-
-    G4ThreeVector sampledLocalPos(localX, localY, localZ);
-
-    // 3. Transform to global position
-    G4ThreeVector globalPos = fDetector->GetCASTOR440FuelGlobalPosition(fCaskNum, fFuelNum, sampledLocalPos);
-    fParticleGun->SetParticlePosition(globalPos);
-
-    // --- DIRECTIONAL BIASING ---
-    G4int numCLYC = fDetector->GetNumCLYC();
-    if (numCLYC == 0) {
-        G4Exception("PrimaryGeneratorAction", "NoCLYC", FatalException, "No CLYC detectors found to bias towards.");
-        return;
-    }
-
-    // Uniformly select one of the CLYC detectors
-    G4int clycIndex = (G4int)(G4UniformRand() * numCLYC);
-    G4ThreeVector clycPos = fDetector->GetCLYCPosition(clycIndex);
-    
-    // Bounding sphere radius encompassing the CLYC assembly length and width
-    G4double boundingRadius = 150.0 * mm; 
-
-    G4ThreeVector directionToDetector = clycPos - globalPos;
-    G4double distance = directionToDetector.mag();
-
-    // Calculate maximum cone angle using arcsin (handles cases where origin is close to detector)
-    G4double sinThetaMax = boundingRadius / distance;
-    if (sinThetaMax > 1.0) sinThetaMax = 1.0; 
-    G4double cosThetaMax = std::sqrt(1.0 - sinThetaMax * sinThetaMax);
-
-    // Sample uniformly within the cone
-    G4double cosTheta = 1.0 - G4UniformRand() * (1.0 - cosThetaMax);
-    G4double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
-    G4double phiEmit = 2.0 * M_PI * G4UniformRand();
-
-    // Local direction vector
-    G4ThreeVector localDir(sinTheta * std::cos(phiEmit), sinTheta * std::sin(phiEmit), cosTheta);
-    
-    // Rotate to point centrally at the chosen detector
-    localDir.rotateUz(directionToDetector.unit());
-    fParticleGun->SetParticleMomentumDirection(localDir);
-
-    // 4. Generate the vertex in the event
-    fParticleGun->GeneratePrimaryVertex(anEvent);
-
-    // 5. Compute and Apply Statistical Weight
-    // The probability of choosing a specific detector is (1 / numCLYC).
-    // The fractional solid angle of the cone relative to 4*PI is (1 - cosThetaMax) / 2.
-    // Weight = (True PDF) / (Biased PDF)
-    G4double fractionalSolidAngle = (1.0 - cosThetaMax) / 2.0;
-    G4double weight = numCLYC * fractionalSolidAngle;
-
-    // Apply the weight to the vertex just created
-    G4PrimaryVertex* vertex = anEvent->GetPrimaryVertex(anEvent->GetNumberOfPrimaryVertex() - 1);
-    if (vertex) {
-        vertex->SetWeight(weight);
-    }
+    const G4double cosTheta = 2.0 * G4UniformRand() - 1.0;
+    const G4double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
+    const G4double phi      = 2.0 * M_PI * G4UniformRand();
+    fParticleGun->SetParticleMomentumDirection(
+        G4ThreeVector(sinTheta * std::cos(phi),
+                      sinTheta * std::sin(phi),
+                      cosTheta));
 }
 
-////....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+G4double
+PrimaryGeneratorAction::SetBiasedDirectionTowardsCLYC(const G4ThreeVector& vertexPos)
+{
+    const G4int numCLYC = fDetector->GetNumCLYC();
+    if (numCLYC == 0) {
+        G4Exception("PrimaryGeneratorAction::SetBiasedDirectionTowardsCLYC",
+                    "NoCLYC", FatalException,
+                    "No CLYC detectors found to bias the primary direction towards.");
+        return 1.0;
+    }
+
+    // Uniformly select one of the CLYC detectors to aim at.
+    const G4int          clycIndex = (G4int)(G4UniformRand() * numCLYC);
+    const G4ThreeVector  clycPos   = fDetector->GetCLYCPosition(clycIndex);
+
+    // Vector from the primary vertex to the chosen CLYC detector.
+    const G4ThreeVector  toDet    = clycPos - vertexPos;
+    const G4double       distance = toDet.mag();
+
+    // Half-opening angle of the cone that exactly circumscribes the CLYC
+    // bounding sphere, seen from the vertex position.
+    G4double sinThetaMax = (distance > 0.) ? fCLYCBoundingRadius / distance : 1.0;
+    if (sinThetaMax > 1.0) sinThetaMax = 1.0;              // vertex inside sphere
+    const G4double cosThetaMax = std::sqrt(1.0 - sinThetaMax * sinThetaMax);
+
+    // Sample a direction uniformly in solid angle within that cone
+    // (cosTheta uniform in [cosThetaMax, 1]).
+    const G4double cosTheta = 1.0 - G4UniformRand() * (1.0 - cosThetaMax);
+    const G4double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
+    const G4double phi      = 2.0 * M_PI * G4UniformRand();
+
+    G4ThreeVector localDir(sinTheta * std::cos(phi),
+                           sinTheta * std::sin(phi),
+                           cosTheta);
+    // Rotate so the cone axis points from the vertex to the CLYC.
+    localDir.rotateUz(toDet.unit());
+
+    fParticleGun->SetParticleMomentumDirection(localDir);
+
+    // ------------------------------------------------------------------
+    // Statistical weight.
+    // Biased PDF for the direction is uniform in the cone of solid angle
+    // Omega_cone = 2*pi*(1 - cosThetaMax), and we pick 1 of numCLYC detectors
+    // with probability 1/numCLYC.
+    //   p_bias(Omega) = (1/numCLYC) * 1/Omega_cone
+    // True (isotropic) PDF is 1/(4*pi).
+    //   weight = p_true / p_bias
+    //          = (1/(4*pi)) / ((1/numCLYC) * 1/(2*pi*(1-cosThetaMax)))
+    //          = numCLYC * (1 - cosThetaMax) / 2
+    // ------------------------------------------------------------------
+    const G4double fractionalSolidAngle = 0.5 * (1.0 - cosThetaMax);
+    const G4double weight               = numCLYC * fractionalSolidAngle;
+
+    return weight;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// Unbiased fuel flux: uniform vertex in the requested fuel assembly with an
+// isotropic emission direction. Implemented entirely in terms of the shared
+// primitives above, so any change in GeometryCASTOR440 dimensions is picked
+// up automatically.
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void 
+PrimaryGeneratorAction::GenerateCASTOR440FuelFlux()
+{
+    const G4ThreeVector vertexPos = GenerateFuelVertexPosition();
+    fParticleGun->SetParticlePosition(vertexPos);
+    SetIsotropicDirection();
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// Biased fuel flux: same spatial sampling as the unbiased mode, but the
+// emission direction is constrained to a cone that bounds the selected CLYC
+// detector. The correct statistical weight is attached to the primary vertex.
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void
+PrimaryGeneratorAction::GenerateCASTOR440FuelFlux_GeometricCLYCbias(G4Event* anEvent)
+{
+    // 1. Shared spatial sampling.
+    const G4ThreeVector vertexPos = GenerateFuelVertexPosition();
+    fParticleGun->SetParticlePosition(vertexPos);
+
+    // 2. Directional bias towards CLYC; returns the required statistical weight.
+    const G4double weight = SetBiasedDirectionTowardsCLYC(vertexPos);
+
+    // 3. Create the primary vertex in the event...
+    fParticleGun->GeneratePrimaryVertex(anEvent);
+
+    // 4. ...and stamp it with the correct weight.
+    G4PrimaryVertex* vertex =
+        anEvent->GetPrimaryVertex(anEvent->GetNumberOfPrimaryVertex() - 1);
+    if (vertex) vertex->SetWeight(weight);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+

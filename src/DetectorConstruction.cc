@@ -262,15 +262,45 @@ void DetectorConstruction::AddCASTOR440()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4ThreeVector DetectorConstruction::GetCASTOR440FuelGlobalPosition(G4int caskIndex, G4int fuelIndex, G4ThreeVector pointInFuel) const {
-    if (caskIndex < 0 || caskIndex >= fCASTOR440Detectors.size()) return G4ThreeVector();
+// legacy helper method, no longer used
+//G4ThreeVector DetectorConstruction::GetCASTOR440FuelGlobalPosition(G4int caskIndex,
+//                                                                   G4int fuelIndex,
+//                                                                   G4ThreeVector pointInFuel) const
+//{
+//    if (caskIndex < 0 || caskIndex >= (G4int)fCASTOR440Detectors.size())
+//        return G4ThreeVector();
+//
+//    GeometryCASTOR440* cask = fCASTOR440Detectors[caskIndex];
+//    G4ThreeVector fuelCenter = cask->GetFuelPosition(fuelIndex);
+//
+//    // Cavity Z offset taken directly from the cask geometry (no hard-coded -150 mm).
+//    G4ThreeVector caskLocalPos = pointInFuel + fuelCenter
+//                               + G4ThreeVector(0., 0., cask->GetCavityZOffsetInBody());
+//
+//    G4ThreeVector globalPos = caskLocalPos;
+//    G4RotationMatrix* rot = fCASTOR440Rotations[caskIndex];
+//    if (rot) globalPos.transform(*rot);
+//
+//    globalPos += fCASTOR440Positions[caskIndex];
+//    return globalPos;
+//}
 
-    G4ThreeVector fuelCenter = fCASTOR440Detectors[caskIndex]->GetFuelPosition(fuelIndex);
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-    // The cavity is shifted by Z = -150 mm relative to the cask body.
-    G4ThreeVector caskLocalPos = pointInFuel + fuelCenter + G4ThreeVector(0., 0., -150. * mm);
+G4ThreeVector DetectorConstruction::SampleUniformGlobalPositionInFuel(G4int caskIndex,
+                                                                      G4int fuelIndex) const
+{
+    if (caskIndex < 0 || caskIndex >= (G4int)fCASTOR440Detectors.size())
+        return G4ThreeVector();
 
-    G4ThreeVector globalPos = caskLocalPos;
+    GeometryCASTOR440* cask = fCASTOR440Detectors[caskIndex];
+
+    // Local point sampled inside the requested fuel assembly, expressed in
+    // the cask body frame.
+    G4ThreeVector localPos = cask->SampleUniformPointInFuel(fuelIndex);
+
+    // Apply the per-cask global placement transform (rotation + translation).
+    G4ThreeVector globalPos = localPos;
     G4RotationMatrix* rot = fCASTOR440Rotations[caskIndex];
     if (rot) globalPos.transform(*rot);
 
@@ -278,4 +308,3 @@ G4ThreeVector DetectorConstruction::GetCASTOR440FuelGlobalPosition(G4int caskInd
     return globalPos;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

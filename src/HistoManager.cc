@@ -80,7 +80,7 @@ void HistoManager::Book()
     analysisManager->CreateNtupleDColumn("py");
     analysisManager->CreateNtupleDColumn("pz");
     analysisManager->FinishNtuple();
-    G4cout << " Created ntuple \"primary\" (id " << idx << ")" << G4endl;
+    //G4cout << " Created ntuple \"primary\" (id " << idx << ")" << G4endl;
     
     // ntuple for detector hits
     idx = analysisManager->CreateNtuple("hits", "tree of sensitive detector hits");
@@ -94,7 +94,7 @@ void HistoManager::Book()
     analysisManager->CreateNtupleIColumn("det");
     analysisManager->CreateNtupleDColumn("weight");
     analysisManager->FinishNtuple();
-    G4cout << " Created ntuple \"hits\" (id " << idx << ")" << G4endl;
+    //G4cout << " Created ntuple \"hits\" (id " << idx << ")" << G4endl;
     
     // ntuple for CASTOR 440 surface tracker
     idx = analysisManager->CreateNtuple("castor_surf", "tree of CASTOR 440 surface flux (particles leaving the cask)");
@@ -111,7 +111,7 @@ void HistoManager::Book()
     analysisManager->CreateNtupleDColumn("weight");
     analysisManager->CreateNtupleDColumn("evtNb");
     analysisManager->FinishNtuple();
-    G4cout << " Created ntuple \"castor_surf\" (id " << idx << ")" << G4endl;
+    //G4cout << " Created ntuple \"castor_surf\" (id " << idx << ")" << G4endl;
     
 }
 
