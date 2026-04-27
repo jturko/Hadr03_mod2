@@ -20,7 +20,8 @@ class GeometryCASTOR440
 
     G4LogicalVolume* GetCASTORLog() { return fCASTORBodyLog; }
     G4VPhysicalVolume* GetCASTORPhys() { return fCASTORBodyPhys; }
-    
+ 
+    void GenerateFuelPositions();   
     G4ThreeVector GetFuelPosition(G4int index) const;
 
   private:
@@ -38,10 +39,14 @@ class GeometryCASTOR440
     G4LogicalVolume* fFinLog;
 
     G4double fCaskHeight;
-    G4double fCaskOuterRadius;
     G4double fCaskInnerRadius;
+    G4double fCaskOuterRadius;
+    G4double fFinTipRadius;
     G4double fCavityHeight;
     G4double fLidThickness;
+    G4double fBottomThickness;
+    G4double fActiveFuelLength;
+    G4double fTotalFuelLength;
 
     G4String fCastIronMatName;
     G4String fHeliumMatName;
