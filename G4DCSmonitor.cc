@@ -92,7 +92,6 @@ int main(int argc, char** argv)
         rootManager.SetFileNum(fileNum);
     }
 
-
     // detect interactive mode (if no arguments) and define UI session
     G4UIExecutive* ui = nullptr;
     if (argc == 1) ui = new G4UIExecutive(argc, argv);
@@ -103,20 +102,19 @@ int main(int argc, char** argv)
 
     // construct the run manager
     auto runManager = G4RunManagerFactory::CreateRunManager();
-    //if (argc == 3) {
-    //    G4int nThreads = G4UIcommand::ConvertToInt(argv[2]);
-    //    runManager->SetNumberOfThreads(nThreads);
-    //}
 
     // set mandatory initialization classes
     DetectorConstruction* det = new DetectorConstruction;
     runManager->SetUserInitialization(det);
-
-    PhysicsList* phys = new PhysicsList;
+    
+    // the importance biasing is always set to true here, however if it is deactivated in the
+    // run macro, then importance values of 1 are registered everywhere (see GeometryParallelBiasing)
+    PhysicsList* phys = new PhysicsList(/*useImportanceBiasing=*/true); 
     runManager->SetUserInitialization(phys);
     runManager->SetUserInitialization(new ActionInitialization(det));
 
     // Replaced HP environmental variables with C++ calls
+    // TODO - can we put this into the physics list class?
     G4ParticleHPManager::GetInstance()->SetSkipMissingIsotopes(false);
     G4ParticleHPManager::GetInstance()->SetDoNotAdjustFinalState(true);
     G4ParticleHPManager::GetInstance()->SetUseOnlyPhotoEvaporation(true);

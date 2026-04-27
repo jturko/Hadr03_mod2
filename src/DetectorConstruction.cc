@@ -67,13 +67,14 @@ DetectorConstruction::DetectorConstruction()
     fPosition = G4ThreeVector(0., 0., 0.);
     fRotation = G4ThreeVector(0., 0., 0.);
 
-    fWorldXYZ = 10 * m;
+    fWorldXYZ = 10. * m; // could need tweaking, as CASTOR 440's are pretty large (d2660 x 4080 mm3)
 
     DefineMaterials();
     fDetectorMessenger = new DetectorMessenger(this);
 
     // biasing
-    RegisterParallelWorld(new GeometryParallelBiasing("ParallelBiasingWorld", this));
+    // TODO -> could we make this registration conditional based on flag set (fUseBiasing) ?
+    RegisterParallelWorld(new GeometryParallelBiasing("BiasingWorld", this));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -140,7 +141,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             false,                  // no boolean operation
             0);                     // copy number
 
-
+    // CLYC detector(s)
     for (size_t i = 0; i < fCLYCDetectors.size(); ++i) {
         fCLYCDetectors[i]->Build();
 
@@ -151,10 +152,12 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
         }
     }
 
-    
+    // CASTOR 440 cask(s)
     for (size_t i = 0; i < fCASTOR440Detectors.size(); ++i) {
         fCASTOR440Detectors[i]->Build();
         fCASTOR440Detectors[i]->PlaceDetector(fLWorld, fCASTOR440Positions[i], fCASTOR440Rotations[i], i);
+
+        fLCASTOR440s.push_back(fCASTOR440Detectors[i]->GetCASTORLog());
     }
 
     //PrintParameters();

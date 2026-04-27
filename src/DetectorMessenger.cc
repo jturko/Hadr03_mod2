@@ -40,6 +40,7 @@
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithoutParameter.hh"
 #include "G4UIcmdWithABool.hh"
+#include "G4UIcmdWithAnInteger.hh"
 #include "G4UIcommand.hh"
 #include "G4UIdirectory.hh"
 #include "G4UIparameter.hh"
@@ -50,7 +51,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
 {
     // directory
     fDir = new G4UIdirectory("/dcs-monitor/det/");
-    fDir->SetGuidance("detector construction commands");
+    fDir->SetGuidance("detector construction commands for DCS monitor project");
  
     // biasing
     fUseBiasingCmd = new G4UIcmdWithABool("/dcs-monitor/det/useBiasing", this);
@@ -58,6 +59,28 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
     fUseBiasingCmd->SetParameterName("useBiasing", true);
     fUseBiasingCmd->SetDefaultValue(true);
     fUseBiasingCmd->AvailableForStates(G4State_PreInit);
+    
+    fSetNShellsCmd = new G4UIcmdWithAnInteger("/dcs-monitor/det/setBiasingShells", this);
+    fSetNShellsCmd->SetGuidance("Number of importance-biasing shells (radial & axial thickness uniform).");
+    fSetNShellsCmd->SetGuidance("Max importance = 2^N. Applies to both gamma and neutron biasing.");
+    fSetNShellsCmd->SetParameterName("nShells", false);
+    fSetNShellsCmd->SetRange("nShells >= 1 && nShells <= 30");
+    fSetNShellsCmd->AvailableForStates(G4State_PreInit);
+
+    fSetBiasRMinCmd = new G4UIcmdWithADoubleAndUnit("/dcs-monitor/det/setBiasingInnerRadius", this);
+    fSetBiasRMinCmd->SetGuidance("Inner (core) radius of the biasing shells.");
+    fSetBiasRMinCmd->SetDefaultUnit("mm");
+    fSetBiasRMinCmd->AvailableForStates(G4State_PreInit);
+
+    fSetBiasRMaxCmd = new G4UIcmdWithADoubleAndUnit("/dcs-monitor/det/setBiasingOuterRadius", this);
+    fSetBiasRMaxCmd->SetGuidance("Outer radius of the outermost biasing shell.");
+    fSetBiasRMaxCmd->SetDefaultUnit("mm");
+    fSetBiasRMaxCmd->AvailableForStates(G4State_PreInit);
+
+    fSetBiasHMinCmd = new G4UIcmdWithADoubleAndUnit("/dcs-monitor/det/setBiasingInnerHeight", this);
+    fSetBiasHMinCmd->SetGuidance("Full axial height of the biasing core (should span the source region).");
+    fSetBiasHMinCmd->SetDefaultUnit("mm");
+    fSetBiasHMinCmd->AvailableForStates(G4State_PreInit);
 
     // placement 
     fSetPositionCmd = new G4UIcmdWith3VectorAndUnit("/dcs-monitor/det/setPosition",this);
@@ -135,39 +158,47 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det) : fDetector(Det)
 
 DetectorMessenger::~DetectorMessenger()
 {
+    // directory
     delete fDir;
-    
+ 
+    // biasing   
     delete fUseBiasingCmd;
+    delete fSetNShellsCmd;
+    delete fSetBiasRMinCmd;
+    delete fSetBiasRMaxCmd;
+    delete fSetBiasHMinCmd;
 
+    // pos/rot
     delete fSetPositionCmd;
     delete fSetRotationCmd;
     
     // DCS monitor
+    // adders
     delete fAddCLYCCmd;
     delete fAddCLYCByCrystalCenterCmd;
-
+    // crystal dims
     delete fSetCLYCCrystalRadiusCmd;
     delete fSetCLYCCrystalLengthCmd;
-    
+    // alum dims
     delete fSetCLYCAlumThicknessCmd;
-    
+    // LiF collimator dims
     delete fSetCLYCLiFColInnerRadiusCmd;
     delete fSetCLYCLiFColOuterRadiusCmd;
     delete fSetCLYCLiFColLengthCmd;
-    
+    // Pb collimator dims
     delete fSetCLYCPbColInnerRadiusCmd;
     delete fSetCLYCPbColOuterRadiusCmd;
     delete fSetCLYCPbColLengthCmd;
-    
+    // PE collimator dims
     delete fSetCLYCPEHDColInnerRadiusCmd;
     delete fSetCLYCPEHDColOuterRadiusCmd;
     delete fSetCLYCPEHDColLengthCmd;
-
+    // PE plug dims
     delete fSetCLYCPEPlugLipRadiusCmd;
     delete fSetCLYCPEPlugInnerRadiusCmd;
     delete fSetCLYCPEPlugLipLengthCmd;
     delete fSetCLYCPEPlugInnerLengthCmd;
-
+    // materials
     delete fSetCLYCCrystalMaterialNameCmd;
     delete fSetCLYCAlumMaterialNameCmd;
     delete fSetCLYCLiFMaterialNameCmd;
@@ -183,52 +214,57 @@ DetectorMessenger::~DetectorMessenger()
 void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String value)
 {
     // biasing
-    if (command == fUseBiasingCmd) {
+    if (command == fUseBiasingCmd)
         fDetector->SetUseBiasing(fUseBiasingCmd->GetNewBoolValue(value));
-    }
+    if (command == fSetNShellsCmd)
+        fDetector->SetNShells(fSetNShellsCmd->GetNewIntValue(value));
+    if (command == fSetBiasRMinCmd)
+        fDetector->SetBiasingInnerRadius(fSetBiasRMinCmd->GetNewDoubleValue(value));
+    if (command == fSetBiasRMaxCmd)
+        fDetector->SetBiasingOuterRadius(fSetBiasRMaxCmd->GetNewDoubleValue(value));
+    if (command == fSetBiasHMinCmd)
+        fDetector->SetBiasingInnerHeight(fSetBiasHMinCmd->GetNewDoubleValue(value));
 
     // placement
-    if(command == fSetPositionCmd) {
+    if(command == fSetPositionCmd) 
         fDetector->SetPosition(fSetPositionCmd->GetNew3VectorValue(value));
-    }
-    if(command == fSetRotationCmd) {
+    if(command == fSetRotationCmd) 
         fDetector->SetRotation(fSetRotationCmd->GetNew3VectorValue(value));
-    }
     
     // DCS monitor
-    if(command == fAddCLYCCmd) fDetector->AddCLYC();
-    if(command == fAddCLYCByCrystalCenterCmd) fDetector->AddCLYCByCrystalCenter();
+    if(command == fAddCLYCCmd)                      fDetector->AddCLYC();
+    if(command == fAddCLYCByCrystalCenterCmd)       fDetector->AddCLYCByCrystalCenter();
 
-    if(command == fSetCLYCCrystalRadiusCmd) fDetector->SetCLYCCrystalRadius(fSetCLYCCrystalRadiusCmd->GetNewDoubleValue(value));
-    if(command == fSetCLYCCrystalLengthCmd) fDetector->SetCLYCCrystalLength(fSetCLYCCrystalLengthCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCCrystalRadiusCmd)         fDetector->SetCLYCCrystalRadius(fSetCLYCCrystalRadiusCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCCrystalLengthCmd)         fDetector->SetCLYCCrystalLength(fSetCLYCCrystalLengthCmd->GetNewDoubleValue(value));
     
-    if(command == fSetCLYCAlumThicknessCmd) fDetector->SetCLYCAlumThickness(fSetCLYCAlumThicknessCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCAlumThicknessCmd)         fDetector->SetCLYCAlumThickness(fSetCLYCAlumThicknessCmd->GetNewDoubleValue(value));
     
-    if(command == fSetCLYCLiFColInnerRadiusCmd) fDetector->SetCLYCLiFCollimatorInnerRadius(fSetCLYCLiFColInnerRadiusCmd->GetNewDoubleValue(value));
-    if(command == fSetCLYCLiFColOuterRadiusCmd) fDetector->SetCLYCLiFCollimatorOuterRadius(fSetCLYCLiFColOuterRadiusCmd->GetNewDoubleValue(value));
-    if(command == fSetCLYCLiFColLengthCmd) fDetector->SetCLYCLiFCollimatorLength(fSetCLYCLiFColLengthCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCLiFColInnerRadiusCmd)     fDetector->SetCLYCLiFCollimatorInnerRadius(fSetCLYCLiFColInnerRadiusCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCLiFColOuterRadiusCmd)     fDetector->SetCLYCLiFCollimatorOuterRadius(fSetCLYCLiFColOuterRadiusCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCLiFColLengthCmd)          fDetector->SetCLYCLiFCollimatorLength(fSetCLYCLiFColLengthCmd->GetNewDoubleValue(value));
     
-    if(command == fSetCLYCPbColInnerRadiusCmd) fDetector->SetCLYCPbCollimatorInnerRadius(fSetCLYCPbColInnerRadiusCmd->GetNewDoubleValue(value));
-    if(command == fSetCLYCPbColOuterRadiusCmd) fDetector->SetCLYCPbCollimatorOuterRadius(fSetCLYCPbColOuterRadiusCmd->GetNewDoubleValue(value));
-    if(command == fSetCLYCPbColLengthCmd) fDetector->SetCLYCPbCollimatorLength(fSetCLYCPbColLengthCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCPbColInnerRadiusCmd)      fDetector->SetCLYCPbCollimatorInnerRadius(fSetCLYCPbColInnerRadiusCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCPbColOuterRadiusCmd)      fDetector->SetCLYCPbCollimatorOuterRadius(fSetCLYCPbColOuterRadiusCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCPbColLengthCmd)           fDetector->SetCLYCPbCollimatorLength(fSetCLYCPbColLengthCmd->GetNewDoubleValue(value));
     
-    if(command == fSetCLYCPEHDColInnerRadiusCmd) fDetector->SetCLYCPEHDCollimatorInnerRadius(fSetCLYCPEHDColInnerRadiusCmd->GetNewDoubleValue(value));
-    if(command == fSetCLYCPEHDColOuterRadiusCmd) fDetector->SetCLYCPEHDCollimatorOuterRadius(fSetCLYCPEHDColOuterRadiusCmd->GetNewDoubleValue(value));
-    if(command == fSetCLYCPEHDColLengthCmd) fDetector->SetCLYCPEHDCollimatorLength(fSetCLYCPEHDColLengthCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCPEHDColInnerRadiusCmd)    fDetector->SetCLYCPEHDCollimatorInnerRadius(fSetCLYCPEHDColInnerRadiusCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCPEHDColOuterRadiusCmd)    fDetector->SetCLYCPEHDCollimatorOuterRadius(fSetCLYCPEHDColOuterRadiusCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCPEHDColLengthCmd)         fDetector->SetCLYCPEHDCollimatorLength(fSetCLYCPEHDColLengthCmd->GetNewDoubleValue(value));
 
-    if(command == fSetCLYCPEPlugLipRadiusCmd)   fDetector->SetCLYCPEPlugLipRadius(  fSetCLYCPEPlugLipRadiusCmd->GetNewDoubleValue(value));
-    if(command == fSetCLYCPEPlugInnerRadiusCmd) fDetector->SetCLYCPEPlugInnerRadius(fSetCLYCPEPlugInnerRadiusCmd->GetNewDoubleValue(value));
-    if(command == fSetCLYCPEPlugLipLengthCmd)   fDetector->SetCLYCPEPlugLipLength(  fSetCLYCPEPlugLipLengthCmd->GetNewDoubleValue(value));
-    if(command == fSetCLYCPEPlugInnerLengthCmd) fDetector->SetCLYCPEPlugInnerLength(fSetCLYCPEPlugInnerLengthCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCPEPlugLipRadiusCmd)       fDetector->SetCLYCPEPlugLipRadius(  fSetCLYCPEPlugLipRadiusCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCPEPlugInnerRadiusCmd)     fDetector->SetCLYCPEPlugInnerRadius(fSetCLYCPEPlugInnerRadiusCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCPEPlugLipLengthCmd)       fDetector->SetCLYCPEPlugLipLength(  fSetCLYCPEPlugLipLengthCmd->GetNewDoubleValue(value));
+    if(command == fSetCLYCPEPlugInnerLengthCmd)     fDetector->SetCLYCPEPlugInnerLength(fSetCLYCPEPlugInnerLengthCmd->GetNewDoubleValue(value));
 
-    if(command == fSetCLYCCrystalMaterialNameCmd) fDetector->SetCLYCCrystalMaterialName(value);
-    if(command == fSetCLYCAlumMaterialNameCmd) fDetector->SetCLYCAlumMaterialName(value);
-    if(command == fSetCLYCLiFMaterialNameCmd) fDetector->SetCLYCLiFMaterialName(value);
-    if(command == fSetCLYCPbMaterialNameCmd) fDetector->SetCLYCPbMaterialName(value);
-    if(command == fSetCLYCPEHDMaterialNameCmd) fDetector->SetCLYCPEHDMaterialName(value);
+    if(command == fSetCLYCCrystalMaterialNameCmd)   fDetector->SetCLYCCrystalMaterialName(value);
+    if(command == fSetCLYCAlumMaterialNameCmd)      fDetector->SetCLYCAlumMaterialName(value);
+    if(command == fSetCLYCLiFMaterialNameCmd)       fDetector->SetCLYCLiFMaterialName(value);
+    if(command == fSetCLYCPbMaterialNameCmd)        fDetector->SetCLYCPbMaterialName(value);
+    if(command == fSetCLYCPEHDMaterialNameCmd)      fDetector->SetCLYCPEHDMaterialName(value);
     
     // CASTOR 440
-    if(command == fAddCASTOR440Cmd) fDetector->AddCASTOR440();
+    if(command == fAddCASTOR440Cmd)                 fDetector->AddCASTOR440();
 
 }
 

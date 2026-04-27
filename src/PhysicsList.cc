@@ -113,20 +113,17 @@ PhysicsList::PhysicsList(G4bool useImportanceBiasing) : fUseImportanceBiasing(us
     RegisterPhysics(new GammaNuclearPhysics("gamma"));
     RegisterPhysics(new G4RadioactiveDecayPhysics());
     
-    // importance biasing
-    if(fUseImportanceBiasing) {
-        // Enable navigation in the parallel world
-        RegisterPhysics(new G4ParallelWorldPhysics("ParallelBiasingWorld"));
-        // Gamma biasing
-        fGammaSampler = new G4GeometrySampler("ParallelBiasingWorld", "gamma");
-        fGammaSampler->SetParallel(true);
-        RegisterPhysics(new G4ImportanceBiasing(fGammaSampler, "ParallelBiasingWorld"));
-        // Neutron biasing
-        fNeutronSampler = new G4GeometrySampler("ParallelBiasingWorld", "neutron");
-        fNeutronSampler->SetParallel(true);
-        RegisterPhysics(new G4ImportanceBiasing(fNeutronSampler, "ParallelBiasingWorld"));
-    }
+    if (fUseImportanceBiasing) {
+        RegisterPhysics(new G4ParallelWorldPhysics("BiasingWorld"));
 
+        fGammaSampler = new G4GeometrySampler("BiasingWorld", "gamma");
+        fGammaSampler->SetParallel(true);
+        RegisterPhysics(new G4ImportanceBiasing(fGammaSampler, "BiasingWorld"));
+
+        fNeutronSampler = new G4GeometrySampler("BiasingWorld", "neutron");
+        fNeutronSampler->SetParallel(true);
+        RegisterPhysics(new G4ImportanceBiasing(fNeutronSampler, "BiasingWorld"));
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

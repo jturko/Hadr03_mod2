@@ -59,13 +59,23 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         void ConstructSDandField() override;
 
     public:
-        void SetUseBiasing(G4bool val) { fUseBiasing = val; }
-        G4bool GetUseBiasing() const { return fUseBiasing; }
 
         const G4VPhysicalVolume* GetWorld()     { return fPWorld; };
 
-        // for messenger
+        // for biasing
+        void SetUseBiasing(G4bool val) { fUseBiasing = val; }
+        G4bool GetUseBiasing() const { return fUseBiasing; }
         
+        void     SetNShells(G4int n)               { fNShells = n; }
+        G4int    GetNShells() const                { return fNShells; }
+
+        void     SetBiasingInnerRadius (G4double r) { fBiasRMin  = r; }
+        void     SetBiasingOuterRadius (G4double r) { fBiasRMax  = r; }
+        void     SetBiasingInnerHeight (G4double h) { fBiasHMin  = h; }
+        G4double GetBiasingInnerRadius () const     { return fBiasRMin; }
+        G4double GetBiasingOuterRadius () const     { return fBiasRMax; }
+        G4double GetBiasingInnerHeight () const     { return fBiasHMin; }
+
         // placement
         void SetPosition(G4ThreeVector pos)     { fPosition = pos; };
         void SetRotation(G4ThreeVector rot)     { fRotation = rot; };
@@ -106,11 +116,11 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     
         // CASTOR 440
         void AddCASTOR440();
-        
+        const std::vector<G4LogicalVolume*> GetLCASTOR440s() { return fLCASTOR440s; };
+
         G4int GetNumCASTOR440s() const { return fCASTOR440Detectors.size(); }
         G4ThreeVector GetCASTOR440Position(G4int index) const { return fCASTOR440Positions[index]; }
         G4RotationMatrix* GetCASTOR440Rotation(G4int index) const { return fCASTOR440Rotations[index]; }
-        
         G4ThreeVector GetCASTOR440FuelGlobalPosition(G4int caskIndex, G4int fuelIndex, G4ThreeVector pointInFuel) const;
 
     private:
@@ -118,6 +128,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
         // for biasing
         G4bool fUseBiasing = false;
+        G4int    fNShells  = 10;
+        G4double fBiasRMin = 800. * CLHEP::mm;
+        G4double fBiasRMax = 1330.* CLHEP::mm;
+        G4double fBiasHMin = 3500.* CLHEP::mm;   // covers cavity/fuel region
 
         // for next placed volume
         G4ThreeVector       fPosition;
@@ -138,6 +152,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         std::vector<GeometryCASTOR440*> fCASTOR440Detectors;
         std::vector<G4ThreeVector> fCASTOR440Positions;
         std::vector<G4RotationMatrix*> fCASTOR440Rotations;
+        std::vector<G4LogicalVolume*> fLCASTOR440s;
 
     private:
         void DefineMaterials();

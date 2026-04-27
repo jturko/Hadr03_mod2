@@ -149,18 +149,18 @@ G4int GeometryCASTOR440::Build()
     }
 
     // 6. External Heat Dispersion Fins
-    G4double finThickness = 10. * mm;
-    G4double finOuterRadius = fCaskOuterRadius + 50. * mm;
-    G4Tubs* fin_solid = new G4Tubs("Fin", fCaskOuterRadius, finOuterRadius, finThickness/2.0, 0.*deg, 360.*deg);
-    fFinLog = new G4LogicalVolume(fin_solid, mat_CastIron, "FinLog");
-    fFinLog->SetVisAttributes(new G4VisAttributes(true, G4Colour(0.2, 0.2, 0.2, alpha)));
+    //G4double finThickness = 10. * mm;
+    //G4double finOuterRadius = fCaskOuterRadius + 50. * mm;
+    //G4Tubs* fin_solid = new G4Tubs("Fin", fCaskOuterRadius, finOuterRadius, finThickness/2.0, 0.*deg, 360.*deg);
+    //fFinLog = new G4LogicalVolume(fin_solid, mat_CastIron, "FinLog");
+    //fFinLog->SetVisAttributes(new G4VisAttributes(true, G4Colour(0.2, 0.2, 0.2, alpha)));
 
-    G4double startZ = -1500. * mm;
-    G4double finSpacing = 50. * mm;
-    for (int i = 0; i < 60; ++i) {
-        G4ThreeVector finPos(0., 0., startZ + i * finSpacing);
-        fCASTORAssembly->AddPlacedVolume(fFinLog, finPos, rotate);
-    }
+    //G4double startZ = -1500. * mm;
+    //G4double finSpacing = 50. * mm;
+    //for (int i = 0; i < 60; ++i) {
+    //    G4ThreeVector finPos(0., 0., startZ + i * finSpacing);
+    //    fCASTORAssembly->AddPlacedVolume(fFinLog, finPos, rotate);
+    //}
 
     // Lock the core body into the assembly coordinate frame
     move = G4ThreeVector(0., 0., 0.);

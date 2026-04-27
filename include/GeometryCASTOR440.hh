@@ -19,6 +19,7 @@ class GeometryCASTOR440
     void PlaceDetector(G4LogicalVolume* expHallLog, G4ThreeVector move, G4RotationMatrix* rotate, G4int copyNo);
 
     G4LogicalVolume* GetCASTORLog() { return fCASTORBodyLog; }
+    G4VPhysicalVolume* GetCASTORPhys() { return fCASTORBodyPhys; }
     
     G4ThreeVector GetFuelPosition(G4int index) const;
 
@@ -27,6 +28,8 @@ class GeometryCASTOR440
 
     G4AssemblyVolume* fCASTORAssembly;
 
+    G4VPhysicalVolume* fCASTORBodyPhys;
+    
     G4LogicalVolume* fCASTORBodyLog;
     G4LogicalVolume* fCavityLog;
     G4LogicalVolume* fLidLog;

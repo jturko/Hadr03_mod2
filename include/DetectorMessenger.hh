@@ -45,6 +45,7 @@ class G4UIcmdWithoutParameter;
 class G4UIcmdWith3Vector;
 class G4UIcmdWith3VectorAndUnit;
 class G4UIcmdWithABool;
+class G4UIcmdWithAnInteger;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -61,38 +62,45 @@ class DetectorMessenger : public G4UImessenger
 
     // directory
     G4UIdirectory* fDir = nullptr;
+
     // biasing
     G4UIcmdWithABool* fUseBiasingCmd = nullptr;
+    G4UIcmdWithAnInteger*      fSetNShellsCmd   = nullptr;
+    G4UIcmdWithADoubleAndUnit* fSetBiasRMinCmd  = nullptr;
+    G4UIcmdWithADoubleAndUnit* fSetBiasRMaxCmd  = nullptr;
+    G4UIcmdWithADoubleAndUnit* fSetBiasHMinCmd  = nullptr;
+
     // placement
     G4UIcmdWith3VectorAndUnit*  fSetPositionCmd = nullptr;
     G4UIcmdWith3Vector*         fSetRotationCmd = nullptr;
 
     // DCS monitor
+    // CLYC detector
     G4UIcmdWithoutParameter* fAddCLYCCmd = nullptr;
     G4UIcmdWithoutParameter* fAddCLYCByCrystalCenterCmd = nullptr;
-
+    // crystal dims
     G4UIcmdWithADoubleAndUnit* fSetCLYCCrystalRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCCrystalLengthCmd = nullptr;
-
+    // aluminum dims
     G4UIcmdWithADoubleAndUnit* fSetCLYCAlumThicknessCmd = nullptr;
-
+    // LiF collimator dims
     G4UIcmdWithADoubleAndUnit* fSetCLYCLiFColInnerRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCLiFColOuterRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCLiFColLengthCmd = nullptr;
-
+    // Pb collimator dims
     G4UIcmdWithADoubleAndUnit* fSetCLYCPbColInnerRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPbColOuterRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPbColLengthCmd = nullptr;
-
+    // PEHD collimator dims
     G4UIcmdWithADoubleAndUnit* fSetCLYCPEHDColInnerRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPEHDColOuterRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPEHDColLengthCmd = nullptr;
-    
+    // PE plug dims
     G4UIcmdWithADoubleAndUnit* fSetCLYCPEPlugLipRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPEPlugInnerRadiusCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPEPlugLipLengthCmd = nullptr;
     G4UIcmdWithADoubleAndUnit* fSetCLYCPEPlugInnerLengthCmd = nullptr;
-
+    // materials
     G4UIcmdWithAString* fSetCLYCCrystalMaterialNameCmd = nullptr;
     G4UIcmdWithAString* fSetCLYCAlumMaterialNameCmd = nullptr;
     G4UIcmdWithAString* fSetCLYCLiFMaterialNameCmd = nullptr;

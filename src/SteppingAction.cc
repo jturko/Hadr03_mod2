@@ -39,6 +39,8 @@
 #include "G4HadronicProcess.hh"
 #include "G4ParticleTypes.hh"
 #include "G4RunManager.hh"
+#include "G4EventManager.hh"
+#include "G4Event.hh"
 
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
@@ -100,6 +102,30 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
         }
     }
 
+    // CASTOR 440 surface flux tracker
+    for(G4int c=0; c<fDetector->GetNumCASTOR440s(); c++) {
+        if(aStep->GetPreStepPoint()->GetPhysicalVolume()->GetLogicalVolume() == fDetector->GetLCASTOR440s()[c] && 
+           aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld() &&
+           (particle->GetPDGEncoding() == 22 || particle->GetPDGEncoding() == 2112)) // gammas and neutrons only
+        {
+            G4int idx = 2; // third  ntuple for castor_surf
+            analysis->FillNtupleDColumn(idx, 0, particle->GetPDGEncoding());
+            analysis->FillNtupleDColumn(idx, 1, aStep->GetTrack()->GetKineticEnergy());
+            analysis->FillNtupleDColumn(idx, 2, aStep->GetPostStepPoint()->GetGlobalTime());
+            analysis->FillNtupleDColumn(idx, 3, aStep->GetPostStepPoint()->GetPosition().x());
+            analysis->FillNtupleDColumn(idx, 4, aStep->GetPostStepPoint()->GetPosition().y());
+            analysis->FillNtupleDColumn(idx, 5, aStep->GetPostStepPoint()->GetPosition().z());
+            analysis->FillNtupleDColumn(idx, 6, aStep->GetPostStepPoint()->GetMomentum().x());
+            analysis->FillNtupleDColumn(idx, 7, aStep->GetPostStepPoint()->GetMomentum().y());
+            analysis->FillNtupleDColumn(idx, 8, aStep->GetPostStepPoint()->GetMomentum().z());
+            analysis->FillNtupleDColumn(idx, 9, aStep->GetPreStepPoint()->GetWeight());
+            analysis->FillNtupleDColumn(idx,10, G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID());
+            analysis->AddNtupleRow(idx);
+        }
+    }
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+
