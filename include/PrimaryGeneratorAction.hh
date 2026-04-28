@@ -36,14 +36,14 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4ParticleGun*           GetParticleGun() { return fParticleGun; }
     G4GeneralParticleSource* GetGPS()         { return fGPS; }
 
+    // set the vertex generation mode
     void SetSourceMode(SourceMode mode);
 
+    // setters for fuel generator modes to pick a cask/fuel assembly to sample positions from
     void SetCaskNum (G4int val) { fCaskNum  = val; }
     void SetFuelNum (G4int val) { fFuelNum  = val; }
 
-    // Bounding sphere radius around the CLYC assembly used by the directional
-    // bias. Exposed so it can be tied to GeometryCLYC dimensions later if you
-    // want a tighter cone.
+    // setters for CLYC bounding sphere radius used in geometric biasing
     void     SetCLYCBoundingRadius(G4double r) { fCLYCBoundingRadius = r; }
     G4double GetCLYCBoundingRadius() const     { return fCLYCBoundingRadius; }
 
@@ -55,21 +55,17 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
     SourceMode fSourceMode;
 
-    // ----- Source mode implementations -----
-    void GenerateCASTOR440Flux();                                     // surface flux
-    void GenerateCASTOR440FuelFlux();                                 // unbiased fuel flux
-    void GenerateCASTOR440FuelFlux_GeometricCLYCbias(G4Event* event); // biased fuel flux
+    // source mode vertex generators
+    void GenerateVertexCASTOR440SurfaceFlux(G4Event* event);            // CASTOR surface flux
+    void GenerateVertexCASTOR440FuelFlux(G4Event* event);               // CASTOR fuel flux (isotropic)
+    void GenerateVertexCASTOR440FuelFluxWithGeomBias(G4Event* event);   // CASTOR fuel flux (isotropic w. geom CLYC bias)
 
-    // ----- Shared primitives used by both biased and unbiased modes -----
-    // Returns a uniformly sampled global position inside (fCaskNum, fFuelNum).
-    // Throws via G4Exception if the configured indices are invalid.
-    G4ThreeVector GenerateFuelVertexPosition();
-    // Sets a globally isotropic momentum direction on fParticleGun.
-    void          SetIsotropicDirection();
-    // Sets a directional-bias momentum direction (cone subtending the CLYC
-    // bounding sphere) and returns the statistical weight to apply to the
-    // resulting primary vertex.
-    G4double      SetBiasedDirectionTowardsCLYC(const G4ThreeVector& vertexPos);
+    // calculate/set the vertex position
+    G4ThreeVector SetVertexPositionInFuel();
+
+    // calculate/set the vertex momentum direction
+    void          SetVertexDirectionIsotropic();
+    G4double      SetVertexDirectionIsotropicWithGeomBias(const G4ThreeVector& vertexPos);
 
     // Source / fuel selection
     G4int    fCaskNum  = 0;

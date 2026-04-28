@@ -47,18 +47,15 @@ PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
             break;
 
         case kCASTOR440_surface:
-            GenerateCASTOR440Flux();
-            fParticleGun->GeneratePrimaryVertex(anEvent);
+            GenerateVertexCASTOR440SurfaceFlux(anEvent);
             break;
 
         case kCASTOR440_fuel:
-            GenerateCASTOR440FuelFlux();
-            fParticleGun->GeneratePrimaryVertex(anEvent);
+            GenerateVertexCASTOR440FuelFlux(anEvent);
             break;
 
         case kCASTOR440_fuel_biased:
-            // This mode generates the vertex itself (so it can stamp the weight).
-            GenerateCASTOR440FuelFlux_GeometricCLYCbias(anEvent);
+            GenerateVertexCASTOR440FuelFluxWithGeomBias(anEvent);
             break;
 
         default:
@@ -113,7 +110,7 @@ PrimaryGeneratorAction::SetSourceMode(SourceMode mode)
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void 
-PrimaryGeneratorAction::GenerateCASTOR440Flux()
+PrimaryGeneratorAction::GenerateVertexCASTOR440SurfaceFlux(G4Event* anEvent)
 {
     const G4int numCasks = fDetector->GetNumCASTOR440s();
     if (fCaskNum < 0 || fCaskNum >= numCasks) {
@@ -172,6 +169,8 @@ PrimaryGeneratorAction::GenerateCASTOR440Flux()
 
     fParticleGun->SetParticlePosition(globalPos);
     fParticleGun->SetParticleMomentumDirection(globalDir);
+
+    fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -179,12 +178,12 @@ PrimaryGeneratorAction::GenerateCASTOR440Flux()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4ThreeVector 
-PrimaryGeneratorAction::GenerateFuelVertexPosition()
+PrimaryGeneratorAction::SetVertexPositionInFuel()
 {
     // 1) Validate cask index
     const G4int numCasks = fDetector->GetNumCASTOR440s();
     if (fCaskNum < 0 || fCaskNum >= numCasks) {
-        G4Exception("PrimaryGeneratorAction::GenerateFuelVertexPosition",
+        G4Exception("PrimaryGeneratorAction::SetVertexPositionInFuel",
                     "InvalidCaskIndex", FatalException,
                     "Configured cask index is out of range.");
         return G4ThreeVector();
@@ -197,7 +196,7 @@ PrimaryGeneratorAction::GenerateFuelVertexPosition()
         G4ExceptionDescription ed;
         ed << "Fuel index " << fFuelNum
            << " out of range [0, " << numFuel << ").";
-        G4Exception("PrimaryGeneratorAction::GenerateFuelVertexPosition",
+        G4Exception("PrimaryGeneratorAction::SetVertexPositionInFuel",
                     "InvalidFuelIndex", FatalException, ed);
         return G4ThreeVector();
     }
@@ -209,7 +208,7 @@ PrimaryGeneratorAction::GenerateFuelVertexPosition()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void 
-PrimaryGeneratorAction::SetIsotropicDirection()
+PrimaryGeneratorAction::SetVertexDirectionIsotropic()
 {
     const G4double cosTheta = 2.0 * G4UniformRand() - 1.0;
     const G4double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
@@ -223,11 +222,11 @@ PrimaryGeneratorAction::SetIsotropicDirection()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4double
-PrimaryGeneratorAction::SetBiasedDirectionTowardsCLYC(const G4ThreeVector& vertexPos)
+PrimaryGeneratorAction::SetVertexDirectionIsotropicWithGeomBias(const G4ThreeVector& vertexPos)
 {
     const G4int numCLYC = fDetector->GetNumCLYC();
     if (numCLYC == 0) {
-        G4Exception("PrimaryGeneratorAction::SetBiasedDirectionTowardsCLYC",
+        G4Exception("PrimaryGeneratorAction::SetVertexDirectionIsotropicWithGeomBias",
                     "NoCLYC", FatalException,
                     "No CLYC detectors found to bias the primary direction towards.");
         return 1.0;
@@ -286,11 +285,13 @@ PrimaryGeneratorAction::SetBiasedDirectionTowardsCLYC(const G4ThreeVector& verte
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void 
-PrimaryGeneratorAction::GenerateCASTOR440FuelFlux()
+PrimaryGeneratorAction::GenerateVertexCASTOR440FuelFlux(G4Event* anEvent)
 {
-    const G4ThreeVector vertexPos = GenerateFuelVertexPosition();
+    const G4ThreeVector vertexPos = SetVertexPositionInFuel();
     fParticleGun->SetParticlePosition(vertexPos);
-    SetIsotropicDirection();
+    SetVertexDirectionIsotropic();
+    
+    fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -300,14 +301,14 @@ PrimaryGeneratorAction::GenerateCASTOR440FuelFlux()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void
-PrimaryGeneratorAction::GenerateCASTOR440FuelFlux_GeometricCLYCbias(G4Event* anEvent)
+PrimaryGeneratorAction::GenerateVertexCASTOR440FuelFluxWithGeomBias(G4Event* anEvent)
 {
     // 1. Shared spatial sampling.
-    const G4ThreeVector vertexPos = GenerateFuelVertexPosition();
+    const G4ThreeVector vertexPos = SetVertexPositionInFuel();
     fParticleGun->SetParticlePosition(vertexPos);
 
     // 2. Directional bias towards CLYC; returns the required statistical weight.
-    const G4double weight = SetBiasedDirectionTowardsCLYC(vertexPos);
+    const G4double weight = SetVertexDirectionIsotropicWithGeomBias(vertexPos);
 
     // 3. Create the primary vertex in the event...
     fParticleGun->GeneratePrimaryVertex(anEvent);
