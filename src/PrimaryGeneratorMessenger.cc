@@ -6,6 +6,7 @@
 #include "G4UIdirectory.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithAnInteger.hh"
+#include "G4UIcmdWithADouble.hh"
 #include "G4UIcmdWith3Vector.hh"
 #include "G4UIcmdWithoutParameter.hh"
 
@@ -29,6 +30,9 @@ PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(PrimaryGeneratorAction* gun
     fCaskNumCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
     fFuelNumCmd = new G4UIcmdWithAnInteger("/dcs-monitor/gun/fuelNum", this);
     fFuelNumCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+    
+    fCLYCBoundingRadiusCmd = new G4UIcmdWithADouble("/dcs-monitor/gun/clycBoundingRadius", this);
+    fCLYCBoundingRadiusCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
 }
 
@@ -42,32 +46,41 @@ PrimaryGeneratorMessenger::~PrimaryGeneratorMessenger()
 
     delete fCaskNumCmd;
     delete fFuelNumCmd;
+
+    delete fCLYCBoundingRadiusCmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
-    if (newValue == "GPS") {
-            G4cout << " --> Setting source mode to the G4GeneralParticleSource (kGPS)" << G4endl;
-            fPrimaryGeneratorAction->SetSourceMode(kGPS);
-    }
-    
-    if (newValue == "CASTOR440_surface") {
-            G4cout << " --> Setting source mode to the CASTOR 440/84 surface flux (kCASTOR440_surface)" << G4endl;
-            fPrimaryGeneratorAction->SetSourceMode(kCASTOR440_surface);
+    if(command == fSourceModeCmd) {
+        if (newValue == "GPS") {
+                G4cout << " --> Setting source mode to the G4GeneralParticleSource (kGPS)" << G4endl;
+                fPrimaryGeneratorAction->SetSourceMode(kGPS);
+        }
+        else if (newValue == "CASTOR440_surface") {
+                G4cout << " --> Setting source mode to the CASTOR 440/84 surface flux (kCASTOR440_surface)" << G4endl;
+                fPrimaryGeneratorAction->SetSourceMode(kCASTOR440_surface);
+        }
+        else if (newValue == "CASTOR440_fuel") {
+            G4cout << " --> Setting source mode to CASTOR 440/84 fuel element volume flux (kCASTOR440_fuel)" << G4endl;
+            fPrimaryGeneratorAction->SetSourceMode(kCASTOR440_fuel);
+        }
+        else if (newValue == "CASTOR440_fuel_biased") {
+            G4cout << " --> Setting source mode to CASTOR 440/84 fuel element volume flux with directional bias (kCASTOR440_fuel_biased)" << G4endl;
+            fPrimaryGeneratorAction->SetSourceMode(kCASTOR440_fuel_biased);
+        }
+        else {
+            G4cout << " --> Unknown source mode, returning..." << G4endl;
+            return;
+        }
     }
 
     if (command == fCaskNumCmd) fPrimaryGeneratorAction->SetCaskNum(fCaskNumCmd->GetNewIntValue(newValue));
     if (command == fFuelNumCmd) fPrimaryGeneratorAction->SetFuelNum(fFuelNumCmd->GetNewIntValue(newValue));
-    if (newValue == "CASTOR440_fuel") {
-        G4cout << " --> Setting source mode to CASTOR 440/84 fuel element volume flux (kCASTOR440_fuel)" << G4endl;
-        fPrimaryGeneratorAction->SetSourceMode(kCASTOR440_fuel);
-    }
-    if (newValue == "CASTOR440_fuel_biased") {
-        G4cout << " --> Setting source mode to CASTOR 440/84 fuel element volume flux with directional bias (kCASTOR440_fuel_biased)" << G4endl;
-        fPrimaryGeneratorAction->SetSourceMode(kCASTOR440_fuel_biased);
-    }
+    
+    if (command == fCLYCBoundingRadiusCmd) fPrimaryGeneratorAction->SetCLYCBoundingRadius(fCLYCBoundingRadiusCmd->GetNewDoubleValue(newValue));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

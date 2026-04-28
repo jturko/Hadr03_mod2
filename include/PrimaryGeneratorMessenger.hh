@@ -12,6 +12,7 @@ class G4UIcmdWithAnInteger;
 class G4UIcmdWith3Vector;
 class G4UIcmdWithoutParameter;
 class G4UIcmdWithAString; 
+class G4UIcmdWithADouble;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -32,6 +33,8 @@ class PrimaryGeneratorMessenger: public G4UImessenger
 
         G4UIcmdWithAnInteger* fCaskNumCmd = nullptr;
         G4UIcmdWithAnInteger* fFuelNumCmd = nullptr;
+        
+        G4UIcmdWithADouble * fCLYCBoundingRadiusCmd = nullptr;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -40,8 +40,6 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
     void SetCaskNum (G4int val) { fCaskNum  = val; }
     void SetFuelNum (G4int val) { fFuelNum  = val; }
-    void SetIsotopeZ(G4int val) { fIsotopeZ = val; }
-    void SetIsotopeA(G4int val) { fIsotopeA = val; }
 
     // Bounding sphere radius around the CLYC assembly used by the directional
     // bias. Exposed so it can be tied to GeometryCLYC dimensions later if you
@@ -76,11 +74,9 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     // Source / fuel selection
     G4int    fCaskNum  = 0;
     G4int    fFuelNum  = 0;
-    G4int    fIsotopeZ = 27; // default Co-60
-    G4int    fIsotopeA = 60;
 
     // Default bounding sphere radius used by the geometric bias
-    G4double fCLYCBoundingRadius = 150.0 * CLHEP::mm;
+    G4double fCLYCBoundingRadius = 150.0 * mm;
 };
 
 #endif
