@@ -142,14 +142,33 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
             0);                     // copy number
 
     // CLYC detector(s)
+    // old method - fCLYCPositions stores either the front PE plug pos OR the crystal centroid pos
+    //for (size_t i = 0; i < fCLYCDetectors.size(); ++i) {
+    //    fCLYCDetectors[i]->Build();
+
+    //    if (fCLYCPlaceByCrystalCenter[i]) {
+    //        fCLYCDetectors[i]->PlaceDetectorByCrystalCenter(fLWorld, fCLYCPositions[i], fCLYCRotations[i], i);
+    //    } else {
+    //        fCLYCDetectors[i]->PlaceDetector(fLWorld, fCLYCPositions[i], fCLYCRotations[i], i);
+    //    }
+    //}
+    // new method - fCLYCPositions ALWAYS stores the PE plug front pos, and the local offset to the crystal center is applied if 
+    // we the bool flag for center placement has been set
     for (size_t i = 0; i < fCLYCDetectors.size(); ++i) {
         fCLYCDetectors[i]->Build();
-
+    
         if (fCLYCPlaceByCrystalCenter[i]) {
-            fCLYCDetectors[i]->PlaceDetectorByCrystalCenter(fLWorld, fCLYCPositions[i], fCLYCRotations[i], i);
-        } else {
-            fCLYCDetectors[i]->PlaceDetector(fLWorld, fCLYCPositions[i], fCLYCRotations[i], i);
+            G4ThreeVector localCenter  = fCLYCDetectors[i]->GetCrystalCenterLocal();
+            G4ThreeVector globalOffset = localCenter;
+            if (fCLYCRotations[i]) globalOffset.transform(*fCLYCRotations[i]);
+    
+            // fCLYCPositions[i] currently holds the desired crystal centre.
+            // Convert it in-place to the corresponding front-face position.
+            fCLYCPositions[i] -= globalOffset;
         }
+    
+        // fCLYCPositions[i] is now guaranteed to be the front-face position.
+        fCLYCDetectors[i]->PlaceDetector(fLWorld, fCLYCPositions[i], fCLYCRotations[i], i);
     }
 
     // CASTOR 440 cask(s)
@@ -185,6 +204,22 @@ void DetectorConstruction::ConstructSDandField()
         }
     }
 
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+G4ThreeVector DetectorConstruction::GetCLYCCrystalPosition(G4int index) const
+{
+    if (index < 0 || index >= (G4int)fCLYCDetectors.size())
+        return G4ThreeVector();
+
+    // Local-frame offset of the crystal centre w.r.t. the assembly origin
+    // (which, after the normalisation done in ConstructVolumes(), is exactly
+    // what fCLYCPositions[index] represents in world coordinates).
+    G4ThreeVector globalOffset = fCLYCDetectors[index]->GetCrystalCenterLocal();
+    if (fCLYCRotations[index]) globalOffset.transform(*fCLYCRotations[index]);
+
+    return fCLYCPositions[index] + globalOffset;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -49,7 +49,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
         void  AddCLYC();
         void  AddCLYCByCrystalCenter();
         G4int GetNumCLYC() const                          { return fCLYCDetectors.size(); }
-        G4ThreeVector GetCLYCPosition(G4int index) const  { return fCLYCPositions[index]; }
+        G4ThreeVector GetCLYCPosition(G4int index) const  { return fCLYCPositions[index]; } // global position of CLYC assembly (front face of PE plug)
+        G4ThreeVector GetCLYCCrystalPosition(G4int index) const; // global position of CLYC crystal center
 
         void SetCLYCCrystalRadius(G4double val);
         void SetCLYCCrystalLength(G4double val);

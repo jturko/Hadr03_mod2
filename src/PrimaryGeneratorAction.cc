@@ -234,7 +234,8 @@ PrimaryGeneratorAction::SetVertexDirectionIsotropicWithGeomBias(const G4ThreeVec
 
     // Uniformly select one of the CLYC detectors to aim at.
     const G4int          clycIndex = (G4int)(G4UniformRand() * numCLYC);
-    const G4ThreeVector  clycPos   = fDetector->GetCLYCPosition(clycIndex);
+    //const G4ThreeVector  clycPos   = fDetector->GetCLYCPosition(clycIndex); // front face of PE plug
+    const G4ThreeVector  clycPos   = fDetector->GetCLYCCrystalPosition(clycIndex); // CLYC crystal COM
 
     // Vector from the primary vertex to the chosen CLYC detector.
     const G4ThreeVector  toDet    = clycPos - vertexPos;

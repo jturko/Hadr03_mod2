@@ -7,6 +7,7 @@
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithAnInteger.hh"
 #include "G4UIcmdWithADouble.hh"
+#include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4UIcmdWith3Vector.hh"
 #include "G4UIcmdWithoutParameter.hh"
 
@@ -31,7 +32,7 @@ PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(PrimaryGeneratorAction* gun
     fFuelNumCmd = new G4UIcmdWithAnInteger("/dcs-monitor/gun/fuelNum", this);
     fFuelNumCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
     
-    fCLYCBoundingRadiusCmd = new G4UIcmdWithADouble("/dcs-monitor/gun/clycBoundingRadius", this);
+    fCLYCBoundingRadiusCmd = new G4UIcmdWithADoubleAndUnit("/dcs-monitor/gun/clycBoundingRadius", this);
     fCLYCBoundingRadiusCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
 }
