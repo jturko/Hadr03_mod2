@@ -31,7 +31,6 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "RunMessenger.hh"
-
 #include "RunAction.hh"
 
 #include "G4UIcmdWithABool.hh"
@@ -49,6 +48,12 @@ RunMessenger::RunMessenger(RunAction* run) : fRun(run)
     fWritePrimaryCmd->SetParameterName("write", true);
     fWritePrimaryCmd->SetDefaultValue(true);
     fWritePrimaryCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+    
+    fWriteCASTOR440SurfaceFluxCmd = new G4UIcmdWithABool("/dcs-monitor/run/writeSurfaceFlux", this);
+    fWriteCASTOR440SurfaceFluxCmd->SetGuidance("Toggle filling of the CASTOR 440 surface flux ntuple");
+    fWriteCASTOR440SurfaceFluxCmd->SetParameterName("write", true);
+    fWriteCASTOR440SurfaceFluxCmd->SetDefaultValue(true);
+    fWriteCASTOR440SurfaceFluxCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
 }
 
@@ -58,6 +63,7 @@ RunMessenger::~RunMessenger()
 {
     delete fRunDir;
     delete fWritePrimaryCmd;
+    delete fWriteCASTOR440SurfaceFluxCmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -66,6 +72,9 @@ void RunMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 {
     if (command == fWritePrimaryCmd) {
         RunAction::WritePrimaryTree = fWritePrimaryCmd->GetNewBoolValue(newValue);
+    }
+    if (command == fWriteCASTOR440SurfaceFluxCmd) {
+        RunAction::WriteCASTOR440SurfaceFluxTree = fWriteCASTOR440SurfaceFluxCmd->GetNewBoolValue(newValue);
     }
 }
 

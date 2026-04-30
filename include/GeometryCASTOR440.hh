@@ -20,6 +20,7 @@ class GeometryCASTOR440
                         G4RotationMatrix* rotate, G4int copyNo);
 
     G4LogicalVolume*   GetCASTORLog()  { return fCASTORBodyLog;  }
+    G4LogicalVolume*   GetFinLog()     { return fFinLog;  }
     G4VPhysicalVolume* GetCASTORPhys() { return fCASTORBodyPhys; }
 
     void          GenerateFuelPositions();

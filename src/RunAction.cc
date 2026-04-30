@@ -56,6 +56,7 @@
 
 //G4bool RunAction::WritePrimaryTree = false;
 std::atomic<G4bool> RunAction::WritePrimaryTree{false};
+std::atomic<G4bool> RunAction::WriteCASTOR440SurfaceFluxTree{false};
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

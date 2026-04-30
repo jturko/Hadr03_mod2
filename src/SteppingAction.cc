@@ -31,10 +31,11 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "SteppingAction.hh"
-
 #include "HistoManager.hh"
+#include "RunAction.hh"
 #include "Run.hh"
 #include "DetectorConstruction.hh"
+#include "GeometryCASTOR440.hh"
 
 #include "G4HadronicProcess.hh"
 #include "G4ParticleTypes.hh"
@@ -44,6 +45,7 @@
 
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -93,37 +95,42 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
             aStep->GetTrack()->SetTrackStatus(fStopAndKill);
             return;
         }
-        // 2. Kill "Junk" Gammas that have scattered too much to be useful
-        // (e.g., anything below 500 keV). Adjust this threshold depending on 
-        // how much of the Compton continuum you actually want to see in the CLYC.
-        if (particle == G4Gamma::Gamma() && aStep->GetTrack()->GetKineticEnergy() < 200.0 * keV) {
+        // kill gammas below a given threshold
+        if (particle == G4Gamma::Gamma() && aStep->GetTrack()->GetKineticEnergy() < 50.0 * keV) {
             aStep->GetTrack()->SetTrackStatus(fStopAndKill);
             return;
         }
     }
 
-    //// CASTOR 440 surface flux tracker
-    //// For this implementation to work correctly, the placement of the heat dissipation fins should be commented out / deactivated
-    //for(G4int c=0; c<fDetector->GetNumCASTOR440s(); c++) {
-    //    if(aStep->GetPreStepPoint()->GetPhysicalVolume()->GetLogicalVolume() == fDetector->GetLCASTOR440s()[c] && 
-    //       aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld() &&
-    //       (particle->GetPDGEncoding() == 22 || particle->GetPDGEncoding() == 2112)) // gammas and neutrons only
-    //    {
-    //        G4int idx = 2; // third  ntuple for castor_surf
-    //        analysis->FillNtupleDColumn(idx, 0, particle->GetPDGEncoding());
-    //        analysis->FillNtupleDColumn(idx, 1, aStep->GetTrack()->GetKineticEnergy());
-    //        analysis->FillNtupleDColumn(idx, 2, aStep->GetPostStepPoint()->GetGlobalTime());
-    //        analysis->FillNtupleDColumn(idx, 3, aStep->GetPostStepPoint()->GetPosition().x());
-    //        analysis->FillNtupleDColumn(idx, 4, aStep->GetPostStepPoint()->GetPosition().y());
-    //        analysis->FillNtupleDColumn(idx, 5, aStep->GetPostStepPoint()->GetPosition().z());
-    //        analysis->FillNtupleDColumn(idx, 6, aStep->GetPostStepPoint()->GetMomentum().x());
-    //        analysis->FillNtupleDColumn(idx, 7, aStep->GetPostStepPoint()->GetMomentum().y());
-    //        analysis->FillNtupleDColumn(idx, 8, aStep->GetPostStepPoint()->GetMomentum().z());
-    //        analysis->FillNtupleDColumn(idx, 9, aStep->GetPreStepPoint()->GetWeight());
-    //        analysis->FillNtupleDColumn(idx,10, G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID());
-    //        analysis->AddNtupleRow(idx);
-    //    }
-    //}
+    // CASTOR 440 surface flux tracker
+    if(RunAction::WriteCASTOR440SurfaceFluxTree) {
+        for(G4int c=0; c<fDetector->GetNumCASTOR440s(); c++) {
+            GeometryCASTOR440 * thisCask = fDetector->GetCASTOR440(c);
+            G4LogicalVolume * preLV = aStep->GetPreStepPoint()->GetPhysicalVolume()->GetLogicalVolume();
+            G4bool inBodyOrFin =  (preLV == thisCask->GetCASTORLog() ||
+                                   preLV == thisCask->GetFinLog());
+
+            if(inBodyOrFin && 
+               aStep->GetPostStepPoint()->GetPhysicalVolume() == fDetector->GetWorld() &&
+               (particle->GetPDGEncoding() == 22 || particle->GetPDGEncoding() == 2112)) // gammas and neutrons only
+            {
+                G4int idx = 2; // third  ntuple for castor_surf
+                analysis->FillNtupleDColumn(idx, 0, particle->GetPDGEncoding());
+                analysis->FillNtupleDColumn(idx, 1, aStep->GetPostStepPoint()->GetKineticEnergy());
+                analysis->FillNtupleDColumn(idx, 2, aStep->GetPostStepPoint()->GetGlobalTime());
+                analysis->FillNtupleDColumn(idx, 3, aStep->GetPostStepPoint()->GetPosition().x());
+                analysis->FillNtupleDColumn(idx, 4, aStep->GetPostStepPoint()->GetPosition().y());
+                analysis->FillNtupleDColumn(idx, 5, aStep->GetPostStepPoint()->GetPosition().z());
+                analysis->FillNtupleDColumn(idx, 6, aStep->GetPostStepPoint()->GetMomentum().x());
+                analysis->FillNtupleDColumn(idx, 7, aStep->GetPostStepPoint()->GetMomentum().y());
+                analysis->FillNtupleDColumn(idx, 8, aStep->GetPostStepPoint()->GetMomentum().z());
+                analysis->FillNtupleDColumn(idx, 9, aStep->GetPreStepPoint()->GetWeight());
+                analysis->FillNtupleDColumn(idx,10, G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID());
+                analysis->AddNtupleRow(idx);
+            }
+            break; //  can only exit one cask
+        }
+    }
 
 }
 

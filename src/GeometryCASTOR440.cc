@@ -149,27 +149,27 @@ G4int GeometryCASTOR440::Build()
                           "ModRodPhys", fCASTORBodyLog, false, i, surfCheck);
     }
 
-    //// --- HEAT-DISPERSION FINS ---
-    //const G4double finThickness = 10. * mm;
-    //const G4double finSpacing   = 50. * mm;
-    //G4Tubs* fin_solid = new G4Tubs("Fin",
-    //                               fCaskOuterRadius, fFinTipRadius,
-    //                               finThickness/2.0,
-    //                               0.*deg, 360.*deg);
-    //fFinLog = new G4LogicalVolume(fin_solid, mat_CastIron, "FinLog");
-    //fFinLog->SetVisAttributes(new G4VisAttributes(true, G4Colour(0.2, 0.2, 0.2, alpha)));
+    // --- HEAT-DISPERSION FINS ---
+    const G4double finThickness = 10. * mm;
+    const G4double finSpacing   = 50. * mm;
+    G4Tubs* fin_solid = new G4Tubs("Fin",
+                                   fCaskOuterRadius, fFinTipRadius,
+                                   finThickness/2.0,
+                                   0.*deg, 360.*deg);
+    fFinLog = new G4LogicalVolume(fin_solid, mat_CastIron, "FinLog");
+    fFinLog->SetVisAttributes(new G4VisAttributes(true, G4Colour(0.2, 0.2, 0.2, alpha)));
 
-    //const G4double finRegionTop    = cavityZ + fCavityHeight/2.0;
-    //const G4double finRegionBottom = cavityZ - fCavityHeight/2.0;
-    //const G4double finRegionLength = finRegionTop - finRegionBottom;
+    const G4double finRegionTop    = cavityZ + fCavityHeight/2.0;
+    const G4double finRegionBottom = cavityZ - fCavityHeight/2.0;
+    const G4double finRegionLength = finRegionTop - finRegionBottom;
 
-    //const G4int    nFins  = static_cast<G4int>(std::floor(finRegionLength / finSpacing));
-    //const G4double startZ = finRegionBottom + 0.5 * finSpacing;
+    const G4int    nFins  = static_cast<G4int>(std::floor(finRegionLength / finSpacing));
+    const G4double startZ = finRegionBottom + 0.5 * finSpacing;
 
-    //for (G4int i = 0; i < nFins; ++i) {
-    //    G4ThreeVector finPos(0., 0., startZ + i * finSpacing);
-    //    fCASTORAssembly->AddPlacedVolume(fFinLog, finPos, rotate);
-    //}
+    for (G4int i = 0; i < nFins; ++i) {
+        G4ThreeVector finPos(0., 0., startZ + i * finSpacing);
+        fCASTORAssembly->AddPlacedVolume(fFinLog, finPos, rotate);
+    }
 
     move = G4ThreeVector(0., 0., 0.);
     fCASTORAssembly->AddPlacedVolume(fCASTORBodyLog, move, rotate);

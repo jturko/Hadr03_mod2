@@ -97,7 +97,7 @@ void HistoManager::Book()
     //G4cout << " Created ntuple \"hits\" (id " << idx << ")" << G4endl;
     
     // ntuple for CASTOR 440 surface tracker
-    idx = analysisManager->CreateNtuple("castor_surf", "tree of CASTOR 440 surface flux (particles leaving the cask)");
+    idx = analysisManager->CreateNtuple("surfaceFlux", "tree of CASTOR 440 surface flux (particles leaving the cask)");
     analysisManager->SetNtupleActivation(idx, true);
     analysisManager->CreateNtupleDColumn("pid");
     analysisManager->CreateNtupleDColumn("ekin");
