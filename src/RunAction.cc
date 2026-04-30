@@ -107,7 +107,8 @@ void RunAction::BeginOfRunAction(const G4Run* run)
     ProgressBar::gEvtNb.store(0, std::memory_order_relaxed);
     if(fProgBar)
         delete fProgBar;
-    fProgBar = new ProgressBar(run->GetNumberOfEventToBeProcessed());
+    fProgBar = new ProgressBar(run->GetNumberOfEventToBeProcessed(), 1.0, 25);
+    //fProgBar = new ProgressBar(run->GetNumberOfEventToBeProcessed());
 
 }
 
@@ -115,7 +116,8 @@ void RunAction::BeginOfRunAction(const G4Run* run)
 
 void RunAction::EndOfRunAction(const G4Run* run)
 {
-    if(G4Threading::G4GetThreadId() == 0) {
+    //if(G4Threading::G4GetThreadId() == 0) {
+    if(isMaster) {
         fProgBar->Print(run->GetNumberOfEventToBeProcessed()-1);
     }
 
