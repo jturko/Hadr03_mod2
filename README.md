@@ -68,17 +68,22 @@ Data is output to a ROOT file specified by `/analysis/setFileName [name]`. The f
 
 ## TODO
 ### **Biasing**
-- [ ] Validate weights for geometric biasing
-- [ ] Validate weights for importance biasing (might require temporary modifications to CASTOR 440 materaials; iron/steel -> air)
-- [ ] Implement geometric biasing for any SourceMode
-- [ ] Implement messenger commands to set shell number/dimensions for gammas/neutrons
+- [ ] Validate weights for geometric biasing.
+- [ ] Validate weights for importance biasing (might require temporary modifications to CASTOR 440 materaials; iron/steel -> air).
+- [x] Implement geometric biasing for any SourceMode.
+    > Use with `PrimaryGeneratorAction::SetVertexDirectionIsotropicWithGeomBias()` method.
+- [x] Implement messenger commands to set shell number/dimensions for gammas/neutrons.
+    > Cannot (easily) have two virtual worlds / importance stores for different particle types.  
+    > Shell number is set (for both n/g) using `/dcs-monitor/det/setBiasingShells <nShells>`.
 ### **Primary generators**
-- [ ] Implement $\cos^2\theta$ (intensity) emission distribution (isotropic) from CASTOR 440
-- [ ] Implement primary generator using phase-space input file
+- [ ] Implement $\cos^2\theta$ (intensity) emission distribution (isotropic) from CASTOR 440.
+- [ ] Implement primary generator using phase-space input file.
 ### **Data output**
-- [ ] CASTOR 440 surface tracker (to create phase-space for flux leaving the cask)
+- [x] CASTOR 440 surface tracker (to create phase-space for flux leaving the cask).
+    > Activate/deactivate with `/dcs-monitor/run/writeSurfaceFlux`  
+    > Output is a TTree `surfaceFlux` with branches $\vec{x}$, $\vec{p}$, $t$, and PID.
 ### **Misc**
-- [ ] Create example simulations directory / examples, for quick validation runs
+- [ ] Create example simulations directory / examples, for quick validation runs.
 
 ## Example Run Macro
 ```macro
